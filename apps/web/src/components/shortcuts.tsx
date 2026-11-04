@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { isMac, useHotkeys } from '@/hooks/use-hotkeys';
-import { openPalette, setUi, useUi } from '@/lib/ui-store';
+import { openPalette, setUi, startFocus, useUi } from '@/lib/ui-store';
 
 const MOD = isMac ? '⌘' : 'Ctrl';
 
@@ -20,11 +20,13 @@ const SECTIONS: { title: string; keys: [string, string][] }[] = [
     keys: [
       [`${MOD} K`, 'Command palette: find, jump, run'],
       ['C', 'New task (quick capture)'],
+      ['F', 'Start a focus session'],
       ['G then T', 'Go to Today'],
       ['G then I', 'Go to Inbox'],
       ['G then P', 'Go to Projects'],
       ['G then L', 'Go to all tasks (list)'],
       ['G then S', 'Go to Settings'],
+      ['G then A', 'Go to Stats'],
       ['?', 'This list'],
     ],
   },
@@ -46,12 +48,14 @@ export function GlobalShortcuts() {
   useHotkeys({
     'mod+k': () => (ui.palette ? setUi({ palette: null }) : openPalette('search')),
     c: () => openPalette('capture'),
+    f: () => startFocus(),
     '?': () => setUi({ shortcuts: true }),
     'g t': () => void navigate({ to: '/today' }),
     'g i': () => void navigate({ to: '/inbox' }),
     'g p': () => void navigate({ to: '/projects' }),
     'g l': () => void navigate({ to: '/tasks' }),
     'g s': () => void navigate({ to: '/settings' }),
+    'g a': () => void navigate({ to: '/stats' }),
   });
 
   return (

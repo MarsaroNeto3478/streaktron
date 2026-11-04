@@ -16,6 +16,7 @@ import {
   type GoalPeriod,
 } from '../structure';
 import { isDateString, isValidTimeZone } from '../time';
+import { RESTABLE_TYPES } from '../game/quests';
 
 export const dateString = z.string().refine(isDateString, 'Expected a YYYY-MM-DD day');
 
@@ -295,5 +296,38 @@ export const resolveQuerySchema = z.object({
   ids: commaList.pipe(z.array(linkableId).min(1).max(MAX_RESOLVE_IDS)),
 });
 
-export const settingsPatchSchema = userSettingsSchema.pick({ activeProjectLimit: true }).partial();
+export const settingsPatchSchema = userSettingsSchema
+  .extend({
+    questSettings: questSettingsSchema
+      .extend({ restingTypes: z.array(z.enum(RESTABLE_TYPES)).max(RESTABLE_TYPES.length) })
+      .refine((q) => q.timeQuestMinMinutes <= q.timeQuestMaxMinutes, {
+        message: 'The minimum can’t be above the maximum',
+        path: ['timeQuestMaxMinutes'],
+      }),
+  })
+  .partial();
 export type SettingsPatch = z.infer<typeof settingsPatchSchema>;
+
+/** Time zone and day start can change once a week, so days can't be farmed (D17). */
+export const DAY_SETTINGS_LOCK_DAYS = 7;
+
+// --- Focus sessions and stats ----------------------------------------------------------------
+
+export const focusStartSchema = z.object({
+  plannedMinutes: z.int().min(1).max(240),
+  /** Attach to a task (its project comes along) or just a project; neither is fine too. */
+  taskId: idOf('task').nullable().optional(),
+  projectId: idOf('project').nullable().optional(),
+});
+export type FocusStart = z.infer<typeof focusStartSchema>;
+
+export const focusFinishSchema = z.object({
+  note: z.string().trim().max(500).optional(),
+  /** Also complete the attached task. */
+  completeTask: z.boolean().optional(),
+});
+export type FocusFinish = z.infer<typeof focusFinishSchema>;
+
+export const dayRangeSchema = z
+  .object({ from: dateString, to: dateString })
+  .refine((r) => r.from <= r.to, { message: '`from` must not be after `to`', path: ['to'] });

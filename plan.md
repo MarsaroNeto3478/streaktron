@@ -2,8 +2,8 @@
 
 > A web app that builds consistency for studies and personal projects with light gamification (quests, streaks, XP) and a cosmetic reward layer (loot boxes, collectibles, a bedroom) on top of real project management (areas, projects, goals, tasks, Kanban, calendar). Built for one user first, designed to become a product.
 
-**Status:** Phases 0 (Foundation) and 1 (Structure & views) done, 2026-11-03 · open questions deferred (§13) · Next up: Phase 2 (Linking system)
-**Last updated:** 2026-11-03
+**Status:** Phases 0–2 done 2026-11-03; Phase 3 (Today + gamification core = MVP) built 2026-11-04, on branch `phase-3-mvp` · open questions deferred (§13) · Next up: dogfooding the MVP, then Phase 4
+**Last updated:** 2026-11-04
 
 **How to use this file across sessions:** It is the source of truth for *what to build and how*. Project memory lives in `.claude/` (`CLAUDE.md` is loaded automatically): the vision, the **decisions log** (`.claude/context/decisions.md`, referenced here as D1…) and progress. When a task is done, tick its checkbox, update the status line above and add to `.claude/context/progress.md`. When a decision changes, record it in the decisions log rather than silently diverging. New ideas go to the backlog (§12), not into the current phase.
 
@@ -64,6 +64,15 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D18 | Daily backups checked hourly, named by the owner's day |
 | D19 | Deleting: tasks/goals soft-deleted with Undo; projects/areas into a snapshot; 30 days to restore |
 | D20 | Board rules: "done" follows the column category; next action prefers in-progress tasks |
+| D21 | Mentions store ids; links rewritten on every description save; broken chips |
+| D22 | Goal and area sheets; editors start from freshly fetched data |
+| D23 | Search: `simple` FTS with prefixes, typo-tolerant titles |
+| D24 | What the activity log records and what counts (unset effort = S, subtasks make an active day) |
+| D25 | Game events: a middleware adds the `game` block after the write commits; failures retry |
+| D26 | Quests count only what happens after they're offered; boards made on first contact of the day |
+| D27 | Focus sessions: one open at a time, credited minutes capped at the plan |
+| D28 | Time zone and day start change at most once a week (first change free) |
+| D29 | No cached game state yet: computed from the whole log on each request |
 
 Rejected ideas are listed at the end of the decisions log so they aren't proposed again.
 
@@ -394,11 +403,11 @@ Postgres. All tables include `id` (prefixed ULID, `text`), `user_id` (FK to the 
 | `habits` | `project_id?`, `title`, `description` (rich), `schedule` (jsonb: `{type: "weekdays", days: [...]}` or `{type: "per_week", count: n}`), `min_minutes?`, `archived_at` |
 | `habit_checkins` | `habit_id`, `date`, `note?` — unique (`habit_id`, `date`) |
 | `calendar_events` | `project_id?`, `title`, `description` (rich), `start_at`, `end_at?`, `all_day`, `recurrence?` (RRULE string), `is_countdown`, `deleted_at` |
-| `focus_sessions` | `task_id?`, `project_id?`, `started_at`, `ended_at?`, `planned_minutes`, `paused_ms`, `status` (running/paused/completed/abandoned), `note?` |
+| `focus_sessions` | `task_id?`, `project_id?`, `started_at`, `ended_at?`, `planned_minutes`, `paused_ms`, `paused_at?`, `status` (running/paused/completed/abandoned), `minutes?` (credited), `note?` — at most one running/paused per user (partial unique index) |
 | `weekly_reviews` | `week_start` (date), `answers` (jsonb), `completed_at?` |
-| `activity` | `type` (task_completed, task_reopened, focus_completed, habit_checked, review_completed, quest_completed, item_created, …), `entity_id?`, `occurred_at`, `local_date`, `payload` (jsonb, e.g. effort, minutes) — append-only |
-| `quest_instances` | `type`, `template_key`, `period_start`, `period_end`, `target`, `reward_xp`, `box_tier`, `params` (jsonb), `target_entity_id?`, `parent_quest_id?` (follow-up chain), `status` (offered/completed/expired/rerolled/cancelled), `offered_at`, `completed_at?` |
-| `loot_boxes` | `quest_instance_id` (unique), `tier`, `earned_at`, `opened_at?`, `item_key?`, `rarity?` — pity counters derived from opened history |
+| `activity` | `type` (task_completed, task_reopened, task_triaged, item_created, next_action_set, focus_completed, quest_completed, quest_bonus; habit_checked and review_completed in Phase 4), `entity_id?`, `occurred_at`, `local_date`, `payload` (jsonb, e.g. effort, minutes) — append-only (D24) |
+| `quests` | `type`, `template_key`, `title`, `period_start`, `period_end`, `target`, `progress`, `reward_xp`, `box_tier`, `params` (jsonb), `target_entity_id?`, `parent_quest_id?` (follow-up chain), `reroll_of?`, `status` (offered/completed/expired/rerolled/cancelled), `offered_at`, `closed_at?` |
+| `loot_boxes` | `quest_id` (unique), `tier`, `earned_at`, `opened_at?`, `item_key?`, `rarity?` — pity counters derived from opened history |
 | `inventory_items` | `item_key`, `acquired_at`, `loot_box_id?` — one row per owned copy |
 | `room_placements` | `inventory_item_id` (unique), `room_id` (default room for now), `surface` (floor/wall_left/wall_right/on_item), `x`, `y`, `rotation`, `parent_placement_id?` |
 | `achievements` | `key`, `earned_at`, `kind` (medal/prize), `params` (jsonb) — unique (`user_id`, `key`) |
@@ -422,15 +431,15 @@ JSON over Hono with Zod validation; typed client via Hono RPC. Write responses i
 - `POST /api/projects/:id/status` — enforces active limit; returns conflict payload listing active projects if over limit
 - `POST /api/tasks/:id/complete` · `POST /api/tasks/:id/reopen` · `POST /api/tasks/:id/move` (column + sort order)
 - `POST /api/habits/:id/checkin` · `DELETE /api/habits/:id/checkin/:date`
-- `POST /api/focus/start` · `/pause` · `/resume` · `/finish` · `/abandon` · `GET /api/focus/current`
-- `GET /api/today` — aggregated Today payload
+- `POST /api/focus/start` · `POST /api/focus/:id/pause|resume|finish|abandon` · `GET /api/focus/current`
+- `GET /api/today` — Today's focus list (the game state and quests are their own queries)
 - `GET /api/calendar?from&to` — events (expanded recurrences), due/scheduled tasks, focus sessions
 - `GET /api/game/state` — XP, level, streaks, freezes, weekly progress
-- `GET /api/quests?period=today|week` · `POST /api/quests/:id/reroll`
+- `GET /api/quests` (today's and this week's; viewing evaluates them) · `POST /api/quests/:id/reroll`
 - `GET /api/goals/:id` — the goal sheet
 - `GET /api/search?q&types&limit` — palette + link picker; an empty `q` lists recently changed open things
 - `GET /api/entities/:id/backlinks` (lines read with current titles) · `GET /api/entities/resolve?ids=` (≤ 100; titles and state for mention chips; unknown ids left out)
-- `GET /api/stats/heatmap?from&to` · `GET /api/stats/focus?groupBy=project|area&from&to` · `GET /api/stats/quests`
+- `GET /api/stats/heatmap?from&to` (Phase 3) · `GET /api/stats/focus?groupBy=project|area&from&to` · `GET /api/stats/quests`
 - `POST /api/reviews/:weekStart/complete`
 - `GET /api/loot` (unopened count + history) · `POST /api/loot/:id/open` · `POST /api/loot/open-all`
 - `GET /api/collection` (catalogue + owned) · `GET /api/inventory`
@@ -486,18 +495,18 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 **Acceptance:** Mention a goal inside a task description; rename the goal and the chip updates; the goal's backlinks panel lists the task; deleting the goal shows a broken chip.
 
 ### Phase 3 — Today + gamification core → **MVP**
-- [ ] `activity` table and service; all counting mutations write activity in the same transaction
-- [ ] `packages/shared/game`: XP rules with **earn-once / never-lose** (D15), level curve, active-day calc, daily streak + freezes, weekly streak — **thorough unit tests** (edge cases: day boundary, timezone change, reopen/re-complete, freeze banking)
-- [ ] Server-side user day from timezone + day-start hour; rate-limited timezone changes (D17)
-- [ ] Game events returned on every write response; UI toasts/animations (subtle)
-- [ ] Focus sessions: timer UI, presets, attach to task/project, persistence across reloads, end notification + sound
-- [ ] Today view: header (level/XP/streaks/freezes/weekly target), capped focus list, start-focus button
-- [ ] Quest engine with **type registry** (D10): weighted picks with waiting time, sizing from your own days, one reroll per quest per day, board bonus, resting types, nothing for idle projects
-- [ ] MVP quest types: quick (with daily cap), daily, time, weekly (basic), comeback, **make + follow-up with soft cap** (D16)
-- [ ] Incremental quest evaluation (only quests an activity can affect); `quest_completed` activity logged for future loot; offered/rerolled/expired logged for fit stats
-- [ ] Contribution heatmap (basic) on Stats page
-- [ ] Settings page: timezone, day-start hour, week start, active-project limit, weekly target, focus presets, quest types on/off, time-quest min/max
-- [ ] Admin "recompute" action
+- [x] `activity` table and service; all counting mutations write activity in the same transaction
+- [x] `packages/shared/game`: XP rules with **earn-once / never-lose** (D15), level curve, active-day calc, daily streak + freezes, weekly streak — **thorough unit tests** (edge cases: day boundary, timezone change, reopen/re-complete, freeze banking)
+- [x] Server-side user day from timezone + day-start hour; rate-limited timezone changes (D17)
+- [x] Game events returned on every write response; UI toasts/animations (subtle)
+- [x] Focus sessions: timer UI, presets, attach to task/project, persistence across reloads, end notification + sound
+- [x] Today view: header (level/XP/streaks/freezes/weekly target), capped focus list, start-focus button (habits join the list in Phase 4)
+- [x] Quest engine with **type registry** (D10): weighted picks with waiting time, sizing from your own days, one reroll per quest per day, board bonus, resting types, nothing for idle projects
+- [x] MVP quest types: quick (with daily cap), daily, time, weekly (basic), comeback, **make + follow-up with soft cap** (D16)
+- [x] Incremental quest evaluation (only quests an activity can affect); `quest_completed` activity logged for future loot; offered/rerolled/expired logged for fit stats
+- [x] Contribution heatmap (basic) on Stats page
+- [x] Settings page: timezone, day-start hour, week start, active-project limit, weekly target, focus presets, quest types on/off, time-quest min/max
+- [x] Admin "recompute" action (API only: `POST /api/admin/recompute`)
 
 **Acceptance:** A full day of real use works end-to-end: plan on Today, run focus sessions, complete tasks, see XP/level/streak update immediately and correctly, complete daily quests. A make quest spawns a follow-up for the new task. Missing a day with a banked freeze keeps the streak. **Start dogfooding.**
 
@@ -625,6 +634,7 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 
 ## 12. Backlog / ideas (not scheduled)
 
+- Drag projects between areas on the Projects page, like Kanban cards (drop on an area moves it there, order within an area by dragging; mouse, touch and keyboard as on the board). Today: areas reorder by drag, a project changes area only in its edit dialog, and projects can't be reordered within an area (user's idea, 2026-11-04)
 - Mentions inside titles (single-line TipTap editor, plain-text fallback for compact views)
 - Create from the mention picker ("New task “X”" when nothing matches; Quire has it)
 - Mention labels in stored text: `description_text` keeps the label a mention had when inserted, so search still finds the old name and palette snippets show it (chips and backlinks already read current titles)

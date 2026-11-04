@@ -2,17 +2,19 @@
 
 ## Status
 
-- **Current phase:** Phases 0–2 done (Phase 2 on branch `phase-2-linking`, not committed yet) → **Phase 3 (Today + gamification core = MVP) next**.
-- **Code:** monorepo with server, web and shared packages; 137 tests passing. **Repository:** https://github.com/JVGdev/streaktron (private, `main`).
+- **Current phase:** Phases 0–2 done and merged into `main`. **Phase 3 (MVP) built** on branch `phase-3-mvp` (not committed yet) → next: dogfood it, then Phase 4.
+- **Code:** monorepo with server, web and shared packages; 205 tests passing. **Repository:** https://github.com/JVGdev/streaktron (private, `main`).
 - **Running over Tailscale:** the Docker app is served at `https://hills.tail99ef4d.ts.net:8443` (port 8443, because the root of that address serves Quire on :8788; never replace it). Verified from the laptop over HTTPS (page, sign-in with a Secure cookie, `/me`); not yet opened from the phone.
-- **Open questions:** deferred by the user (plan.md §13). Pending confirmation: the loot-box timing for make quests (D16); D19–D23 are Claude's choices to confirm when convenient.
-- **The Docker app on :8443 still runs Phase 1.** Rebuilding it (`docker compose up -d --build`) applies migrations `0003_links` and `0004_search` to the real database on start (new table, generated search columns; no data changes).
+- **Open questions:** deferred by the user (plan.md §13). Pending confirmation: the loot-box timing for make quests (D16); D19–D29 are Claude's choices to confirm when convenient (D24 and D26 matter most for how the game feels).
+- **The Docker app on :8443 still runs Phase 1.** Rebuilding it (`docker compose up -d --build`) applies migrations `0003_links`, `0004_search` and `0005_game` to the real database on start (new tables and columns; no data changes).
+- **Two machines:** the Linux laptop (Tailscale, the real data) and, since 2026-11-04, a Windows machine (Docker Desktop with WSL 2, `npx pnpm@11.24.0` since pnpm isn't installed globally there, a local `.env` and dev database).
 
 ## Next steps
 
-1. The user tries Phases 1–2 on real data, on the laptop and the phone (after rebuilding the Docker app), against their acceptance.
-2. The user confirms or changes D19–D23 (Claude's choices).
-3. Phase 3 (plan.md §9) to reach the MVP and start dogfooding.
+1. The user reviews the `phase-3-mvp` branch; commit and merge when they ask.
+2. Rebuild the Docker app on the laptop and **start dogfooding** (Phase 3's acceptance is a full day of real use).
+3. The user confirms or changes D19–D29 (Claude's choices).
+4. After 2–3 weeks of use: the usage review (Phase 6) tunes §5's numbers; meanwhile Phase 4.
 
 ---
 
@@ -67,3 +69,18 @@
 - **Checked in a real browser:** headless Chromium (Playwright from the scratchpad) against a production build on :3101 with a throwaway `streaktron_e2e` database (the Docker app and real data untouched; dropped afterwards). It ran the acceptance flow (mention a goal, rename it, the chip and the backlink line follow, delete it, broken chip), `[[`, hover preview, reload, palette description search, project and area descriptions with mentions, and the phone layout (the picker stays on screen). No console errors.
 - **Decisions:** D21 (mentions and links), D22 (goal and area sheets, editors start fresh), D23 (search). All Claude's choices.
 - **Not yet:** creating an entity from the picker, and refreshing stored mention labels on rename (both in plan.md §12).
+
+### 2026-11-04 — Phase 3 (Today + gamification core = MVP)
+- **Setup on Windows:** no Docker, Postgres or pnpm on this machine. The user installed Docker Desktop (WSL 2 first: `wsl --install`, restart). Dependencies via `npx pnpm@11.24.0 install`; `.env` made from `.env.example` with a fresh secret; `pnpm db:up`; baseline 137 tests green.
+- **Shared `game/`:** `config.ts` (every number of plan.md §5), `activity.ts` (types and payloads), `xp.ts` (earn-once credits, daily soft cap with the crossing task split, levels), `streaks.ts` (active days, daily streak with banked freezes, weekly streak; today only adds), `state.ts` (state and the before/after events of a write), `select.ts` (seeded RNG, waiting-time weights, weighted picks, sizing from your own days, make soft cap), `quests.ts` (type registry: generators over a `BoardContext`, `planBoard`, `rerollSpec`, follow-up specs, `questProgress`, `affectedTemplates`). 47 unit tests.
+- **Database:** `0005_game`: `activity` (append-only), `focus_sessions` (one open per user), `quests`.
+- **Server:** `services/activity.ts` (`recordActivity` in the write's transaction, `touch`, an async-local scope per request); every completion path logs (complete, reopen, board move, column category change, column delete, created in a done column), plus creations, triage and pinned next actions. `services/game.ts` (state from the log, lazy day/week boards, incremental and full evaluation, follow-ups, board bonus, reroll, heatmap), `services/focus.ts`, `services/today.ts` (focus list). `http/game.ts` adds the `game` block after the commit; failures queue a `game` retry job. Routes: `/api/game/state`, `/api/quests` (+ reroll), `/api/today`, `/api/focus/*`, `/api/stats/heatmap`, `/api/admin/recompute`; `PATCH /api/settings` takes every setting, with the weekly day-settings lock.
+- **Web:** `call()` takes the `game` block out and `lib/game.ts` celebrates it (toasts, a synthesized chime, the cached state updated at once). Today: level/streak/week header, focus list (5 visible, a Focus button per row), quest board with progress and reroll. Focus: start dialog (presets, custom length, project), a bar under the top bar on every page (pause, resume, finish, abandon; survives reloads), a chime + notification + finish dialog when time's up, "mark the task done". Settings: day (time zone, day start, lock shown), week, focus presets, quest types and time-quest bounds. Stats: header + 26-week heatmap. `F` starts a session, `G A` opens Stats, both in the palette too. A level/streak chip in the top bar.
+- **Bugs found on the way:**
+  - Quests made by a write completed from that same write (a board built while completing a task paid out at once). Progress now counts only activity after the offer (D26).
+  - Correlated subqueries in a select without a join: Drizzle wrote the outer column unqualified, so `t.project_id = "id"` compared the inner table with itself and every count was 0. Those subqueries now name the outer table explicitly.
+  - Quest offer times came from the database clock while activity times come from the app's; they're both the app's now.
+- **Tests (205):** + 47 game rules, + 21 API (XP once per task, board moves and column flips, subtasks, the user's day, a banked freeze covering a gap, boards made once, quests done from writes with the bonus, make → follow-up → done with 2 details, follow-up cancelled on delete, reroll once, expiry, comeback-only after a week, scoping, focus run/pause/resume/finish with the cap and task completion, short and abandoned sessions, Today's order and parked projects, the settings lock and validation, heatmap, recompute).
+- **Checked in a real browser** (the built-in one, dev server, seed account): Today on phone and desktop, two completions (XP, streak, quest 1/2 → done, toasts), a 1-minute focus session surviving a reload and ringing at the end, finishing it with the task marked done (level 2), reroll (409 when nothing else fits, shown as a toast), Stats heatmap, Settings. Under the preview tool on Windows `pnpm dev` didn't start the API (the server ran fine on its own), so the API ran separately; `.claude/launch.json` starts only the web app.
+- **Decisions:** D24–D29 (Claude's choices).
+- **Not yet:** habits in the focus list and calendar items on Today (Phase 4); no UI button for recompute; a reroll button shows even when there's nothing to swap for.

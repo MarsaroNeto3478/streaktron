@@ -5,6 +5,7 @@ import { Command as Cmdk } from 'cmdk';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
+  BarChart3,
   FolderPlus,
   Inbox,
   Keyboard,
@@ -14,6 +15,7 @@ import {
   Settings,
   Shapes,
   Sun,
+  Timer,
   type LucideIcon,
 } from 'lucide-react';
 import { useDeferredValue, useState, type ReactNode } from 'react';
@@ -23,7 +25,7 @@ import { useOpenEntity, useOpenTask } from '@/hooks/use-open-task';
 import { isMac } from '@/hooks/use-hotkeys';
 import { useTaskActions } from '@/lib/actions';
 import { projectsQuery, searchQuery, type Project, type SearchHit } from '@/lib/queries';
-import { newArea, newProject, setUi, useUi } from '@/lib/ui-store';
+import { newArea, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
 import { EntityIcon, RefIcon } from './entity-icon';
 
 export function CommandPalette() {
@@ -122,6 +124,15 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
     },
     { id: 'new-area', label: 'New area', icon: Shapes, run: run(newArea) },
     {
+      id: 'focus',
+      label: 'Start a focus session',
+      icon: Timer,
+      hint: 'F',
+      run: run(() =>
+        startFocus(currentId && current?.status === 'active' ? { projectId: currentId } : {}),
+      ),
+    },
+    {
       id: 'go-today',
       label: 'Go to Today',
       icon: Sun,
@@ -148,6 +159,13 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       icon: ListTodo,
       hint: 'G L',
       run: run(() => void navigate({ to: '/tasks' })),
+    },
+    {
+      id: 'go-stats',
+      label: 'Go to Stats',
+      icon: BarChart3,
+      hint: 'G A',
+      run: run(() => void navigate({ to: '/stats' })),
     },
     {
       id: 'go-settings',

@@ -9,9 +9,17 @@ export interface UiState {
   projectDialog: null | { projectId?: string; areaId?: string | null };
   areaDialog: null | { areaId?: string };
   shortcuts: boolean;
+  /** The start-focus dialog, optionally attached to a task or project. */
+  focusDialog: null | { taskId?: string; projectId?: string };
 }
 
-let state: UiState = { palette: null, projectDialog: null, areaDialog: null, shortcuts: false };
+let state: UiState = {
+  palette: null,
+  projectDialog: null,
+  areaDialog: null,
+  shortcuts: false,
+  focusDialog: null,
+};
 const listeners = new Set<() => void>();
 
 export function setUi(patch: Partial<UiState>) {
@@ -34,3 +42,5 @@ export const newProject = (areaId?: string | null) => setUi({ projectDialog: { a
 export const editProject = (projectId: string) => setUi({ projectDialog: { projectId } });
 export const newArea = () => setUi({ areaDialog: {} });
 export const editArea = (areaId: string) => setUi({ areaDialog: { areaId } });
+export const startFocus = (attach: { taskId?: string; projectId?: string } = {}) =>
+  setUi({ focusDialog: attach });

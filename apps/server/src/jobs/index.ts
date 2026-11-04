@@ -3,10 +3,13 @@
 
 import { PgBoss } from 'pg-boss';
 import { env } from '../env';
+import { evaluateAll } from '../services/game';
 import { runBackup } from './backup';
+import { QUEUES } from './names';
 import { runPurge } from './purge';
+import { setBoss } from './queue';
 
-export const QUEUES = { backup: 'backup', purge: 'purge' } as const;
+export { QUEUES };
 
 export async function startJobs(): Promise<PgBoss> {
   const boss = new PgBoss({ connectionString: env.DATABASE_URL, schema: 'pgboss' });
@@ -42,5 +45,12 @@ export async function startJobs(): Promise<PgBoss> {
   });
   await boss.schedule(QUEUES.purge, '43 * * * *');
 
+  // Retries of a game evaluation that failed after a write (http/game.ts).
+  await boss.createQueue(QUEUES.game, { retryLimit: 5, retryDelay: 30, retryBackoff: true });
+  await boss.work<{ userId: string }>(QUEUES.game, async ([job]) => {
+    if (job) await evaluateAll(job.data.userId);
+  });
+
+  setBoss(boss);
   return boss;
 }

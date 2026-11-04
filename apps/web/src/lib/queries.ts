@@ -110,3 +110,45 @@ const fetchGoal = (id: string) => call(api.goals[':id'].$get({ param: { id } }))
 /** One goal (the goal sheet). */
 export const goalQuery = (id: string) =>
   queryOptions({ queryKey: ['goal', id], queryFn: () => fetchGoal(id) });
+
+// --- The day and the game --------------------------------------------------------------------
+
+const fetchGame = () => call(api.game.state.$get());
+export type GameStateView = Awaited<ReturnType<typeof fetchGame>>;
+
+/** XP, level, streaks (server-computed from the activity log). */
+export const gameStateQuery = queryOptions({ queryKey: ['game', 'state'], queryFn: fetchGame });
+
+const fetchQuests = () => call(api.quests.$get());
+export type Quest = Awaited<ReturnType<typeof fetchQuests>>['quests'][number];
+
+/** Today's and this week's quests; fetching brings progress up to date. */
+export const questsQuery = queryOptions({
+  queryKey: ['game', 'quests'],
+  queryFn: async () => (await fetchQuests()).quests,
+});
+
+const fetchToday = () => call(api.today.$get());
+export type FocusItem = Awaited<ReturnType<typeof fetchToday>>['focus'][number];
+
+/** Today's focus list. */
+export const todayQuery = queryOptions({ queryKey: ['today'], queryFn: fetchToday });
+
+const fetchFocus = () => call(api.focus.current.$get());
+export type FocusSession = NonNullable<Awaited<ReturnType<typeof fetchFocus>>['session']>;
+
+/** The running or paused focus session, if any. */
+export const focusQuery = queryOptions({
+  queryKey: ['focus'],
+  queryFn: async () => (await fetchFocus()).session,
+});
+
+const fetchHeatmap = (from: string, to: string) =>
+  call(api.stats.heatmap.$get({ query: { from, to } }));
+export type HeatDay = Awaited<ReturnType<typeof fetchHeatmap>>['days'][number];
+
+export const heatmapQuery = (from: string, to: string) =>
+  queryOptions({
+    queryKey: ['game', 'heatmap', from, to],
+    queryFn: async () => (await fetchHeatmap(from, to)).days,
+  });

@@ -22,6 +22,7 @@ import {
   type Conn,
   type Tx,
 } from './common';
+import { recordActivity } from './activity';
 import { writeLinks } from './links';
 import { snapshotProjects } from './snapshots';
 
@@ -282,6 +283,13 @@ export async function updateProject(userId: string, id: string, patch: ProjectPa
       await tx.update(projects).set(values).where(eq(projects.id, id));
     }
     await writeLinks(tx, userId, id, description);
+    if (patch.nextActionTaskId && patch.nextActionTaskId !== project.nextActionTaskId) {
+      await recordActivity(tx, userId, {
+        type: 'next_action_set',
+        entityId: patch.nextActionTaskId,
+        payload: { projectId: id },
+      });
+    }
     return projectView(tx, userId, id);
   });
 }

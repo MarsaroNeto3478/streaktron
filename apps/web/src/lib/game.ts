@@ -1,0 +1,65 @@
+// What happens when a write earned something: the game's queries take the new state at once, and a
+// short, quiet toast says what changed (plan.md §4.5: immediate, subtle feedback). Also the chime
+// for focus sessions (Web Audio, no files).
+
+import type { GameEvents } from '@streaktron/shared/game';
+import type { QueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+export function celebrate(qc: QueryClient, e: GameEvents) {
+  qc.setQueryData(['game', 'state'], e.state);
+  void qc.invalidateQueries({ queryKey: ['game'] });
+
+  if (e.levelUp) {
+    chime('level');
+    toast.success(`Level ${e.levelUp.to}!`, { description: `+${e.xp} XP` });
+  }
+  for (const q of e.questsDone) {
+    if (!e.levelUp) chime('quest');
+    toast.success(`Quest done: ${q.title}`, { description: `+${q.xp} XP` });
+  }
+  for (const q of e.questsAdded) {
+    toast(`New quest: ${q.title}`, { description: 'Lasts until the end of tomorrow.' });
+  }
+  if (e.streak && !e.levelUp) {
+    toast(`${e.streak.to}-day streak`, {
+      description: e.streak.to === 1 ? 'Today counts.' : 'Today counts. Keep it going.',
+    });
+  }
+  if (e.freezeEarned)
+    toast('Streak freeze earned', { description: 'A missed day won’t break it.' });
+  if (e.weekMet) toast.success('Weekly target met', { description: 'The weekly streak grows.' });
+  // XP alone: a small, quick note.
+  if (e.xp > 0 && !e.levelUp && !e.questsDone.length && !e.streak) {
+    toast(`+${e.xp} XP`, { duration: 1500 });
+  }
+}
+
+// --- Sound -----------------------------------------------------------------------------------
+
+let ctx: AudioContext | null = null;
+
+/** A short synthesized chime: `focus` when a session ends, `quest` and `level` for rewards. */
+export function chime(kind: 'focus' | 'quest' | 'level') {
+  try {
+    ctx ??= new AudioContext();
+    const notes =
+      kind === 'focus' ? [660, 880, 990] : kind === 'level' ? [523, 659, 784, 1047] : [784, 1047];
+    const now = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx!.createOscillator();
+      const gain = ctx!.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = now + i * 0.12;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(kind === 'focus' ? 0.18 : 0.08, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      osc.connect(gain).connect(ctx!.destination);
+      osc.start(t);
+      osc.stop(t + 0.55);
+    });
+  } catch {
+    // No audio (blocked autoplay, old browser): stay quiet.
+  }
+}

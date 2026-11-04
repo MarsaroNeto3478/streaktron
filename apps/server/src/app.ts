@@ -8,18 +8,22 @@ import { auth } from './auth';
 import { env } from './env';
 import { DEFAULT_STATIC_DIR } from './paths';
 import { errorBody, onError } from './http/errors';
+import { gameEvents } from './http/game';
 import { adminRoutes } from './routes/admin';
 import { areaRoutes } from './routes/areas';
 import { columnRoutes } from './routes/columns';
 import { goalRoutes } from './routes/goals';
 import { healthRoutes } from './routes/health';
 import { meRoutes } from './routes/me';
+import { focusRoutes, gameRoutes, questRoutes, statsRoutes, todayRoutes } from './routes/game';
 import { entityRoutes, searchRoutes, settingsRoutes, snapshotRoutes } from './routes/misc';
 import { projectRoutes } from './routes/projects';
 import { setupRoutes } from './routes/setup';
 import { taskRoutes } from './routes/tasks';
 
 const api = new Hono()
+  // Writes that count answer with a `game` block (XP, quests done…).
+  .use(gameEvents)
   // Accounts are made through /api/setup only, while sign-up is closed (D1).
   .post('/auth/sign-up/*', (c) => c.json(errorBody('signup_closed', 'Sign-up is closed.'), 403))
   .on(['GET', 'POST'], '/auth/*', (c) => auth.handler(c.req.raw))
@@ -35,7 +39,12 @@ const api = new Hono()
   .route('/search', searchRoutes)
   .route('/entities', entityRoutes)
   .route('/snapshots', snapshotRoutes)
-  .route('/settings', settingsRoutes);
+  .route('/settings', settingsRoutes)
+  .route('/game', gameRoutes)
+  .route('/quests', questRoutes)
+  .route('/today', todayRoutes)
+  .route('/focus', focusRoutes)
+  .route('/stats', statsRoutes);
 
 export const app = new Hono();
 
