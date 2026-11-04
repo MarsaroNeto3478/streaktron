@@ -2,6 +2,7 @@ import {
   columnCreateSchema,
   idOf,
   projectCreateSchema,
+  projectMoveSchema,
   projectPatchSchema,
   projectStatusSchema,
   reorderSchema,
@@ -16,6 +17,7 @@ import { listGoals } from '../services/goals';
 import {
   createProject,
   deleteProject,
+  moveProject,
   projectView,
   projectViews,
   setProjectStatus,
@@ -43,6 +45,12 @@ export const projectRoutes = new Hono<AuthedEnv>()
   })
   .patch('/:id', param, validate('json', projectPatchSchema), async (c) =>
     c.json(await updateProject(c.get('user').id, c.req.valid('param').id, c.req.valid('json'))),
+  )
+  /** Drag on the Projects page: to an area (or none) and a position among its projects. */
+  .post('/:id/move', param, validate('json', projectMoveSchema), async (c) =>
+    c.json({
+      projects: await moveProject(c.get('user').id, c.req.valid('param').id, c.req.valid('json')),
+    }),
   )
   /** Lifecycle; 409 `active_limit` (with the active projects) when over the limit (D5). */
   .post('/:id/status', param, validate('json', projectStatusSchema), async (c) =>

@@ -8,6 +8,7 @@ import { and, asc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '../db/client';
 import { goals } from '../db/schema';
 import { defined, edgeOrder, invalid, notFound, richColumns, type Conn } from './common';
+import { recordActivity, touch } from './activity';
 import { writeLinks } from './links';
 import { ownedProject } from './projects';
 
@@ -57,6 +58,11 @@ export async function createGoal(userId: string, input: GoalCreate) {
       })
       .returning();
     await writeLinks(tx, userId, id, input.description);
+    await recordActivity(tx, userId, {
+      type: 'item_created',
+      entityId: id,
+      payload: { kind: 'goal', projectId: input.projectId, parentTaskId: null },
+    });
     return view(row!);
   });
 }
@@ -86,6 +92,7 @@ export async function updateGoal(userId: string, id: string, patch: GoalPatch) {
       .where(eq(goals.id, id))
       .returning();
     await writeLinks(tx, userId, id, description);
+    touch(userId, id);
     return view(row!);
   });
 }
@@ -95,6 +102,7 @@ export async function deleteGoal(userId: string, id: string) {
   await ownedGoal(db, userId, id);
   const deletedAt = new Date();
   await db.update(goals).set({ deletedAt }).where(eq(goals.id, id));
+  touch(userId, id);
   return { id, deletedAt };
 }
 

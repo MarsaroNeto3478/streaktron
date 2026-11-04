@@ -125,6 +125,43 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Decision:** Postgres FTS with the `simple` configuration (no stemming, so text in any language matches the same way) over unaccented titles (weight A) and descriptions (weight B); every query word is a prefix, in any order. Titles also match by trigram similarity when **every** query word is close to a word of the title (≥ 0.5, e.g. "algerba" → "Linear algebra"). Ranking: title starts with the query, title contains it, FTS rank, similarity, then open before closed, shorter, recent. Description-only matches return the words around the match. An empty query lists recently changed open things (the mention picker's first view).
 - **Why:** The UI is English (D7) but the user may write in Portuguese; stemming for one language would mis-handle the other. Requiring every word to be similar stops one shared word from carrying a multi-word query.
 
+### D24 · What the activity log records and what counts — accepted (2026-11-04, Claude's choice, confirm when convenient)
+- **Decision:**
+  - Activity types so far: `task_completed`, `task_reopened`, `task_triaged` (an inbox task given a project), `item_created` (task, subtask or goal), `next_action_set`, `focus_completed`, `quest_completed`, `quest_bonus`. Every path that completes a task writes one: the complete button, a drag into a done column, a column turned into a done one, a task created straight into a done column.
+  - A task with **no effort set earns as S** (10 XP).
+  - A **subtask** earns no XP but **makes the day active** (it's real work done).
+  - `local_date` is fixed when the row is written; a later time-zone change never rewrites history.
+- **Why:** One log answers "did anything count?" for XP, streaks and quests alike (D8). Unset effort is the common case for quick captures; paying it nothing would punish capturing.
+
+### D25 · Game events through a middleware — accepted (2026-11-04, Claude's choice)
+- **Decision:** Services call `recordActivity` / `touch` inside their transactions; an async-local scope collects them per request. After the write commits, the `gameEvents` middleware evaluates quests (under a lock on the user's settings row) and adds a `game` block to the JSON body (XP, level up, streak, freeze, weekly target, quests done or added, and the new state). The web client's `call()` takes the block out and hands it to one handler (toasts, cache update). If the evaluation fails, the response goes out without it and a pg-boss `game` job retries it.
+- **Why:** Every write gets the block without each route knowing about it, and the client celebrates the same way everywhere. Failing the evaluation never fails a committed write (Quire's SRV-4).
+
+### D26 · Quest boards and progress — accepted (2026-11-04, Claude's choice, confirm when convenient)
+- **Decision:**
+  - The day's board (and the week's) is made on **first contact**: the first quest view or counting write of that day. Past quests are expired then; a follow-up whose item is gone is cancelled.
+  - **Progress counts only what happens after a quest was offered.** A board made by a write never pays out for that same write.
+  - MVP templates: quick (triage one inbox item; pick the next action of a project; tick off a subtask), daily (finish Today's top item; move an untouched project forward; complete a task in a project; complete 2 tasks; a 25-minute session), time (minutes today; minutes this week), weekly (the active-day target), make (add a task; add a goal to a project with none; break an L task into 2 subtasks), follow-up, comeback.
+  - A make quest pays its XP when the item is made. Its follow-up asks for 2 of the item's missing parts (a task's goal only when its project has goals); "break it down" has no follow-up (subtasks are just titles). The D16 box rule is kept in the follow-up's status: completed or expired → the make quest's box is due (Phase 5), cancelled → none.
+  - Rerolls swap for another quest of the same type that isn't on the board; a replacement can't be rerolled. When nothing else fits, the reroll answers 409.
+- **Why:** Counting work done before the board existed made quests complete the moment they appeared (found by the API tests). Lazy boards need no per-timezone midnight job.
+
+### D27 · Focus sessions — accepted (2026-11-04, Claude's choice)
+- **Decision:** One running or paused session per user (a partial unique index). The server keeps the start time and pauses; the client counts on from the server's figure. Finishing credits the minutes worked, **capped at the planned length** (a forgotten timer doesn't keep counting). Sessions under 10 minutes still log their minutes (time quests count them) but earn no XP and don't make an active day. "Mark the task done" is a second write in the same request.
+- **Why:** Sessions must survive reloads and devices (plan.md §4.4), and an open-ended timer would be the easiest XP farm in the app.
+
+### D28 · Day settings change once a week — accepted (2026-11-04, Claude's choice)
+- **Decision:** Time zone **and** day-start hour can change at most once every 7 days (409 `day_settings_locked`); the first change after setup is free. Week start, weekly target, presets and quest settings change any time. A changed weekly target applies to past weeks too (the weekly streak is recomputed with it).
+- **Why:** D17 names the time zone; the day-start hour moves the same boundary, so it can farm days the same way.
+
+### D29 · No cached game state yet — accepted (2026-11-04, Claude's choice)
+- **Decision:** XP, level and streaks are computed from the user's whole activity log on each request; there is no `stats_snapshot` row. `POST /api/admin/recompute` therefore only re-evaluates open quests and returns the state.
+- **Why:** A year of daily use is a few thousand rows, milliseconds to replay. A cache is one more thing that can drift; add it when the log is big enough to need it.
+
+### D30 · Dragging projects between areas — accepted (2026-11-04, the user's idea; details Claude's)
+- **Decision:** On the Projects page, projects in progress (active and parked) are cards that drag within an area or into another one, or into "No area" (shown while dragging), like board cards: mouse, touch (a short press) and keyboard (Space, arrows, Space). `POST /api/projects/:id/move { areaId, index }` places it among that area's projects in progress; completed and archived ones keep their places after them and can't be dragged. Projects in an area are shown in their own order now (no longer active first, then parked).
+- **Why:** Moving a project used to need its edit dialog, and projects couldn't be ordered at all. Showing them in the order the user set is what makes ordering mean something.
+
 ---
 
 ## Rejected ideas (don't propose again)

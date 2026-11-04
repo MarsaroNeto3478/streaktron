@@ -12,6 +12,7 @@ import type {
   GoalPatch,
   ProjectCreate,
   ProjectPatch,
+  SettingsPatch,
   TaskCreate,
   TaskPatch,
 } from '@streaktron/shared/schemas';
@@ -26,7 +27,16 @@ import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { api, call } from './api';
-import type { Area, BoardColumn, Goal, Project, ProjectPage, Task, TaskDetail } from './queries';
+import type {
+  Area,
+  BoardColumn,
+  FocusSession,
+  Goal,
+  Project,
+  ProjectPage,
+  Task,
+  TaskDetail,
+} from './queries';
 import { refreshEntities } from './entities';
 import { attempt, report } from './report';
 import { cachedTask, dropTasks, mergeTasks, refreshAfterTaskWrite } from './task-cache';
@@ -299,6 +309,40 @@ export function structureActions(qc: QueryClient) {
       return project;
     },
 
+    /**
+     * Drag on the Projects page: into `areaId` (null: no area) at `index` among `lane` (that
+     * area's projects in progress as shown, without the moved one). Optimistic.
+     */
+    moveProject: (project: Project, areaId: string | null, index: number, lane: Project[]) => {
+      const order = placeAt(
+        lane.filter((p) => p.id !== project.id).map((p) => p.id),
+        project.id,
+        index,
+      );
+      qc.setQueryData<Project[]>(['projects'], (old) =>
+        old?.map((p) => {
+          const i = order.indexOf(p.id);
+          if (i === -1) return p;
+          return { ...p, sortOrder: i, ...(p.id === project.id ? { areaId } : {}) };
+        }),
+      );
+      return attempt(async () => {
+        try {
+          const { projects } = await call(
+            api.projects[':id'].move.$post({
+              param: { id: project.id },
+              json: { areaId, index },
+            }),
+          );
+          qc.setQueryData<Project[]>(['projects'], (old) =>
+            old?.map((p) => projects.find((x) => x.id === p.id) ?? p),
+          );
+        } finally {
+          refreshStructure(qc, project.id);
+        }
+      });
+    },
+
     /** Throws (an `active_limit` 409 is handled by the caller's dialog). */
     setStatus: async (id: string, status: ProjectStatus, park?: string) => {
       const { projects } = await call(
@@ -444,4 +488,63 @@ function undoToast(qc: QueryClient, message: string, snapshotId: string) {
 export function useStructureActions() {
   const qc = useQueryClient();
   return useMemo(() => structureActions(qc), [qc]);
+}
+
+// --- Focus sessions, quests, settings --------------------------------------------------------
+
+export function gameActions(qc: QueryClient) {
+  const setSession = (s: FocusSession | null) => qc.setQueryData(['focus'], s);
+  return {
+    startFocus: (input: { plannedMinutes: number; taskId?: string; projectId?: string }) =>
+      attempt(async () => {
+        const s = await call(api.focus.start.$post({ json: input }));
+        setSession(s);
+        return s;
+      }),
+
+    pauseFocus: (id: string) =>
+      attempt(async () => setSession(await call(api.focus[':id'].pause.$post({ param: { id } })))),
+
+    resumeFocus: (id: string) =>
+      attempt(async () => setSession(await call(api.focus[':id'].resume.$post({ param: { id } })))),
+
+    /** Finish: the minutes worked count (XP, quests); optionally completes the attached task. */
+    finishFocus: (id: string, input: { note?: string; completeTask?: boolean }) =>
+      attempt(async () => {
+        const res = await call(api.focus[':id'].finish.$post({ param: { id }, json: input }));
+        setSession(null);
+        if (res.task) {
+          mergeTasks(qc, res.task);
+          refreshAfterTaskWrite(qc, [res.task.projectId]);
+        }
+        return res;
+      }),
+
+    abandonFocus: (id: string) =>
+      attempt(async () => {
+        await call(api.focus[':id'].abandon.$post({ param: { id } }));
+        setSession(null);
+      }),
+
+    reroll: (id: string) =>
+      attempt(async () => {
+        const next = await call(api.quests[':id'].reroll.$post({ param: { id } }));
+        await qc.invalidateQueries({ queryKey: ['game', 'quests'] });
+        return next;
+      }),
+
+    /** Throws (the settings form shows the message, e.g. the weekly time-zone lock). */
+    saveSettings: async (patch: SettingsPatch) => {
+      const settings = await call(api.settings.$patch({ json: patch }));
+      await qc.invalidateQueries({ queryKey: ['me'] });
+      void qc.invalidateQueries({ queryKey: ['game'] });
+      void qc.invalidateQueries({ queryKey: ['today'] });
+      return settings;
+    },
+  };
+}
+
+export function useGameActions() {
+  const qc = useQueryClient();
+  return useMemo(() => gameActions(qc), [qc]);
 }

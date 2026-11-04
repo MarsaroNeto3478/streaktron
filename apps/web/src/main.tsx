@@ -3,7 +3,8 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { toast } from 'sonner';
-import { ApiError, errorMessage } from './lib/api';
+import { ApiError, errorMessage, setGameHandler } from './lib/api';
+import { celebrate } from './lib/game';
 import { setErrorHandler } from './lib/report';
 import { anyBusy, flushAll } from './lib/saver';
 import { followSystemTheme } from './lib/theme';
@@ -36,6 +37,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+setGameHandler((events) => celebrate(queryClient, events));
 
 const router = createRouter({
   routeTree,

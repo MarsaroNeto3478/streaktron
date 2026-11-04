@@ -5,6 +5,8 @@ import { useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { CommandPalette } from '@/components/command-palette';
 import { EntityIcon } from '@/components/entity-icon';
+import { FocusBar, FocusStartDialog } from '@/components/focus';
+import { GameChip } from '@/components/game-header';
 import { Logo } from '@/components/logo';
 import { NAV } from '@/components/nav';
 import { ProjectStatusProvider } from '@/components/project-status';
@@ -90,6 +92,7 @@ export function AppShell({
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b bg-background/85 px-4 backdrop-blur md:px-8">
             <Logo className="md:invisible" />
             <div className="flex items-center gap-1">
+              <GameChip />
               <Button
                 variant="ghost"
                 size="icon"
@@ -102,6 +105,7 @@ export function AppShell({
               <UserMenu me={me} />
             </div>
           </header>
+          <FocusBar />
           <main className="flex-1 px-4 pt-6 pb-28 md:px-8 md:pb-10">{children}</main>
         </div>
 
@@ -143,6 +147,7 @@ export function AppShell({
       <GoalSheet goalId={sheets.goal} />
       <AreaSheet areaId={sheets.area} />
       <CommandPalette />
+      <FocusStartDialog />
       <StructureDialogs />
       <GlobalShortcuts />
     </ProjectStatusProvider>

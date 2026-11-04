@@ -75,6 +75,7 @@ export function refreshAfterTaskWrite(qc: QueryClient, projectIds: (string | nul
   refreshEntities(qc);
   void qc.invalidateQueries({ queryKey: ['tasks', 'list'] });
   void qc.invalidateQueries({ queryKey: ['projects'] });
+  void qc.invalidateQueries({ queryKey: ['today'] });
   for (const id of new Set(projectIds)) {
     if (id) void qc.invalidateQueries({ queryKey: ['project', id] });
   }

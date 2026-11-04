@@ -24,11 +24,27 @@ import {
   type Conn,
   type Tx,
 } from './common';
+import { recordActivity, touch, type ActivityInput } from './activity';
 import { writeLinks } from './links';
 import { ownedProject, unpinClosed } from './projects';
 
 type TaskRow = typeof tasks.$inferSelect;
 type ColumnRow = typeof boardColumns.$inferSelect;
+
+// --- Activity (D8) ---------------------------------------------------------------------------
+
+type DonenessRow = Pick<TaskRow, 'id' | 'effort' | 'projectId' | 'parentTaskId'>;
+
+/** The activity a task's completion or reopening writes. */
+function donenessActivity(task: DonenessRow, done: boolean): ActivityInput {
+  return done
+    ? {
+        type: 'task_completed',
+        entityId: task.id,
+        payload: { effort: task.effort, projectId: task.projectId, subtask: !!task.parentTaskId },
+      }
+    : { type: 'task_reopened', entityId: task.id, payload: { projectId: task.projectId } };
+}
 
 // --- Reading ---------------------------------------------------------------------------------
 
@@ -54,7 +70,7 @@ const viewColumns = {
   )`,
 };
 
-function selectViews(conn: Conn, where: SQL | undefined) {
+export function selectViews(conn: Conn, where: SQL | undefined) {
   return conn
     .select(viewColumns)
     .from(tasks)
@@ -198,6 +214,26 @@ export async function createTask(userId: string, input: TaskCreate) {
       ...richColumns(input.description),
     });
     await writeLinks(tx, userId, id, input.description);
+    const row = {
+      id,
+      effort: input.effort ?? null,
+      projectId,
+      parentTaskId: input.parentTaskId ?? null,
+    };
+    await recordActivity(tx, userId, [
+      {
+        type: 'item_created',
+        entityId: id,
+        payload: {
+          kind: input.parentTaskId ? 'subtask' : 'task',
+          projectId,
+          parentTaskId: input.parentTaskId ?? null,
+        },
+      },
+      ...(completedAt ? [donenessActivity(row, true)] : []),
+    ]);
+    // A new subtask or task under a goal fills in its parent's details (follow-up quests).
+    touch(userId, input.parentTaskId, input.goalId);
     return taskView(tx, userId, id);
   });
 }
@@ -232,6 +268,14 @@ export async function updateTask(userId: string, id: string, patch: TaskPatch) {
 
     if (Object.keys(values).length) await tx.update(tasks).set(values).where(eq(tasks.id, id));
     await writeLinks(tx, userId, id, description);
+    if (moving && task.projectId === null && projectId && !task.parentTaskId) {
+      await recordActivity(tx, userId, {
+        type: 'task_triaged',
+        entityId: id,
+        payload: { projectId },
+      });
+    }
+    touch(userId, id, values.goalId);
     return taskView(tx, userId, id);
   });
 }
@@ -280,6 +324,7 @@ export async function completeTask(userId: string, id: string) {
     }
     await tx.update(tasks).set(values).where(eq(tasks.id, id));
     await unpinClosed(tx, [task.projectId]);
+    await recordActivity(tx, userId, donenessActivity(task, true));
     return taskView(tx, userId, id);
   });
 }
@@ -299,6 +344,7 @@ export async function reopenTask(userId: string, id: string) {
       }
     }
     await tx.update(tasks).set(values).where(eq(tasks.id, id));
+    await recordActivity(tx, userId, donenessActivity(task, false));
     return taskView(tx, userId, id);
   });
 }
@@ -335,6 +381,9 @@ export async function moveTask(userId: string, id: string, move: TaskMove) {
       .where(eq(tasks.id, id));
     await writeOrder(tx, tasks, userId, order);
     if (done) await unpinClosed(tx, [task.projectId]);
+    if (done !== (task.completedAt !== null)) {
+      await recordActivity(tx, userId, donenessActivity(task, done));
+    }
     return taskView(tx, userId, id);
   });
 }
@@ -355,6 +404,7 @@ export async function deleteTask(userId: string, id: string) {
         ),
       );
     await unpinClosed(tx, [task.projectId]);
+    touch(userId, id, task.parentTaskId, task.goalId);
     return { id, deletedAt };
   });
 }
@@ -404,14 +454,34 @@ export async function moveColumnTasks(tx: Tx, userId: string, from: string, to: 
     .where(and(inColumn(to.id)))
     .orderBy(asc(tasks.sortOrder));
   const ids = moving.map((t) => t.id);
-  await setDoneness(tx, ids, to.category === 'done');
+  await setDoneness(tx, userId, ids, to.category === 'done');
   await tx.update(tasks).set({ columnId: to.id }).where(inArray(tasks.id, ids));
   await writeOrder(tx, tasks, userId, [...staying.map((t) => t.id), ...ids]);
 }
 
-/** Complete (keeping earlier completion times) or reopen these tasks. */
-export async function setDoneness(tx: Tx, ids: string[], done: boolean) {
+/** Complete (keeping earlier completion times) or reopen these tasks, logging each change. */
+export async function setDoneness(tx: Tx, userId: string, ids: string[], done: boolean) {
   if (!ids.length) return;
+  const changing = await tx
+    .select({
+      id: tasks.id,
+      effort: tasks.effort,
+      projectId: tasks.projectId,
+      parentTaskId: tasks.parentTaskId,
+    })
+    .from(tasks)
+    .where(
+      and(
+        inArray(tasks.id, ids),
+        isNull(tasks.deletedAt),
+        done ? isNull(tasks.completedAt) : isNotNull(tasks.completedAt),
+      ),
+    );
+  await recordActivity(
+    tx,
+    userId,
+    changing.map((t) => donenessActivity(t, done)),
+  );
   await tx
     .update(tasks)
     .set({ completedAt: done ? sql`coalesce(${tasks.completedAt}, now())` : null })

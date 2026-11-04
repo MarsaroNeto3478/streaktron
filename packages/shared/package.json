@@ -8,7 +8,8 @@
     "./time": "./src/time/index.ts",
     "./schemas": "./src/schemas/index.ts",
     "./structure": "./src/structure/index.ts",
-    "./rich": "./src/rich/index.ts"
+    "./rich": "./src/rich/index.ts",
+    "./game": "./src/game/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

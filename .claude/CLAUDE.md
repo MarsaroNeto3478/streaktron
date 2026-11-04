@@ -4,8 +4,8 @@ Streaktron is a web app that helps people stay consistent with studies and perso
 
 ## Current status
 
-- **Phase:** Phases 0 (Foundation), 1 (Structure & views) and 2 (Linking system) done 2026-11-03; **next up is Phase 3 (Today + gamification core = MVP)**.
-- **Run it:** `pnpm db:up && pnpm dev` (README has setup, scripts, Tailscale and backups).
+- **Phase:** Phases 0–2 done 2026-11-03; **Phase 3 (Today + gamification core = MVP) built 2026-11-04 on branch `phase-3-mvp`**; next: dogfooding, then Phase 4.
+- **Run it:** `pnpm db:up && pnpm dev` (README has setup, scripts, Tailscale and backups). On the Windows machine pnpm isn't installed globally: use `npx pnpm@11.24.0 …`.
 - **Repository:** https://github.com/JVGdev/streaktron (private), branch `main`.
 - Detailed status and session history: `.claude/context/progress.md`.
 

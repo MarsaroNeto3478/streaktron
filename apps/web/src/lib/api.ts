@@ -4,6 +4,7 @@
 //   const me = await call(api.me.$get());
 
 import type { AppType } from '@streaktron/server';
+import type { GameEvents } from '@streaktron/shared/game';
 import { apiErrorSchema } from '@streaktron/shared/schemas';
 import { hc, type ClientResponse } from 'hono/client';
 import type { SuccessStatusCode } from 'hono/utils/http-status';
@@ -67,7 +68,18 @@ type Ok<R> =
       : never
     : never;
 
-/** Await a request; resolve to its JSON body, or throw an `ApiError`. */
+let onGame: (events: GameEvents) => void = () => {};
+
+/** Where a write's `game` block goes (main.tsx: celebrate it and refresh the game's queries). */
+export const setGameHandler = (fn: (events: GameEvents) => void) => {
+  onGame = fn;
+};
+
+/**
+ * Await a request; resolve to its JSON body, or throw an `ApiError`. A `game` block (the events a
+ * write caused) is taken out of the body and handed to the game handler, so every write
+ * celebrates the same way wherever it was made.
+ */
 export async function call<R extends ClientResponse<unknown, number, string>>(
   request: Promise<R>,
 ): Promise<Ok<R>> {
@@ -79,7 +91,13 @@ export async function call<R extends ClientResponse<unknown, number, string>>(
   }
   if (!res.ok) throw await errorFrom(res as unknown as Response);
   if (res.status === 204) return undefined as Ok<R>;
-  return (await res.json()) as Ok<R>;
+  const body: unknown = await res.json();
+  if (body !== null && typeof body === 'object' && 'game' in body) {
+    const { game, ...rest } = body as { game: GameEvents | null };
+    if (game) onGame(game);
+    return rest as Ok<R>;
+  }
+  return body as Ok<R>;
 }
 
 /** A message fit to show for any error. */

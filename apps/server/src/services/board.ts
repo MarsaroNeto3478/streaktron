@@ -73,6 +73,7 @@ export async function updateColumn(userId: string, id: string, patch: ColumnPatc
           .where(and(eq(tasks.columnId, id), isNull(tasks.parentTaskId)));
         await setDoneness(
           tx,
+          userId,
           own.map((t) => t.id),
           isDone,
         );

@@ -1,12 +1,18 @@
 // Projects: lifecycle with the hard active-project limit (D5), next actions, deletion into a
 // snapshot.
 
-import type { ProjectCreate, ProjectPatch, ProjectStatusInput } from '@streaktron/shared/schemas';
+import type {
+  ProjectCreate,
+  ProjectMove,
+  ProjectPatch,
+  ProjectStatusInput,
+} from '@streaktron/shared/schemas';
 import { newId } from '@streaktron/shared/ids';
 import {
   canTransition,
   DEFAULT_COLUMNS,
   pickNextAction,
+  placeAt,
   type ProjectStatus,
 } from '@streaktron/shared/structure';
 import { and, asc, count, eq, inArray, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
@@ -19,9 +25,11 @@ import {
   invalid,
   notFound,
   richColumns,
+  writeOrder,
   type Conn,
   type Tx,
 } from './common';
+import { recordActivity } from './activity';
 import { writeLinks } from './links';
 import { snapshotProjects } from './snapshots';
 
@@ -282,7 +290,55 @@ export async function updateProject(userId: string, id: string, patch: ProjectPa
       await tx.update(projects).set(values).where(eq(projects.id, id));
     }
     await writeLinks(tx, userId, id, description);
+    if (patch.nextActionTaskId && patch.nextActionTaskId !== project.nextActionTaskId) {
+      await recordActivity(tx, userId, {
+        type: 'next_action_set',
+        entityId: patch.nextActionTaskId,
+        payload: { projectId: id },
+      });
+    }
     return projectView(tx, userId, id);
+  });
+}
+
+/**
+ * Drag and drop on the Projects page: into `areaId` (null: no area) at `index` among that area's
+ * projects in progress (active and parked, as the page shows them). Completed and archived ones
+ * keep their places after those. Returns every project of the area, in order.
+ */
+export async function moveProject(userId: string, id: string, move: ProjectMove) {
+  return db.transaction(async (tx) => {
+    const project = await ownedProject(tx, userId, id, true);
+    if (project.status !== 'active' && project.status !== 'parked') {
+      throw invalid('invalid_move', 'Only projects in progress can be dragged.');
+    }
+    await assertArea(tx, userId, move.areaId);
+    const siblings = await tx
+      .select({ id: projects.id, status: projects.status })
+      .from(projects)
+      .where(
+        and(
+          eq(projects.userId, userId),
+          move.areaId ? eq(projects.areaId, move.areaId) : isNull(projects.areaId),
+          ne(projects.id, id),
+        ),
+      )
+      .orderBy(asc(projects.sortOrder), asc(projects.createdAt));
+    const inProgress = siblings.filter((p) => p.status === 'active' || p.status === 'parked');
+    const closed = siblings.filter((p) => p.status !== 'active' && p.status !== 'parked');
+    const order = [
+      ...placeAt(
+        inProgress.map((p) => p.id),
+        id,
+        move.index,
+      ),
+      ...closed.map((p) => p.id),
+    ];
+    if (move.areaId !== project.areaId) {
+      await tx.update(projects).set({ areaId: move.areaId }).where(eq(projects.id, id));
+    }
+    await writeOrder(tx, projects, userId, order);
+    return projectViews(tx, userId, order);
   });
 }
 
