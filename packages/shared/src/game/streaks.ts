@@ -9,6 +9,7 @@ import { GAME } from './config';
 export function qualifies(a: Activity): boolean {
   switch (a.type) {
     case 'task_completed':
+    case 'habit_checked':
       return true;
     case 'focus_completed':
       return a.payload.minutes >= GAME.xp.focusMinMinutes;

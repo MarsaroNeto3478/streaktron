@@ -338,3 +338,47 @@ export type FocusFinish = z.infer<typeof focusFinishSchema>;
 export const dayRangeSchema = z
   .object({ from: dateString, to: dateString })
   .refine((r) => r.from <= r.to, { message: '`from` must not be after `to`', path: ['to'] });
+
+// --- Habits (Phase 4) ------------------------------------------------------------------------
+
+export const habitScheduleSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('weekdays'),
+    days: z
+      .array(z.int().min(0).max(6))
+      .min(1, 'Pick at least one day')
+      .max(7)
+      .transform((d) => [...new Set(d)].sort()),
+  }),
+  z.object({ type: z.literal('per_week'), count: z.int().min(1).max(7) }),
+]);
+
+const habitFields = {
+  title,
+  notes: z.string().trim().max(2000),
+  /** Optional: the habit belongs to a project (shown there, counts as work on it). */
+  projectId: idOf('project').nullable(),
+  schedule: habitScheduleSchema,
+  /** "At least N minutes" — a reminder of the bar, not checked against focus time. */
+  minMinutes: z.int().min(1).max(600).nullable(),
+};
+
+export const habitCreateSchema = z.object({
+  ...habitFields,
+  notes: habitFields.notes.optional(),
+  projectId: habitFields.projectId.optional(),
+  minMinutes: habitFields.minMinutes.optional(),
+});
+export type HabitCreate = z.input<typeof habitCreateSchema>;
+
+export const habitPatchSchema = z
+  .object({ ...habitFields, /** Archive (true) or bring back (false). */ archived: z.boolean() })
+  .partial();
+export type HabitPatch = z.infer<typeof habitPatchSchema>;
+
+export const habitCheckinSchema = z.object({
+  /** Defaults to today; yesterday is allowed for a forgotten check-in (D34). */
+  date: dateString.optional(),
+  note: z.string().trim().max(500).optional(),
+});
+export type HabitCheckin = z.infer<typeof habitCheckinSchema>;

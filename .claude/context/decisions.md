@@ -174,6 +174,11 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Decision:** While a session or break runs, the tab title shows the time left and the favicon a progress ring; an optional mini clock window floats over other windows (Document Picture-in-Picture; Chrome and Edge on desktop, hidden elsewhere). Finishing a session offers the preset's break with its own timer; breaks are skippable and earn nothing. Quest completions and level-ups get a short visual burst besides the chime, unless the system asks for reduced motion. A clock that stays on the phone's screen needs the native app (Phase 10).
 - **Why:** Distraction starts when you leave the tab and forget the time; rest matters, but rewarding it would make it farmable.
 
+### D34 · How habits count — accepted (2026-11-04, Claude's, within plan.md §5)
+- **Decision:** Two schedules: certain weekdays (all seven = every day) or N times a week. A habit's own streak counts scheduled days (or weeks that reached N) in a row since it was made; today (this week) only adds. A check-in earns 10 XP **once per habit and day** and makes the day active; unchecking deletes the check-in but keeps the XP (D15), and checking in again earns nothing more. A **forgotten check-in can be made for yesterday only**: it counts for the habit's streak, but its XP and active day go to **today**, so past days (and the daily streak) can't be filled in afterwards (D17). Habit notes are plain text, not rich text: habits aren't mention sources. "At least N minutes" is a reminder of the bar, not checked against focus time. New quests: quick "Check in one habit" and daily "Check in all N habits due today" (needs 2+ due).
+- **Why:** Forgetting to tap is common and shouldn't break a habit's run; letting yesterday's tap also save yesterday's daily streak would make streaks farmable. Keeping habits out of mentions avoids a second backlink source for little gain.
+- **Alternatives:** Any past day (farmable); no backdating at all (punishes a forgotten tap); rich-text descriptions (more plumbing, little use).
+
 ---
 
 ## Rejected ideas (don't propose again)

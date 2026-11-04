@@ -10,6 +10,8 @@ import type {
   AreaPatch,
   GoalCreate,
   GoalPatch,
+  HabitCreate,
+  HabitPatch,
   ProjectCreate,
   ProjectPatch,
   SettingsPatch,
@@ -32,6 +34,7 @@ import type {
   BoardColumn,
   FocusSession,
   Goal,
+  Habit,
   Project,
   ProjectPage,
   Task,
@@ -547,4 +550,85 @@ export function gameActions(qc: QueryClient) {
 export function useGameActions() {
   const qc = useQueryClient();
   return useMemo(() => gameActions(qc), [qc]);
+}
+
+// --- Habits ----------------------------------------------------------------------------------
+
+export function habitActions(qc: QueryClient) {
+  /** Put a fresh view of a habit wherever it's cached; Today re-reads its list. */
+  const put = (h: Habit) => {
+    for (const archived of [false, true]) {
+      qc.setQueryData<Habit[]>(['habits', archived], (list) =>
+        list?.map((x) => (x.id === h.id ? h : x)),
+      );
+    }
+    void qc.invalidateQueries({ queryKey: ['today'] });
+  };
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ['habits'] });
+    void qc.invalidateQueries({ queryKey: ['today'] });
+    void qc.invalidateQueries({ queryKey: ['game', 'quests'] });
+  };
+  return {
+    create: (input: HabitCreate) =>
+      attempt(async () => {
+        const h = await call(api.habits.$post({ json: input }));
+        refresh();
+        toast.success(`Added habit “${h.title}”`);
+        return h;
+      }),
+
+    update: (id: string, patch: HabitPatch) =>
+      attempt(async () => {
+        const h = await call(api.habits[':id'].$patch({ param: { id }, json: patch }));
+        if (patch.archived !== undefined || patch.schedule) refresh();
+        else put(h);
+        return h;
+      }),
+
+    archive: (h: Habit, archived: boolean) =>
+      attempt(async () => {
+        await call(api.habits[':id'].$patch({ param: { id: h.id }, json: { archived } }));
+        refresh();
+        toast(archived ? `Archived “${h.title}”` : `Brought back “${h.title}”`);
+      }),
+
+    remove: (h: Habit) =>
+      attempt(async () => {
+        await call(api.habits[':id'].$delete({ param: { id: h.id } }));
+        refresh();
+        toast(`Deleted habit “${h.title}”`, {
+          action: {
+            label: 'Undo',
+            onClick: () =>
+              void attempt(async () => {
+                await call(api.habits[':id'].restore.$post({ param: { id: h.id } }));
+                refresh();
+              }),
+          },
+        });
+      }),
+
+    /** Check in for today, or `date` (yesterday, when forgotten). */
+    checkIn: (id: string, date?: string) =>
+      attempt(async () => {
+        const h = await call(
+          api.habits[':id'].checkin.$post({ param: { id }, json: date ? { date } : {} }),
+        );
+        put(h);
+        return h;
+      }),
+
+    uncheck: (id: string, date: string) =>
+      attempt(async () => {
+        const h = await call(api.habits[':id'].checkin[':date'].$delete({ param: { id, date } }));
+        put(h);
+        return h;
+      }),
+  };
+}
+
+export function useHabitActions() {
+  const qc = useQueryClient();
+  return useMemo(() => habitActions(qc), [qc]);
 }

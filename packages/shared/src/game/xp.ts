@@ -13,6 +13,9 @@ function sourceKey(a: Activity): string | null {
     case 'quest_completed':
     case 'quest_bonus':
       return a.entityId ? `${a.type}:${a.entityId}` : null;
+    case 'habit_checked':
+      // Once per habit and day: unchecking and checking again earns nothing more.
+      return a.entityId ? `${a.type}:${a.entityId}:${a.payload.date}` : null;
     default:
       return null;
   }
@@ -30,6 +33,8 @@ function baseXp(a: Activity): number {
     case 'quest_completed':
     case 'quest_bonus':
       return Math.max(0, Math.floor(a.payload.xp));
+    case 'habit_checked':
+      return GAME.xp.habitCheckin;
     default:
       return 0;
   }

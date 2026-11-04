@@ -105,3 +105,11 @@
 
 ### 2026-11-04 — Fix: inbox triage counts for "Add a task to X"
 - The user found that "Add a task to X" only finished for tasks created inside the project. A task created in the Inbox and then moved into X now counts too (`madeBy` accepts `task_triaged` into the quest's project, each task once). Unit and server tests added; 210 pass.
+
+### 2026-11-04 — Phase 4 started: habits (branch `phase-4-habits`)
+- Phase 4 is split into slices, each on its own branch: habits → calendar and countdowns → weekly review, commitment goals and the review/project/weekly quests → PWA and push → Streaky, tutorial and the challenge question (waits for the user's drawings).
+- **Habits built (D34):** `packages/shared/habits` (schedules, due-on-day, per-habit streaks, last 7 days; unit-tested), tables `habits` and `habit_checkins` (migration `0006_habits`), `/api/habits` (CRUD, archive, soft delete + restore, check-in for today or yesterday, uncheck), `habit_checked` activity (10 XP once per habit-day, active day), quests `quick.habit` and `daily.all_habits`, `/api/today` returns today's habits, purge job covers habits.
+- **Web:** Habits page (Today / Not today / Archived), habit dialog (weekday picker or N a week, minutes, project, notes), habit rows with check box, schedule, last 7 days, streak flame, "Did it yesterday?" and a menu; a Habits section on Today; nav, palette ("New habit", "Go to Habits") and `G H`.
+- **Checked in the browser:** create, edit (weekdays → 3× a week), Today section, delete with undo. Check-in was not clicked in the browser on purpose (XP can't be taken back on the user's account); server tests cover it. 228 tests pass.
+- **Windows note:** run Prettier with `--end-of-line auto`; without it, it rewrites every CRLF file.
+- **Quest details (the user's idea):** the user couldn't tell what "Add details to …" wanted. Clicking a quest now opens a dialog (`components/quest-detail.tsx`) with what to do, what counts, progress, reward, swap, and a "go" button per template; follow-ups list the asked parts with the filled ones ticked (the quest API returns `filled` for open follow-ups), and the row itself says "Add any N of: …".

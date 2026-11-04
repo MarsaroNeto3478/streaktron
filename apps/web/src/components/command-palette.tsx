@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   ListTodo,
   Plus,
+  Repeat,
   Settings,
   Shapes,
   Sun,
@@ -25,7 +26,7 @@ import { useOpenEntity, useOpenTask } from '@/hooks/use-open-task';
 import { isMac } from '@/hooks/use-hotkeys';
 import { useTaskActions } from '@/lib/actions';
 import { projectsQuery, searchQuery, type Project, type SearchHit } from '@/lib/queries';
-import { newArea, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
+import { newArea, newHabit, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
 import { EntityIcon, RefIcon } from './entity-icon';
 
 export function CommandPalette() {
@@ -159,6 +160,19 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       icon: ListTodo,
       hint: 'G L',
       run: run(() => void navigate({ to: '/tasks' })),
+    },
+    {
+      id: 'go-habits',
+      label: 'Go to Habits',
+      icon: Repeat,
+      hint: 'G H',
+      run: run(() => void navigate({ to: '/habits' })),
+    },
+    {
+      id: 'new-habit',
+      label: 'New habit',
+      icon: Repeat,
+      run: run(() => newHabit()),
     },
     {
       id: 'go-stats',

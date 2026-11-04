@@ -36,6 +36,7 @@ import { and, asc, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { activity, goals, projects, quests, tasks, userSettings } from '../db/schema';
 import { dayOf, recordActivity, type GameScope } from './activity';
+import { habitsDueToday } from './habits';
 import { conflict, notFound, type Conn, type Tx } from './common';
 import { focusList } from './today';
 
@@ -238,6 +239,7 @@ async function boardContext(
     projects: activeProjects.map((p) => ({ ...p, lastWorked: lastWorked.get(p.id) ?? null })),
     inboxOpen: counts?.inbox ?? 0,
     openSubtasks: counts?.subtasks ?? 0,
+    habitsDue: await habitsDueToday(tx, userId),
     topTask: top ? { id: top.task.id, title: top.task.title } : null,
     breakdownTasks: breakdown.map((t) => ({ ...t, projectId: t.projectId! })),
     focusDays: [...focusByDay.values()].filter((m) => m > 0),
@@ -285,7 +287,7 @@ const closeQuest = (tx: Tx, id: string, status: QuestRow['status']) =>
 // --- Follow-up items -------------------------------------------------------------------------
 
 /** A task or goal a make quest produced, with which details it has now; null when it's gone. */
-async function madeItem(tx: Tx, userId: string, id: string | null): Promise<MadeItem | null> {
+async function madeItem(tx: Conn, userId: string, id: string | null): Promise<MadeItem | null> {
   if (!id) return null;
   if (id.startsWith('tsk_')) {
     const [t] = await tx
@@ -511,7 +513,20 @@ export async function questBoard(userId: string) {
       ),
     )
     .orderBy(asc(quests.offeredAt), asc(quests.id));
-  return { today, quests: rows.map((r) => questView(r, today)), game: events };
+  const views = await Promise.all(
+    rows.map(async (r) => {
+      // Follow-ups also say which of the asked parts are filled in already.
+      const item =
+        r.type === 'follow_up' && r.status === 'offered'
+          ? await madeItem(db, userId, r.targetEntityId)
+          : null;
+      const filled = item
+        ? ((r.params.missing as DetailPart[] | undefined) ?? []).filter((p) => item.filled[p])
+        : null;
+      return { ...questView(r, today), filled };
+    }),
+  );
+  return { today, quests: views, game: events };
 }
 
 function questView(r: QuestRow, today: DateString) {
