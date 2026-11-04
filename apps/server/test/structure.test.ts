@@ -519,3 +519,54 @@ describe('purge', () => {
     expect(await db.$count(tasks, eq(tasks.id, t.id))).toBe(0);
   });
 });
+
+describe('dragging projects between areas', () => {
+  const titlesIn = async (areaId: string | null) => {
+    const { body } = await as.get('/api/projects');
+    return (body.projects as { title: string; areaId: string | null; status: string }[])
+      .filter((p) => p.areaId === areaId)
+      .map((p) => p.title);
+  };
+
+  it('moves a project into another area at a position, and orders within one', async () => {
+    const uni = (await as.post('/api/areas', { title: 'University' })).body;
+    const side = (await as.post('/api/areas', { title: 'Side' })).body;
+    const a = await newProject('A', { areaId: uni.id });
+    await newProject('B', { areaId: uni.id });
+    await newProject('C', { areaId: side.id, status: 'parked' });
+    await newProject('D', { areaId: side.id, status: 'parked' });
+
+    const res = await as.post(`/api/projects/${a.id}/move`, { areaId: side.id, index: 1 });
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(res.body.projects.map((p: { title: string }) => p.title)).toEqual(['C', 'A', 'D']);
+    expect(await titlesIn(side.id)).toEqual(['C', 'A', 'D']);
+    expect(await titlesIn(uni.id)).toEqual(['B']);
+
+    // Within the same area; an index past the end lands last.
+    await as.post(`/api/projects/${a.id}/move`, { areaId: side.id, index: 99 });
+    expect(await titlesIn(side.id)).toEqual(['C', 'D', 'A']);
+
+    // Out of every area.
+    await as.post(`/api/projects/${a.id}/move`, { areaId: null, index: 0 });
+    expect(await titlesIn(null)).toEqual(['A']);
+  });
+
+  it('keeps closed projects after the ones in progress, and won’t drag them', async () => {
+    const area = (await as.post('/api/areas', { title: 'Area' })).body;
+    const done = await newProject('Done', { areaId: area.id });
+    await as.post(`/api/projects/${done.id}/status`, { status: 'completed' });
+    const x = await newProject('X');
+    await as.post(`/api/projects/${x.id}/move`, { areaId: area.id, index: 5 });
+    expect(await titlesIn(area.id)).toEqual(['X', 'Done']);
+    const res = await as.post(`/api/projects/${done.id}/move`, { areaId: null, index: 0 });
+    expect(res.status).toBe(400);
+  });
+
+  it('checks the area belongs to you', async () => {
+    const p = await newProject('P');
+    expect(
+      (await as.post(`/api/projects/${p.id}/move`, { areaId: await foreignArea(), index: 0 }))
+        .status,
+    ).toBe(404);
+  });
+});

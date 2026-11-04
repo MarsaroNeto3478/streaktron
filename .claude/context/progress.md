@@ -84,3 +84,11 @@
 - **Checked in a real browser** (the built-in one, dev server, seed account): Today on phone and desktop, two completions (XP, streak, quest 1/2 → done, toasts), a 1-minute focus session surviving a reload and ringing at the end, finishing it with the task marked done (level 2), reroll (409 when nothing else fits, shown as a toast), Stats heatmap, Settings. Under the preview tool on Windows `pnpm dev` didn't start the API (the server ran fine on its own), so the API ran separately; `.claude/launch.json` starts only the web app.
 - **Decisions:** D24–D29 (Claude's choices).
 - **Not yet:** habits in the focus list and calendar items on Today (Phase 4); no UI button for recompute; a reroll button shows even when there's nothing to swap for.
+
+### 2026-11-04 — Dragging projects between areas (the user's idea)
+- **Branches:** Phase 3 committed on `phase-3-mvp`; this on `projects-drag` (from it); both merged into `main` at the user's request.
+- **Server:** `POST /api/projects/:id/move { areaId, index }` (`moveProject`): into an area (or none) at a position among its projects in progress; closed projects stay after them and can't be dragged. 3 API tests (208 in all).
+- **Web:** the Projects page has one `DndContext` for areas (grip) and project cards (lanes per area plus "No area", which shows while dragging), the board's lane pattern with a drag overlay; `moveProject` in `lib/actions.ts` is optimistic. Cards are shown in their own order.
+- **Bug found on the way:** with "closest corners", the keyboard couldn't take a card into another area (an empty area's lane is much wider than a card, so the wrong one was closest). Collisions now go by what's under the pointer, or what the card overlaps (keyboard), with cards winning over lanes.
+- **Checked in the browser:** mouse drag across areas and within one (simulated step by step; the browser tool's one-jump drag doesn't trigger dnd-kit), keyboard across areas. Done on the seed account the user was also using: a test area was made and deleted (it's in Settings → Deleted for 30 days), and every move was undone.
+- **Decision:** D30.

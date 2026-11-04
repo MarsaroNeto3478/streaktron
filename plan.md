@@ -73,6 +73,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D27 | Focus sessions: one open at a time, credited minutes capped at the plan |
 | D28 | Time zone and day start change at most once a week (first change free) |
 | D29 | No cached game state yet: computed from the whole log on each request |
+| D30 | Projects drag between areas like board cards; only projects in progress move |
 
 Rejected ideas are listed at the end of the decisions log so they aren't proposed again.
 
@@ -507,6 +508,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Contribution heatmap (basic) on Stats page
 - [x] Settings page: timezone, day-start hour, week start, active-project limit, weekly target, focus presets, quest types on/off, time-quest min/max
 - [x] Admin "recompute" action (API only: `POST /api/admin/recompute`)
+- [x] *(user's idea, added 2026-11-04)* Drag projects between areas and reorder them within one on the Projects page, like Kanban cards (D30)
 
 **Acceptance:** A full day of real use works end-to-end: plan on Today, run focus sessions, complete tasks, see XP/level/streak update immediately and correctly, complete daily quests. A make quest spawns a follow-up for the new task. Missing a day with a banked freeze keeps the streak. **Start dogfooding.**
 
@@ -634,7 +636,6 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 
 ## 12. Backlog / ideas (not scheduled)
 
-- Drag projects between areas on the Projects page, like Kanban cards (drop on an area moves it there, order within an area by dragging; mouse, touch and keyboard as on the board). Today: areas reorder by drag, a project changes area only in its edit dialog, and projects can't be reordered within an area (user's idea, 2026-11-04)
 - Mentions inside titles (single-line TipTap editor, plain-text fallback for compact views)
 - Create from the mention picker ("New task “X”" when nothing matches; Quire has it)
 - Mention labels in stored text: `description_text` keeps the label a mention had when inserted, so search still finds the old name and palette snippets show it (chips and backlinks already read current titles)

@@ -164,6 +164,13 @@ export const projectPatchSchema = z
   .partial();
 export type ProjectPatch = z.infer<typeof projectPatchSchema>;
 
+/** Drag on the Projects page: into an area (or none) at `index` among its projects in progress. */
+export const projectMoveSchema = z.object({
+  areaId: idOf('area').nullable(),
+  index: z.int().min(0),
+});
+export type ProjectMove = z.infer<typeof projectMoveSchema>;
+
 export const projectStatusSchema = z.object({
   status: z.enum(PROJECT_STATUSES),
   /** Park this active project in the same step, to make room under the limit. */

@@ -309,6 +309,40 @@ export function structureActions(qc: QueryClient) {
       return project;
     },
 
+    /**
+     * Drag on the Projects page: into `areaId` (null: no area) at `index` among `lane` (that
+     * area's projects in progress as shown, without the moved one). Optimistic.
+     */
+    moveProject: (project: Project, areaId: string | null, index: number, lane: Project[]) => {
+      const order = placeAt(
+        lane.filter((p) => p.id !== project.id).map((p) => p.id),
+        project.id,
+        index,
+      );
+      qc.setQueryData<Project[]>(['projects'], (old) =>
+        old?.map((p) => {
+          const i = order.indexOf(p.id);
+          if (i === -1) return p;
+          return { ...p, sortOrder: i, ...(p.id === project.id ? { areaId } : {}) };
+        }),
+      );
+      return attempt(async () => {
+        try {
+          const { projects } = await call(
+            api.projects[':id'].move.$post({
+              param: { id: project.id },
+              json: { areaId, index },
+            }),
+          );
+          qc.setQueryData<Project[]>(['projects'], (old) =>
+            old?.map((p) => projects.find((x) => x.id === p.id) ?? p),
+          );
+        } finally {
+          refreshStructure(qc, project.id);
+        }
+      });
+    },
+
     /** Throws (an `active_limit` 409 is handled by the caller's dialog). */
     setStatus: async (id: string, status: ProjectStatus, park?: string) => {
       const { projects } = await call(

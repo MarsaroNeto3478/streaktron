@@ -158,6 +158,10 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Decision:** XP, level and streaks are computed from the user's whole activity log on each request; there is no `stats_snapshot` row. `POST /api/admin/recompute` therefore only re-evaluates open quests and returns the state.
 - **Why:** A year of daily use is a few thousand rows, milliseconds to replay. A cache is one more thing that can drift; add it when the log is big enough to need it.
 
+### D30 · Dragging projects between areas — accepted (2026-11-04, the user's idea; details Claude's)
+- **Decision:** On the Projects page, projects in progress (active and parked) are cards that drag within an area or into another one, or into "No area" (shown while dragging), like board cards: mouse, touch (a short press) and keyboard (Space, arrows, Space). `POST /api/projects/:id/move { areaId, index }` places it among that area's projects in progress; completed and archived ones keep their places after them and can't be dragged. Projects in an area are shown in their own order now (no longer active first, then parked).
+- **Why:** Moving a project used to need its edit dialog, and projects couldn't be ordered at all. Showing them in the order the user set is what makes ordering mean something.
+
 ---
 
 ## Rejected ideas (don't propose again)
