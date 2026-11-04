@@ -4,6 +4,7 @@ import { ChevronRight, Keyboard, LogOut, Plus, Search, Settings } from 'lucide-r
 import { useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { CommandPalette } from '@/components/command-palette';
+import { Celebration } from '@/components/celebration';
 import { EntityIcon } from '@/components/entity-icon';
 import { FocusBar, FocusStartDialog } from '@/components/focus';
 import { GameChip } from '@/components/game-header';
@@ -148,6 +149,7 @@ export function AppShell({
       <AreaSheet areaId={sheets.area} />
       <CommandPalette />
       <FocusStartDialog />
+      <Celebration />
       <StructureDialogs />
       <GlobalShortcuts />
     </ProjectStatusProvider>

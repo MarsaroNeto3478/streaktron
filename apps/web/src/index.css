@@ -172,3 +172,59 @@
     @apply rounded bg-accent/60;
   }
 }
+
+/* Celebrations (D33): a short burst when a quest is done or a level reached, and the quest row
+   lighting up. Nothing moves when the system asks for reduced motion. */
+@keyframes burst-particle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes burst-badge {
+  0% {
+    transform: translate(-50%, 8px) scale(0.85);
+    opacity: 0;
+  }
+  15%,
+  75% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -6px) scale(1);
+    opacity: 0;
+  }
+}
+@keyframes quest-done {
+  0% {
+    box-shadow: inset 0 0 0 2px var(--primary);
+    background-color: color-mix(in oklab, var(--primary) 18%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+    background-color: transparent;
+  }
+}
+@layer utilities {
+  .animate-burst-particle {
+    animation: burst-particle 900ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+  .animate-burst-badge {
+    animation: burst-badge 1800ms ease-out forwards;
+  }
+  .animate-quest-done {
+    animation: quest-done 1600ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-burst-particle,
+  .animate-burst-badge,
+  .animate-quest-done {
+    animation: none;
+  }
+}

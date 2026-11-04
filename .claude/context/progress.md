@@ -92,3 +92,13 @@
 - **Bug found on the way:** with "closest corners", the keyboard couldn't take a card into another area (an empty area's lane is much wider than a card, so the wrong one was closest). Collisions now go by what's under the pointer, or what the card overlaps (keyboard), with cards winning over lanes.
 - **Checked in the browser:** mouse drag across areas and within one (simulated step by step; the browser tool's one-jump drag doesn't trigger dnd-kit), keyboard across areas. Done on the seed account the user was also using: a test area was made and deleted (it's in Settings → Deleted for 30 days), and every move was undone.
 - **Decision:** D30.
+
+### 2026-11-04 — The user's ideas: review, focus clock, breaks, celebration
+- **Reviewed six ideas with the user.** Anki-style flashcards left out (D6; listed as rejected). Streaky as a guide mascot, the tutorial as a quest chain and the challenge question go to Phase 4 (D31, D32); Streaky is explicitly not the pet rejected on 2026-11-03, and the user will draw him. The anonymous "you're not the only one" comparison goes to the social phase (Phase 8), opt-in and with real numbers only.
+- **Built (branch `focus-polish`, D33):**
+  - The time left in the tab title and a progress ring as the favicon while a session or break runs (`lib/focus-extras.ts`).
+  - An optional mini clock window that stays on top (Document Picture-in-Picture; the button shows only on Chrome/Edge desktop).
+  - Breaks: the finish dialog offers the preset's break (checked by default); a blue bar counts it down, chimes and notifies at the end, "Back to focus" or skip. Breaks live in localStorage and earn nothing.
+  - Celebration: a short particle burst with a badge for quests done and level-ups, and the finished quest row lighting up; off under reduced motion.
+- **Checked in the browser:** the break bar, title and favicon ring, skipping. The mini clock window and the burst weren't triggered in the test browser (the mini clock needs a real click on Chrome/Edge; no quest finished during the check).
+- **Windows note:** Docker Desktop doesn't stay running between sessions here; start it (and `pnpm db:up`) before `pnpm dev`.

@@ -162,12 +162,25 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Decision:** On the Projects page, projects in progress (active and parked) are cards that drag within an area or into another one, or into "No area" (shown while dragging), like board cards: mouse, touch (a short press) and keyboard (Space, arrows, Space). `POST /api/projects/:id/move { areaId, index }` places it among that area's projects in progress; completed and archived ones keep their places after them and can't be dragged. Projects in an area are shown in their own order now (no longer active first, then parked).
 - **Why:** Moving a project used to need its edit dialog, and projects couldn't be ordered at all. Showing them in the order the user set is what makes ordering mean something.
 
+### D31 · Streaky, a guide mascot; the tutorial is a quest chain — accepted (2026-11-04, the user's idea)
+- **Decision:** Streaky is the app's mascot, drawn by the user. He guides (the tutorial, tips when you're stuck) and cheers (celebrations). He is **not** a companion that grows with level, has needs or reacts as a pet: that idea was rejected on 2026-11-03 and stays rejected. The tutorial is a chain of welcome quests done in the real app, introduced by Streaky. Both are Phase 4, once the user's drawings arrive.
+- **Why:** Personality and a first-run path without explanation screens; the quest system already does chains.
+
+### D32 · The challenge question and "you're not the only one" — accepted (2026-11-04, the user's idea; the multiple-choice form is Claude's)
+- **Decision:** Streaky asks "What's your biggest challenge with discipline?" as **multiple choice** over the five failure modes the product is built around (forgetting to start, not knowing what's next, dropping after a missed day, too many projects, fading motivation). The answer tunes the app and can be changed later. Asked in Phase 4. Comparing answers anonymously ("N people share this, you're not the only one") comes with the social phase: opt-in, counts only, shown only when the numbers are real and large enough not to identify anyone. Never invented.
+- **Why:** Fixed choices can be counted without reading anyone's text and map to things the app can change. A made-up "many people feel this" would be a lie.
+
+### D33 · Focus clock outside the app, breaks, celebration — accepted (2026-11-04, the user's ideas)
+- **Decision:** While a session or break runs, the tab title shows the time left and the favicon a progress ring; an optional mini clock window floats over other windows (Document Picture-in-Picture; Chrome and Edge on desktop, hidden elsewhere). Finishing a session offers the preset's break with its own timer; breaks are skippable and earn nothing. Quest completions and level-ups get a short visual burst besides the chime, unless the system asks for reduced motion. A clock that stays on the phone's screen needs the native app (Phase 10).
+- **Why:** Distraction starts when you leave the tab and forget the time; rest matters, but rewarding it would make it farmable.
+
 ---
 
 ## Rejected ideas (don't propose again)
 
 - **Quire integration** (Quire writing days counting as Streaktron activity) — rejected by the user, 2026-11-03.
 - **Familiar / pet companion** that grows with level and reacts (from Quire) — rejected by the user, 2026-11-03.
+- **Spaced repetition / Anki-style flashcards inside the app** — left out by the user, 2026-11-04: conflicts with D6 (no study-specific features) and would be a product of its own; Anki already exists.
 - **All data in Firestore** — rejected by Claude's analysis (breaks the relational model); superseded anyway by D14.
 
 ## Deferred, not rejected

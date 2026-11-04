@@ -74,6 +74,9 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D28 | Time zone and day start change at most once a week (first change free) |
 | D29 | No cached game state yet: computed from the whole log on each request |
 | D30 | Projects drag between areas like board cards; only projects in progress move |
+| D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
+| D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
+| D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
 
 Rejected ideas are listed at the end of the decisions log so they aren't proposed again.
 
@@ -509,6 +512,9 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Settings page: timezone, day-start hour, week start, active-project limit, weekly target, focus presets, quest types on/off, time-quest min/max
 - [x] Admin "recompute" action (API only: `POST /api/admin/recompute`)
 - [x] *(user's idea, added 2026-11-04)* Drag projects between areas and reorder them within one on the Projects page, like Kanban cards (D30)
+- [x] *(user's ideas, added 2026-11-04)* Focus clock outside the app: the time left in the tab title and a progress ring in the favicon; an optional always-on-top mini clock window (Document Picture-in-Picture, Chrome/Edge desktop) (D33)
+- [x] *(user's ideas, added 2026-11-04)* Breaks between sessions: finishing a session offers the preset's break with its own timer, chime and "back to focus"; skippable, no XP (D33)
+- [x] *(user's ideas, added 2026-11-04)* A visible moment when a quest is done or a level is reached (a short burst animation and the quest row lighting up, on top of the chime); respects reduced motion (D33)
 
 **Acceptance:** A full day of real use works end-to-end: plan on Today, run focus sessions, complete tasks, see XP/level/streak update immediately and correctly, complete daily quests. A make quest spawns a follow-up for the new task. Missing a day with a banked freeze keeps the streak. **Start dogfooding.**
 
@@ -524,6 +530,9 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [ ] **Project** quest type generated from goals and deadlines
 - [ ] PWA: manifest, service worker (no offline data), install on phone over Tailscale HTTPS
 - [ ] Web Push reminders: habits due, focus ended, opt-in "streak at risk" nudge (max one per day)
+- [ ] **Streaky**, the guide mascot (D31): the user draws him; appears in the tutorial, as a helper with tips, and in celebrations. A guide, not a pet: no growth, needs or levels
+- [ ] **Tutorial as the first quests** (D31): a chain of welcome quests done in the real app (an area, a project, a task, completing one, 10 minutes of focus), introduced by Streaky
+- [ ] **"What's your biggest challenge with discipline?"** (D32): multiple choice over the five failure modes (§1), asked by Streaky; the answer tunes the app (e.g. a lower active limit, the weekly streak first) and can be changed in Settings
 
 **Acceptance:** Exams/deadlines appear on the calendar with countdowns; a recurring lecture block shows every week; completing the weekly review is guided and takes ~5 minutes; a habit reminder reaches the phone.
 
@@ -567,6 +576,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [ ] **Friend streaks**: per-pair streak with freezes, computed server-side, shown on Today and the friends page
 - [ ] Realtime updates via SSE; nudges ("your friend kept the streak alive — your turn") in-app and via Web Push
 - [ ] Privacy settings: what friends see (defaults to minimal)
+- [ ] **"You're not the only one"** (D32): with explicit consent, challenge answers are counted anonymously and Streaky can say how many people share yours; shown only with real numbers and enough people
 
 **Acceptance:** Two accounts can become friends, see each other's streak status within seconds, and a friend streak grows only on days both were active.
 

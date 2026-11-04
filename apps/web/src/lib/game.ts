@@ -4,11 +4,46 @@
 
 import type { GameEvents } from '@streaktron/shared/game';
 import type { QueryClient } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
+
+// --- The burst (components/celebration.tsx draws it) -----------------------------------------
+
+export interface Burst {
+  id: number;
+  kind: 'quest' | 'level';
+  text: string;
+}
+
+let burst: Burst | null = null;
+const burstListeners = new Set<() => void>();
+
+function showBurst(kind: Burst['kind'], text: string) {
+  burst = { id: Date.now(), kind, text };
+  for (const l of burstListeners) l();
+}
+
+export function useBurst(): Burst | null {
+  return useSyncExternalStore(
+    (l) => {
+      burstListeners.add(l);
+      return () => burstListeners.delete(l);
+    },
+    () => burst,
+  );
+}
 
 export function celebrate(qc: QueryClient, e: GameEvents) {
   qc.setQueryData(['game', 'state'], e.state);
   void qc.invalidateQueries({ queryKey: ['game'] });
+
+  if (e.levelUp) showBurst('level', `Level ${e.levelUp.to}`);
+  else if (e.questsDone.length) {
+    showBurst(
+      'quest',
+      e.questsDone.length === 1 ? 'Quest done' : `${e.questsDone.length} quests done`,
+    );
+  }
 
   if (e.levelUp) {
     chime('level');
