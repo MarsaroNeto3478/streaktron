@@ -4,7 +4,7 @@ Streaktron is a web app that helps people stay consistent with studies and perso
 
 ## Current status
 
-- **Phase:** Phases 0–2 done 2026-11-03; **Phase 3 (Today + gamification core = MVP) built 2026-11-04 on branch `phase-3-mvp`**; next: dogfooding, then Phase 4.
+- **Phase:** Phases 0–3 done (Phase 3 = MVP, 2026-11-04, being dogfooded). **Phase 4 in slices:** habits done 2026-11-04; next the calendar and countdowns, then the weekly review, PWA/push, and Streaky/tutorial (waits for the user's drawings).
 - **Run it:** `pnpm db:up && pnpm dev` (README has setup, scripts, Tailscale and backups). On the Windows machine pnpm isn't installed globally: use `npx pnpm@11.24.0 …`.
 - **Repository:** https://github.com/MarsaroNeto3478/streaktron (this user's copy), branch `main`.
 - **Two parallel Streaktrons:** the user and a partner (`JVGdev/streaktron`) built a shared base, then each continues their own version; at the end they'll compare both and merge the best into a bigger project. Keep this repo's choices well documented (decisions.md) so the comparison is easy; never push to the partner's repo.
@@ -18,6 +18,8 @@ Streaktron is a web app that helps people stay consistent with studies and perso
 | `.claude/context/vision.md` | Main idea, the problem, target user, principles, product direction | **why** |
 | `.claude/context/decisions.md` | Every decision (D1…), with rationale, alternatives, status; rejected ideas | **decisions** (canonical log) |
 | `.claude/context/progress.md` | Session log, what's done, what's next | **state** |
+| `.claude/logbook.txt` | The user's logbook (diário de bordo, in Portuguese) for their TCC: every interaction, what they asked and what changed | **the user's record** |
+| `.claude/referencias.md` | Articles and books behind the project's ideas (psychology and technology), for the TCC | — |
 | `observations.txt` | The user's idea inbox between sessions (they clear it after merging) | — |
 
 Read the relevant context file before working on an area; read `plan.md` sections as needed rather than all of it.
@@ -39,6 +41,7 @@ Read the relevant context file before working on an area; read `plan.md` section
 - **Don't re-propose rejected ideas** (listed at the end of decisions.md).
 - **When `observations.txt` has new content**, fold it into `plan.md` (right phase/section) and decisions.md if it decides something, then tell the user.
 - **Tick `plan.md` checkboxes** as tasks finish and **append a session entry to `progress.md`** at the end of meaningful work.
+- **Append an entry to `.claude/logbook.txt` for every interaction** (in Portuguese, in its format: PEDIDO with the user's own words, O QUE FOI FEITO, DECISÕES, RESULTADO, OBSERVAÇÕES). The user is writing a TCC about this project; the logbook is their record of the process, so it includes questions, ideas, bugs they found and rejected ideas, not just code.
 - New ideas go to `plan.md` §12 (backlog), not into the current phase.
 - **Quire** (`~/Documentos/quire`) is the user's earlier personal app (Svelte 5 + Fastify + node:sqlite). It is a **reference only**: reuse its framework-agnostic logic and lessons (plan.md §11), never integrate with it.
 

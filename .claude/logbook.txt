@@ -1,0 +1,187 @@
+DIÁRIO DE BORDO — STREAKTRON
+============================
+
+Registro de cada interação entre o autor e o Claude (assistente de IA) no desenvolvimento do
+Streaktron: o que o autor pediu, o que foi decidido, o que mudou no código e o que ficou pendente.
+Feito para servir de base a um TCC.
+
+Formato de cada entrada:
+  DATA — título
+  PEDIDO: o que o autor falou/pediu (com as palavras dele quando possível)
+  O QUE FOI FEITO: o que mudou (código, documentos, decisões)
+  DECISÕES: IDs do .claude/context/decisions.md (o "porquê" completo está lá)
+  RESULTADO: testes, verificações, commits
+  OBSERVAÇÕES: problemas, aprendizados, pendências
+
+Outras fontes de detalhe:
+  - .claude/context/decisions.md  → cada decisão (D1, D2…), com motivo e alternativas
+  - .claude/context/progress.md   → registro técnico de cada sessão (em inglês)
+  - plan.md                       → o plano completo e as fases
+  - git log                       → cada commit, com data
+
+Nota: as entradas de 03/11/2026 até o início de 04/11/2026 foram reconstruídas depois (em
+04/11/2026) a partir do progress.md e do histórico do git; as falas do autor nessas entradas são
+resumos, não citações exatas. A partir de "Correção da missão Add a task" as entradas foram escritas
+na hora.
+
+
+-------------------------------------------------------------------------------------------------
+2026-11-03 — Sessão de planejamento (reconstruída)
+-------------------------------------------------------------------------------------------------
+PEDIDO: Criar um app para ajudar a manter constância nos estudos e projetos pessoais, com
+  gestão de projetos de verdade e gamificação leve. O autor relatou os cinco modos de falha de
+  constância que vive (ver vision.md) e mandou ideias pelo observations.txt: tipos de quests,
+  uma loot box por quest com raridades, um quarto customizável, streaks com amigos e depois um
+  guarda-roupa de medalhas.
+O QUE FOI FEITO:
+  - Brainstorm do conceito; escrita do plan.md (visão, funcionalidades, regras de gamificação,
+    arquitetura, modelo de dados, API, fases).
+  - Estudo do Quire (app anterior do autor) para reaproveitar lógica e lições (plan.md §11).
+  - Criação da pasta .claude/ como memória do projeto (CLAUDE.md, vision.md, decisions.md,
+    progress.md) e do repositório no GitHub.
+DECISÕES: D1–D18 (entre elas: stack TypeScript com React + Hono + Postgres (D14); XP nunca é
+  retirado (D15); missões "make" com follow-up e limite suave (D16); o servidor é a autoridade
+  do jogo (D17); limite rígido de projetos ativos (D5); interface em inglês (D7)).
+  Rejeitadas pelo autor: integração com o Quire e um pet companheiro.
+RESULTADO: commits aebbd90, 91b0109.
+
+-------------------------------------------------------------------------------------------------
+2026-11-03 — Fase 0: Fundação (reconstruída)
+-------------------------------------------------------------------------------------------------
+PEDIDO: Começar a implementação.
+O QUE FOI FEITO: monorepo (servidor, web, pacote compartilhado), login com conta única, banco
+  com migrações automáticas, backups diários, interface base (barra lateral, celular), Docker,
+  acesso pelo Tailscale.
+DECISÕES: D18 (backup uma vez por dia).
+RESULTADO: 56 testes. Commit 2e70560 (PR #1).
+
+-------------------------------------------------------------------------------------------------
+2026-11-03 — Fase 1: Estrutura e visões (reconstruída)
+-------------------------------------------------------------------------------------------------
+O QUE FOI FEITO: áreas → projetos → metas → tarefas; quadro Kanban com arrastar (mouse, toque,
+  teclado); lista com filtros; Inbox; ficha de tarefa com salvamento automático; paleta de
+  comandos (Ctrl K); atalhos; limite de projetos ativos com "estacione um para continuar";
+  excluir com desfazer.
+DECISÕES: D19 (exclusão), D20 (regras do quadro e da próxima ação).
+RESULTADO: 121 testes; teste num navegador real encontrou e corrigiu um bug na paleta.
+  Commit e6169da.
+
+-------------------------------------------------------------------------------------------------
+2026-11-03 — Fase 2: Sistema de links (reconstruída)
+-------------------------------------------------------------------------------------------------
+O QUE FOI FEITO: editor de texto rico com menções "@" a áreas, projetos, metas e tarefas;
+  backlinks ("quem cita isto"); busca por texto completo.
+DECISÕES: D21–D23.
+OBSERVAÇÕES: foi encontrado e corrigido um risco de perda de dados (o editor podia abrir com
+  uma versão antiga da descrição e salvar por cima da nova).
+RESULTADO: 137 testes. Commit 6b6bcb2.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Leitura do projeto e Fase 3: Today + gamificação (MVP)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "claude veja a pasta streakton e leia o .claude e se informe do projeto", depois
+  "vamos começar a fase 3".
+O QUE FOI FEITO:
+  - Preparação da máquina Windows: o autor instalou o Docker Desktop (com WSL 2 e Ubuntu).
+  - Log de atividades (só cresce, nada é apagado) de onde saem XP, níveis e streaks.
+  - XP e níveis, streak diário com "congelamentos", streak semanal.
+  - Quests: rápidas, diárias, de tempo, "make" + follow-up, semanais, de retorno; trocar
+    ("reroll") uma vez; bônus por limpar o quadro.
+  - Sessões de foco (timer que sobrevive a recarregar a página), página Today, estatísticas
+    com mapa de calor, configurações.
+DECISÕES: D24–D29.
+OBSERVAÇÕES: bug encontrado — uma quest criada pela própria ação que a completava já vinha
+  concluída; corrigido (só conta o que acontece depois da quest aparecer, D26).
+RESULTADO: 205 testes. Commit c2cd0d8.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Onde testar; arrastar projetos entre áreas
+-------------------------------------------------------------------------------------------------
+PEDIDO: "onde que eu testo" → servidores iniciados, endereço local passado.
+  Ideia do autor: "arrastar os projetos paras as areas, como o quadro do kanban".
+  Depois: "faça essa branch, de merge nas duas branchs depois merge em tudo e commita".
+O QUE FOI FEITO: página Projects com arrastar projetos entre áreas e reordenar dentro delas.
+DECISÕES: D30.
+OBSERVAÇÕES: no teclado o cartão não passava para outra área; corrigido mudando a forma de
+  detectar onde o cartão está.
+RESULTADO: 208 testes. Commits 3c937ad, merge e292b10.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Análise das seis ideias do autor; relógio, pausas e comemoração
+-------------------------------------------------------------------------------------------------
+PEDIDO: análise honesta de seis ideias: Anki, o mascote Streaky com tutorial e a pergunta
+  "Qual é seu maior desafio para ter disciplina?" (com comparação anônima), relógio de foco
+  visível fora do app, pausas entre sessões, tutorial como primeira missão, som/animação ao
+  concluir missão.
+  Decisão do autor: "deixe o anki de fora, o relogio, pausas e animação pode meter bala, vou
+  desenhar como eu quero que seja o streaky (...) tutorial deixamos para a 4 fase, juntamente
+  com o streaky e deixa as perguntas para a parte quatro tmb".
+O QUE FOI FEITO:
+  - Tempo restante no título da aba e um anel de progresso no ícone; mini relógio flutuante
+    (Chrome/Edge).
+  - Pausas oferecidas ao terminar uma sessão (sem XP).
+  - Explosão de partículas e selo ao concluir quest ou subir de nível.
+DECISÕES: D31 (Streaky como guia, não pet), D32 (pergunta do desafio), D33 (relógio, pausas,
+  comemoração). Anki entrou na lista de ideias rejeitadas.
+RESULTADO: commit 38b4daa, merge 5b0d144.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Correção da missão "Add a task to …"
+-------------------------------------------------------------------------------------------------
+PEDIDO: "a missao add a task to '...' só concluiu quando eu abri o SO e la eu criei, nao quando
+  eu fui em indox e criei e associei la".
+O QUE FOI FEITO: a missão passou a contar também uma tarefa criada na Inbox e depois movida
+  para o projeto (cada tarefa conta uma vez).
+RESULTADO: 210 testes. Commit 154cfe6, push.
+OBSERVAÇÕES: bug encontrado pelo autor ao usar o app — exemplo do valor do uso real
+  ("dogfooding").
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Dois Streaktrons
+-------------------------------------------------------------------------------------------------
+PEDIDO: corrigir o repositório no CLAUDE.md. O autor explicou: "são dois streaktrons (...)
+  fizemos uma base, e cada um ta fazendo pra no final compararmos e juntarmos num projeto
+  maior".
+O QUE FOI FEITO: CLAUDE.md aponta para MarsaroNeto3478/streaktron (o do autor); o do parceiro
+  é JVGdev/streaktron, onde nunca se faz push.
+RESULTADO: commit 72370a4, push.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Fase 4, parte 1: Hábitos
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para a parte 4".
+O QUE FOI FEITO:
+  - A Fase 4 foi dividida em partes: hábitos → calendário → revisão semanal → PWA/lembretes →
+    Streaky/tutorial/pergunta (espera os desenhos do autor).
+  - Hábitos: agenda por dias da semana ou "N vezes por semana", check-in no Today e na página
+    Habits, sequência de cada hábito, 10 XP uma vez por hábito por dia, check-in esquecido
+    pode ser feito no dia seguinte (conta para o hábito, mas o XP vai para hoje), arquivar,
+    excluir com desfazer, quests de hábito.
+DECISÕES: D34.
+RESULTADO: 228 testes.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Janela de detalhes das quests
+-------------------------------------------------------------------------------------------------
+PEDIDO: "a follow up ali qual que é? nao entendi oq eu preciso fazer". Depois, ideia do autor:
+  "quando clicar numa quest, ela abre uma aba falando sobre detalhes dela e um botao de ir para
+  onde a quest pede".
+O QUE FOI FEITO: clicar numa quest abre uma janela com o que fazer, o que conta, progresso,
+  recompensa, trocar, e um botão que leva até a tarefa, o projeto, a Inbox, os hábitos ou o
+  timer. A follow-up lista os detalhes pedidos e risca os já preenchidos.
+OBSERVAÇÕES: a dúvida do autor revelou uma falha de usabilidade — a regra estava certa, mas a
+  tela não explicava o que fazer.
+RESULTADO: 228 testes. Commit 1ea2af9, merge ca1ffae, push ("sim, faz o commit, merge e push").
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Diário de bordo e referências para o TCC
+-------------------------------------------------------------------------------------------------
+PEDIDO: "fazer um txt chamado logbook com todas as interações minhas pq eu quero fazer um
+  diário de bordo (...) to pensando em fazer um tcc sobre isso" e "me passar artigos sobre
+  coisas importantes que estamos abordando no projeto, tanto de tecnologia, tanto psicologicas".
+O QUE FOI FEITO:
+  - Criado este arquivo (.claude/logbook.txt), com as sessões anteriores reconstruídas.
+  - Regra adicionada ao .claude/CLAUDE.md: toda interação ganha uma entrada aqui.
+  - Criado .claude/referencias.md com artigos e livros de psicologia e de tecnologia ligados a
+    cada parte do projeto.
+RESULTADO: commit e push a pedido do autor ("sim, faz o commit e push").
