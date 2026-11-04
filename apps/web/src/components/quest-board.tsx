@@ -4,7 +4,7 @@
 import { QUEST_TYPE_LABELS, type QuestType } from '@streaktron/shared/game';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Dices, Swords } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useGameActions } from '@/lib/actions';
 import { formatMinutes } from '@/lib/days';
@@ -70,6 +70,21 @@ function QuestRow({ quest: q }: { quest: Quest }) {
   const actions = useGameActions();
   const [busy, setBusy] = useState(false);
   const done = q.status === 'completed';
+  // Light up when it turns done while on screen (not when the board loads already done).
+  const wasDone = useRef(done);
+  const [justDone, setJustDone] = useState(false);
+  useEffect(() => {
+    if (done && !wasDone.current) {
+      const on = setTimeout(() => setJustDone(true), 0);
+      const off = setTimeout(() => setJustDone(false), 1700);
+      wasDone.current = true;
+      return () => {
+        clearTimeout(on);
+        clearTimeout(off);
+      };
+    }
+    wasDone.current = done;
+  }, [done]);
   const pct = Math.min(100, (q.progress / q.target) * 100);
   const progress = isMinutes(q)
     ? `${formatMinutes(q.progress)} / ${formatMinutes(q.target)}`
@@ -78,7 +93,7 @@ function QuestRow({ quest: q }: { quest: Quest }) {
       : null;
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li className={cn('flex items-center gap-3 px-4 py-3', justDone && 'animate-quest-done')}>
       <span
         className={cn(
           'grid size-6 shrink-0 place-items-center rounded-full border-2',

@@ -1,10 +1,12 @@
 // Focus sessions (plan.md §4.4). The session lives on the server (start time and pauses), so a
 // reload or another device picks it up; this clock only counts on from what the server said. When
-// the planned time is up: a chime, a browser notification, and the finish dialog.
+// the planned time is up: a chime, a browser notification, and the finish dialog. Then a break
+// (D33). While either runs, the time shows in the tab and, if asked, in a floating mini clock.
 
 import { useQuery } from '@tanstack/react-query';
-import { Pause, Play, Square, Timer, X } from 'lucide-react';
+import { Coffee, PictureInPicture2, Pause, Play, Square, Timer, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -25,9 +27,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useGameActions } from '@/lib/actions';
+import {
+  breakFor,
+  closeMiniClock,
+  endBreak,
+  miniClockSupported,
+  openMiniClock,
+  startBreak,
+  useBreak,
+  useMiniClockWindow,
+  useTabClock,
+} from '@/lib/focus-extras';
 import { chime } from '@/lib/game';
 import { focusQuery, meQuery, projectsQuery, taskQuery, type FocusSession } from '@/lib/queries';
-import { setUi, useUi } from '@/lib/ui-store';
+import { setUi, startFocus, useUi } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
 
 /** Milliseconds worked, ticking while it runs. */
@@ -71,6 +84,12 @@ export function FocusBar() {
   const left = planned - worked;
   const over = !!session && left <= 0;
 
+  useTabClock(
+    session
+      ? { text: over ? 'Done' : clock(left), fraction: worked / planned, kind: 'focus' }
+      : null,
+  );
+
   useEffect(() => {
     if (!session || !over || rang.current === session.id) return;
     rang.current = session.id;
@@ -84,7 +103,7 @@ export function FocusBar() {
     setFinishing(true);
   }, [over, session]);
 
-  if (!session) return null;
+  if (!session) return <BreakBar />;
   const label = session.task?.title ?? session.project?.title ?? 'Focus session';
   const paused = session.status === 'paused';
 
@@ -128,6 +147,7 @@ export function FocusBar() {
                 <Pause />
               </Button>
             ))}
+          <PopOutButton />
           <Button
             size="sm"
             variant={over ? 'default' : 'outline'}
@@ -153,7 +173,189 @@ export function FocusBar() {
         open={finishing}
         onOpenChange={setFinishing}
       />
+      <MiniClock
+        label={label}
+        text={over ? 'Done' : clock(left)}
+        fraction={worked / planned}
+        kind="focus"
+        paused={paused}
+      />
     </>
+  );
+}
+
+/** A break after a session: its own countdown, then "back to focus". Skippable; earns nothing. */
+function BreakBar() {
+  const brk = useBreak();
+  const [now, setNow] = useState(() => Date.now());
+  const rang = useRef<number | null>(null);
+  useEffect(() => {
+    if (!brk) return;
+    const t = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(t);
+  }, [brk]);
+
+  const total = (brk?.minutes ?? 0) * 60_000;
+  const left = brk ? brk.startedAt + total - now : 0;
+  const over = !!brk && left <= 0;
+
+  useTabClock(
+    brk
+      ? { text: over ? 'Break over' : clock(left), fraction: 1 - left / total, kind: 'break' }
+      : null,
+  );
+
+  useEffect(() => {
+    if (!brk || !over || rang.current === brk.startedAt) return;
+    rang.current = brk.startedAt;
+    // Only when it ends while the app is open, not for one that ran out while it was closed.
+    if (Date.now() - (brk.startedAt + total) < 60_000) {
+      chime('focus');
+      notify('Break’s over', 'Ready for another round?');
+    }
+  }, [over, brk, total]);
+
+  if (!brk) return null;
+  return (
+    <>
+      <div className="sticky top-14 z-10 border-b bg-sky-500/10 px-4 py-2 backdrop-blur md:px-8">
+        <div className="mx-auto flex max-w-5xl items-center gap-3">
+          <Coffee className="size-4 shrink-0 text-sky-600 dark:text-sky-400" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-medium">
+              {over ? 'Break’s over. Ready for another round?' : 'Break: step away for a bit'}
+            </div>
+            {!over && (
+              <div className="h-1 overflow-hidden rounded-full bg-sky-500/15">
+                <div
+                  className="h-full bg-sky-500 transition-[width] duration-300"
+                  style={{ width: `${Math.min(100, (1 - left / total) * 100)}%` }}
+                />
+              </div>
+            )}
+          </div>
+          {!over && (
+            <span className="font-mono text-sm tabular-nums" aria-label="Break time left">
+              {clock(left)}
+            </span>
+          )}
+          {!over && <PopOutButton />}
+          {over ? (
+            <Button
+              size="sm"
+              onClick={() => {
+                endBreak();
+                startFocus();
+              }}
+            >
+              <Timer className="size-3.5" /> Back to focus
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" onClick={endBreak}>
+              Skip break
+            </Button>
+          )}
+          {over && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-8 text-muted-foreground"
+              aria-label="Dismiss"
+              onClick={endBreak}
+            >
+              <X />
+            </Button>
+          )}
+        </div>
+      </div>
+      {!over && (
+        <MiniClock label="Break" text={clock(left)} fraction={1 - left / total} kind="break" />
+      )}
+    </>
+  );
+}
+
+function PopOutButton() {
+  const win = useMiniClockWindow();
+  if (!miniClockSupported()) return null;
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      className="hidden size-8 md:inline-flex"
+      aria-label={win ? 'Close the mini clock' : 'Pop out a mini clock'}
+      title={win ? 'Close the mini clock' : 'Mini clock that stays on top of other windows'}
+      aria-pressed={!!win}
+      onClick={() => (win ? closeMiniClock() : void openMiniClock().catch(() => {}))}
+    >
+      <PictureInPicture2 />
+    </Button>
+  );
+}
+
+/**
+ * The floating mini clock (Document Picture-in-Picture): stays on top of other windows, so the
+ * time is in view while you work elsewhere. Inline styles: it's another document, without ours.
+ */
+function MiniClock({
+  label,
+  text,
+  fraction,
+  kind,
+  paused,
+}: {
+  label: string;
+  text: string;
+  fraction: number;
+  kind: 'focus' | 'break';
+  paused?: boolean;
+}) {
+  const win = useMiniClockWindow();
+  if (!win) return null;
+  const color = kind === 'focus' ? '#f97316' : '#0ea5e9';
+  return createPortal(
+    <div
+      style={{
+        boxSizing: 'border-box',
+        height: '100vh',
+        padding: '12px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 6,
+        background: '#1c1917',
+        color: '#fafaf9',
+        fontFamily: 'system-ui, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          opacity: 0.75,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {kind === 'focus' ? '⏱ ' : '☕ '}
+        {label}
+        {paused ? ' · paused' : ''}
+      </div>
+      <div style={{ fontSize: 34, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+        {text}
+      </div>
+      <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.15)' }}>
+        <div
+          style={{
+            height: '100%',
+            borderRadius: 4,
+            background: color,
+            width: `${Math.min(100, Math.max(0, fraction * 100))}%`,
+          }}
+        />
+      </div>
+    </div>,
+    win.document.body,
   );
 }
 
@@ -169,9 +371,12 @@ function FinishDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const actions = useGameActions();
+  const { data: me } = useQuery(meQuery);
   const [note, setNote] = useState('');
   const [completeTask, setCompleteTask] = useState(false);
+  const [takeBreak, setTakeBreak] = useState(true);
   const [busy, setBusy] = useState(false);
+  const breakMinutes = breakFor(session.plannedMinutes, me?.settings.focusPresets ?? []);
   const minutes = Math.min(Math.floor(workedMs / 60_000), session.plannedMinutes);
   const taskOpen = session.task && !session.task.completedAt;
 
@@ -197,6 +402,7 @@ function FinishDialog({
             });
             setBusy(false);
             if (res) {
+              if (takeBreak && breakMinutes > 0) startBreak(breakMinutes);
               setNote('');
               setCompleteTask(false);
               onOpenChange(false);
@@ -220,6 +426,12 @@ function FinishDialog({
                 onCheckedChange={(v) => setCompleteTask(v === true)}
               />
               Mark “{session.task!.title}” done
+            </label>
+          )}
+          {breakMinutes > 0 && (
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={takeBreak} onCheckedChange={(v) => setTakeBreak(v === true)} />
+              Then take a {breakMinutes}-minute break
             </label>
           )}
         </form>
@@ -303,7 +515,10 @@ function StartForm({
                 : {}),
           });
           setBusy(false);
-          if (s) close();
+          if (s) {
+            endBreak();
+            close();
+          }
         }}
       >
         <div className="flex flex-wrap gap-2">
