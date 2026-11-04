@@ -102,3 +102,6 @@
   - Celebration: a short particle burst with a badge for quests done and level-ups, and the finished quest row lighting up; off under reduced motion.
 - **Checked in the browser:** the break bar, title and favicon ring, skipping. The mini clock window and the burst weren't triggered in the test browser (the mini clock needs a real click on Chrome/Edge; no quest finished during the check).
 - **Windows note:** Docker Desktop doesn't stay running between sessions here; start it (and `pnpm db:up`) before `pnpm dev`.
+
+### 2026-11-04 — Fix: inbox triage counts for "Add a task to X"
+- The user found that "Add a task to X" only finished for tasks created inside the project. A task created in the Inbox and then moved into X now counts too (`madeBy` accepts `task_triaged` into the quest's project, each task once). Unit and server tests added; 210 pass.

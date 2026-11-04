@@ -252,6 +252,37 @@ describe('quests', () => {
     expect(two.body.game.questsDone).toMatchObject([{ type: 'follow_up', xp: 15 }]);
   });
 
+  it('counts a task moved from the inbox into the project for “Add a task to X”', async () => {
+    await onlyQuests();
+    const p = await newProject('Thesis');
+    const today = (await as.get('/api/me')).body.today;
+    await as.get('/api/quests');
+    const makeId = newId('quest');
+    await db.insert(quests).values({
+      id: makeId,
+      userId,
+      type: 'make',
+      templateKey: 'make.task',
+      title: 'Add a task to “Thesis”',
+      periodStart: today,
+      periodEnd: today,
+      target: 1,
+      rewardXp: 15,
+      boxTier: 'standard',
+      targetEntityId: p.id,
+      params: { projectId: p.id },
+      offeredAt: new Date(Date.now() - 1000),
+    });
+    const inbox = await newTask('Read chapter 2');
+    expect(inbox.game?.questsDone ?? []).toEqual([]);
+    const moved = await as.patch(`/api/tasks/${inbox.id}`, { projectId: p.id });
+    expect(moved.status).toBe(200);
+    expect(moved.body.game?.questsDone).toMatchObject([{ id: makeId, xp: 15 }]);
+    expect(moved.body.game?.questsAdded).toMatchObject([
+      { title: 'Add details to “Read chapter 2”' },
+    ]);
+  });
+
   it('cancels a follow-up when its item is deleted', async () => {
     await onlyQuests();
     const p = await newProject('Thesis');

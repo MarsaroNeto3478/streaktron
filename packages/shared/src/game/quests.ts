@@ -576,13 +576,21 @@ export function questProgress(
   }
 }
 
-/** The items a make quest's activity produced, oldest first. */
+/**
+ * The items a make quest's activity produced, oldest first. A task moved from the inbox into the
+ * project counts for "Add a task to X" just like one created there.
+ */
 export function madeBy(q: QuestLike, activities: readonly Activity[]): string[] {
   const projectId = q.params.projectId as string | undefined;
   const out: string[] = [];
   for (const a of activities) {
-    if (a.type !== 'item_created' || !a.entityId) continue;
+    if (!a.entityId || out.includes(a.entityId)) continue;
     if (a.occurredAt.getTime() < q.offeredAt.getTime()) continue;
+    if (a.type === 'task_triaged') {
+      if (q.templateKey === 'make.task' && a.payload.projectId === projectId) out.push(a.entityId);
+      continue;
+    }
+    if (a.type !== 'item_created') continue;
     const p = a.payload;
     const ok =
       q.templateKey === 'make.task'
@@ -611,7 +619,7 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'weekly.target',
       ];
     case 'task_triaged':
-      return ['quick.triage'];
+      return ['quick.triage', 'make.task'];
     case 'next_action_set':
       return ['quick.pin_next'];
     case 'focus_completed':

@@ -6,6 +6,7 @@ import {
   filledCount,
   followUpSpec,
   isIdle,
+  affectedTemplates,
   madeBy,
   needsComeback,
   planBoard,
@@ -642,6 +643,34 @@ describe('progress', () => {
     expect(questProgress(q, [early, other])).toBe(0);
     expect(questProgress(q, [early, other, made])).toBe(1);
     expect(madeBy(q, [early, other, made])).toEqual(['tsk_new']);
+  });
+
+  it('“Add a task to X” also counts a task moved from the inbox into X, once', () => {
+    const offeredAt = new Date(`${TODAY}T10:00:00Z`);
+    const q = stored(
+      {
+        ...planBoard(ctx(), seededRng(1))[0]!,
+        type: 'make',
+        templateKey: 'make.task',
+        params: { projectId: 'prj_a' },
+        targetEntityId: 'prj_a',
+        target: 1,
+      },
+      offeredAt,
+    );
+    const at = new Date(`${TODAY}T11:00:00Z`);
+    const inbox = act(
+      'item_created',
+      TODAY,
+      { kind: 'task', projectId: null, parentTaskId: null },
+      'tsk_i',
+      at,
+    );
+    const elsewhere = act('task_triaged', TODAY, { projectId: 'prj_b' }, 'tsk_j', at);
+    const triaged = act('task_triaged', TODAY, { projectId: 'prj_a' }, 'tsk_i', at);
+    expect(questProgress(q, [inbox, elsewhere])).toBe(0);
+    expect(madeBy(q, [inbox, elsewhere, triaged, triaged])).toEqual(['tsk_i']);
+    expect(affectedTemplates(triaged)).toContain('make.task');
   });
 });
 
