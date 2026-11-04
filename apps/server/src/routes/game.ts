@@ -21,6 +21,7 @@ import {
   startFocus,
 } from '../services/focus';
 import { getGameState, heatmap, questBoard, rerollQuest } from '../services/game';
+import { todayHabits } from '../services/habits';
 import { focusList } from '../services/today';
 
 export const gameRoutes = new Hono<AuthedEnv>()
@@ -42,7 +43,11 @@ export const questRoutes = new Hono<AuthedEnv>()
 export const todayRoutes = new Hono<AuthedEnv>().use(requireUser).get('/', async (c) => {
   const userId = c.get('user').id;
   const today = await userToday(db, userId);
-  return c.json({ today, focus: await focusList(db, userId, today) });
+  const [focus, habits] = await Promise.all([
+    focusList(db, userId, today),
+    todayHabits(db, userId),
+  ]);
+  return c.json({ today, focus, habits });
 });
 
 const focusParam = validate('param', z.object({ id: idOf('focusSession') }));

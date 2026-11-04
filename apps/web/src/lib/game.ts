@@ -2,10 +2,11 @@
 // short, quiet toast says what changed (plan.md §4.5: immediate, subtle feedback). Also the chime
 // for focus sessions (Web Audio, no files).
 
-import type { GameEvents } from '@streaktron/shared/game';
+import type { DetailPart, GameEvents } from '@streaktron/shared/game';
 import type { QueryClient } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
+import type { Quest } from './queries';
 
 // --- The burst (components/celebration.tsx draws it) -----------------------------------------
 
@@ -97,4 +98,11 @@ export function chime(kind: 'focus' | 'quest' | 'level') {
   } catch {
     // No audio (blocked autoplay, old browser): stay quiet.
   }
+}
+
+/** The parts a follow-up still needs, in the order it asked for them. */
+export function missingParts(q: Pick<Quest, 'params' | 'filled'>): DetailPart[] {
+  const missing = (q.params.missing as DetailPart[] | undefined) ?? [];
+  const filled = new Set(q.filled ?? []);
+  return missing.filter((p) => !filled.has(p));
 }

@@ -11,6 +11,8 @@ export interface UiState {
   shortcuts: boolean;
   /** The start-focus dialog, optionally attached to a task or project. */
   focusDialog: null | { taskId?: string; projectId?: string };
+  /** The habit dialog: new (optionally for a project) or editing one. */
+  habitDialog: null | { habitId?: string; projectId?: string };
 }
 
 let state: UiState = {
@@ -19,6 +21,7 @@ let state: UiState = {
   areaDialog: null,
   shortcuts: false,
   focusDialog: null,
+  habitDialog: null,
 };
 const listeners = new Set<() => void>();
 
@@ -44,3 +47,5 @@ export const newArea = () => setUi({ areaDialog: {} });
 export const editArea = (areaId: string) => setUi({ areaDialog: { areaId } });
 export const startFocus = (attach: { taskId?: string; projectId?: string } = {}) =>
   setUi({ focusDialog: attach });
+export const newHabit = (projectId?: string) => setUi({ habitDialog: { projectId } });
+export const editHabit = (habitId: string) => setUi({ habitDialog: { habitId } });

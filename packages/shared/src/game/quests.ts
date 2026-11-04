@@ -112,6 +112,8 @@ export interface BoardContext {
   }[];
   inboxOpen: number;
   openSubtasks: number;
+  /** Habits due today and not checked in yet. */
+  habitsDue: readonly { id: string; title: string }[];
   /** The first task of Today's focus list. */
   topTask: { id: string; title: string } | null;
   /** Open L tasks without subtasks, in active projects ("break it down"). */
@@ -207,6 +209,12 @@ function quickCandidates(ctx: BoardContext): Candidate[] {
       need: 1,
     });
   }
+  if (ctx.habitsDue.length > 0) {
+    out.push({
+      spec: dayQuest(ctx, 'quick', 'quick.habit', 'Check in one habit', 10),
+      need: 1.5,
+    });
+  }
   return out;
 }
 
@@ -237,6 +245,20 @@ function dailyCandidates(ctx: BoardContext): Candidate[] {
       ),
       need: stale ? 2 : 1,
       projectId: p.id,
+    });
+  }
+  const due = ctx.habitsDue;
+  if (due.length >= GAME.quests.allHabitsMin) {
+    out.push({
+      spec: dayQuest(
+        ctx,
+        'daily',
+        'daily.all_habits',
+        `Check in all ${due.length} habits due today`,
+        Math.min(40, 10 + 5 * due.length),
+        { target: due.length, params: { habitIds: due.map((h) => h.id) } },
+      ),
+      need: 1.5,
     });
   }
   out.push({
@@ -568,6 +590,17 @@ export function questProgress(
     case 'make.goal':
     case 'make.subtasks':
       return madeBy(q, inPeriod).length;
+    case 'quick.habit':
+      return inPeriod.filter((a) => a.type === 'habit_checked').length;
+    case 'daily.all_habits': {
+      const ids = new Set((q.params.habitIds as string[] | undefined) ?? []);
+      const done = new Set<string>();
+      for (const a of inPeriod) {
+        if (a.type !== 'habit_checked' || !a.entityId || !ids.has(a.entityId)) continue;
+        if (a.payload.date === q.periodStart) done.add(a.entityId);
+      }
+      return done.size;
+    }
     case 'follow_up.task':
     case 'follow_up.goal':
       return extra.filledParts ?? 0;
@@ -626,6 +659,8 @@ export function affectedTemplates(a: Activity): readonly string[] {
       return ['daily.focus_session', 'time.day', 'time.week', 'weekly.target', 'comeback.focus'];
     case 'item_created':
       return ['make.task', 'make.goal', 'make.subtasks'];
+    case 'habit_checked':
+      return ['quick.habit', 'daily.all_habits', 'weekly.target'];
     default:
       return [];
   }

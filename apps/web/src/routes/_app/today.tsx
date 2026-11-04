@@ -1,14 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
-import { ListTodo, Timer } from 'lucide-react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ListTodo, Plus, Repeat, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
+import { HabitRow } from '@/components/habits';
 import { QuestBoard } from '@/components/quest-board';
 import { TaskRow } from '@/components/task-row';
 import { Button } from '@/components/ui/button';
 import { formatDayLong } from '@/lib/days';
-import { focusQuery, meQuery, projectsQuery, todayQuery, type FocusItem } from '@/lib/queries';
-import { openPalette, startFocus } from '@/lib/ui-store';
+import {
+  focusQuery,
+  meQuery,
+  projectsQuery,
+  todayQuery,
+  type FocusItem,
+  type Habit,
+} from '@/lib/queries';
+import { newHabit, openPalette, startFocus } from '@/lib/ui-store';
 
 export const Route = createFileRoute('/_app/today')({
   component: TodayPage,
@@ -54,6 +62,7 @@ function TodayPage() {
 
       <GameHeader />
       <FocusList items={today?.focus} today={me.today} />
+      <TodayHabits habits={today?.habits} today={me.today} />
       <QuestBoard />
     </div>
   );
@@ -116,6 +125,42 @@ function FocusList({ items, today }: { items: FocusItem[] | undefined; today: st
               {all ? 'Show less' : `Show ${items.length - VISIBLE} more`}
             </button>
           )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TodayHabits({ habits, today }: { habits: Habit[] | undefined; today: string }) {
+  if (!habits) return null;
+  const done = habits.filter((h) => h.checkedToday).length;
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
+          <Repeat className="size-4 text-emerald-500" /> Habits
+          {habits.length > 0 && (
+            <span className="text-xs font-normal text-muted-foreground">
+              {done}/{habits.length}
+            </span>
+          )}
+        </h2>
+        <Button variant="ghost" size="sm" className="h-7" onClick={() => newHabit()}>
+          <Plus className="size-3.5" /> Habit
+        </Button>
+      </div>
+      {habits.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No habits due today.{' '}
+          <Link to="/habits" className="font-medium text-primary hover:underline">
+            See all habits
+          </Link>
+        </p>
+      ) : (
+        <div className="rounded-xl border bg-card p-1">
+          {habits.map((h) => (
+            <HabitRow key={h.id} habit={h} today={today} />
+          ))}
         </div>
       )}
     </section>

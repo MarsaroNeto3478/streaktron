@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D34 | Habits: weekday or N-a-week schedules, own streaks, 10 XP once per habit-day, a forgotten check-in allowed for yesterday but counted today |
 
 Rejected ideas are listed at the end of the decisions log so they aren't proposed again.
 
@@ -519,7 +520,8 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 **Acceptance:** A full day of real use works end-to-end: plan on Today, run focus sessions, complete tasks, see XP/level/streak update immediately and correctly, complete daily quests. A make quest spawns a follow-up for the new task. Missing a day with a banked freeze keeps the streak. **Start dogfooding.**
 
 ### Phase 4 — Consistency tools, calendar & reminders
-- [ ] Habits: CRUD, flexible schedules, check-ins from Today and habit page, habit streaks
+- [x] Habits: CRUD, flexible schedules, check-ins from Today and habit page, habit streaks; habit quests (quick + daily) (D34)
+- [x] *(user's idea, added 2026-11-04)* Clicking a quest opens its details: what to do, what counts, progress, reward, the parts a follow-up still needs, and a button that goes where the quest asks (task, project, Inbox, Habits, focus timer)
 - [ ] Calendar events: one-off + recurring (RRULE via `rrule` lib), project association
 - [ ] Calendar view: month + week, showing events, schedule blocks, task due/scheduled dates, focus sessions; drag a task onto a day to schedule it
 - [ ] Countdowns: pin events/due dates; countdown widgets on Today and project page

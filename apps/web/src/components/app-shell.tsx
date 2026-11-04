@@ -12,6 +12,7 @@ import { Logo } from '@/components/logo';
 import { NAV } from '@/components/nav';
 import { ProjectStatusProvider } from '@/components/project-status';
 import { GlobalShortcuts } from '@/components/shortcuts';
+import { HabitDialog } from '@/components/habits';
 import { StructureDialogs } from '@/components/structure-dialogs';
 import { AreaSheet } from '@/components/area-sheet';
 import { GoalSheet } from '@/components/goal-sheet';
@@ -151,6 +152,7 @@ export function AppShell({
       <FocusStartDialog />
       <Celebration />
       <StructureDialogs />
+      <HabitDialog />
       <GlobalShortcuts />
     </ProjectStatusProvider>
   );

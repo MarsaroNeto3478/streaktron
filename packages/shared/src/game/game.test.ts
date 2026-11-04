@@ -412,6 +412,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     ],
     inboxOpen: 2,
     openSubtasks: 1,
+    habitsDue: [],
     topTask: { id: 'tsk_top', title: 'Read chapter 3' },
     breakdownTasks: [],
     focusDays: [],
@@ -723,3 +724,69 @@ describe('follow-ups', () => {
     ).toBeNull();
   });
 });
+
+describe('habit check-ins', () => {
+  it('earn 10 XP once per habit and day, and make the day active', () => {
+    const a = act('habit_checked', TODAY, { date: TODAY, projectId: null }, 'hab_a');
+    const again = act('habit_checked', TODAY, { date: TODAY, projectId: null }, 'hab_a');
+    const other = act('habit_checked', TODAY, { date: TODAY, projectId: null }, 'hab_b');
+    const yesterday = act(
+      'habit_checked',
+      TODAY,
+      { date: addDays(TODAY, -1), projectId: null },
+      'hab_a',
+    );
+    const credits = xpCredits([a, again, other, yesterday]);
+    expect([a, again, other, yesterday].map((x) => credits.get(x.id))).toEqual([10, 0, 10, 10]);
+    expect(activeDaysOf([a]).has(TODAY)).toBe(true);
+  });
+
+  it('feed the habit quests', () => {
+    const due = [
+      { id: 'hab_a', title: 'Read' },
+      { id: 'hab_b', title: 'Run' },
+    ];
+    const board = planBoard(ctx({ habitsDue: due }), seededRng(1));
+    const daily = dailyCandidatesOf(ctx({ habitsDue: due }));
+    expect(daily).toContain('daily.all_habits');
+    const all = stored(
+      {
+        ...board[0]!,
+        type: 'daily',
+        templateKey: 'daily.all_habits',
+        target: 2,
+        params: { habitIds: ['hab_a', 'hab_b'] },
+      },
+      new Date(`${TODAY}T08:00:00Z`),
+    );
+    const checkA = act('habit_checked', TODAY, { date: TODAY, projectId: null }, 'hab_a');
+    const backdated = act(
+      'habit_checked',
+      TODAY,
+      { date: addDays(TODAY, -1), projectId: null },
+      'hab_b',
+    );
+    const checkB = act('habit_checked', TODAY, { date: TODAY, projectId: null }, 'hab_b');
+    expect(questProgress(all, [checkA, backdated])).toBe(1);
+    expect(questProgress(all, [checkA, backdated, checkB, checkB])).toBe(2);
+    expect(affectedTemplates(checkA)).toEqual(
+      expect.arrayContaining(['quick.habit', 'daily.all_habits', 'weekly.target']),
+    );
+  });
+
+  it('offer no habit quests without habits due', () => {
+    expect(dailyCandidatesOf(ctx())).not.toContain('daily.all_habits');
+    expect(dailyCandidatesOf(ctx({ habitsDue: [{ id: 'hab_a', title: 'Read' }] }))).not.toContain(
+      'daily.all_habits',
+    );
+  });
+});
+
+/** Template keys a board could offer as daily quests (over many seeds). */
+function dailyCandidatesOf(c: BoardContext): string[] {
+  const keys = new Set<string>();
+  for (let seed = 1; seed < 200; seed++) {
+    for (const q of planBoard(c, seededRng(seed))) keys.add(q.templateKey);
+  }
+  return [...keys];
+}

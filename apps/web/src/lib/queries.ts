@@ -152,3 +152,14 @@ export const heatmapQuery = (from: string, to: string) =>
     queryKey: ['game', 'heatmap', from, to],
     queryFn: async () => (await fetchHeatmap(from, to)).days,
   });
+
+const fetchHabits = (archived: boolean) =>
+  call(api.habits.$get({ query: { archived: archived ? 'true' : 'false' } }));
+export type Habit = Awaited<ReturnType<typeof fetchHabits>>['habits'][number];
+
+/** The user's habits (or the archived ones), in their order. */
+export const habitsQuery = (archived = false) =>
+  queryOptions({
+    queryKey: ['habits', archived],
+    queryFn: async () => (await fetchHabits(archived)).habits,
+  });

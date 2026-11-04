@@ -17,6 +17,8 @@ export const ACTIVITY_TYPES = [
   'quest_completed',
   /** Every daily quest of a day done. */
   'quest_bonus',
+  /** A habit checked in for a day (`payload.date`; may be yesterday's, D34). */
+  'habit_checked',
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -31,6 +33,7 @@ export interface ActivityPayloads {
   focus_completed: { minutes: number; projectId: string | null; taskId: string | null };
   quest_completed: { questType: string; xp: number; boxTier: string };
   quest_bonus: { xp: number };
+  habit_checked: { date: DateString; projectId: string | null };
 }
 
 /** An activity row as the rules read it. */

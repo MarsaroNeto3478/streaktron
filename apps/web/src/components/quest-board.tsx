@@ -1,13 +1,15 @@
 // The quest board on Today: today's quests, this week's, and follow-ups. Each shows its progress;
-// most can be rerolled once.
+// most can be rerolled once. Clicking one opens what it asks and a button to go do it.
 
-import { QUEST_TYPE_LABELS, type QuestType } from '@streaktron/shared/game';
+import { PART_LABELS, QUEST_TYPE_LABELS, type QuestType } from '@streaktron/shared/game';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Dices, Swords } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { QuestDetail } from '@/components/quest-detail';
 import { Button } from '@/components/ui/button';
 import { useGameActions } from '@/lib/actions';
 import { formatMinutes } from '@/lib/days';
+import { missingParts } from '@/lib/game';
 import { questsQuery, type Quest } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -69,7 +71,9 @@ const isMinutes = (q: Quest) => q.templateKey.startsWith('time.');
 function QuestRow({ quest: q }: { quest: Quest }) {
   const actions = useGameActions();
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
   const done = q.status === 'completed';
+  const missing = q.type === 'follow_up' && !done ? missingParts(q) : [];
   // Light up when it turns done while on screen (not when the board loads already done).
   const wasDone = useRef(done);
   const [justDone, setJustDone] = useState(false);
@@ -93,51 +97,79 @@ function QuestRow({ quest: q }: { quest: Quest }) {
       : null;
 
   return (
-    <li className={cn('flex items-center gap-3 px-4 py-3', justDone && 'animate-quest-done')}>
-      <span
+    <>
+      <li
+        role="button"
+        tabIndex={0}
+        aria-label={`${q.title}: details`}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
         className={cn(
-          'grid size-6 shrink-0 place-items-center rounded-full border-2',
-          done ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30',
+          'flex cursor-pointer items-center gap-3 px-4 py-3 outline-none first:rounded-t-xl last:rounded-b-xl hover:bg-muted/40 focus-visible:bg-muted/40',
+          justDone && 'animate-quest-done',
         )}
-        aria-label={done ? 'Done' : 'Open'}
       >
-        {done && <Check className="size-3.5 stroke-[3]" />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className={cn('text-sm leading-5', done && 'text-muted-foreground line-through')}>
-          {q.title}
-        </div>
-        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="rounded bg-muted px-1.5 py-px font-medium">
-            {QUEST_TYPE_LABELS[q.type]}
-          </span>
-          <span className="tabular-nums">+{q.xp} XP</span>
-          {progress && <span className="tabular-nums">{progress}</span>}
-          {q.type === 'follow_up' && !done && <span>until tomorrow</span>}
-        </div>
-        {!done && q.target > 1 && (
-          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-primary/70" style={{ width: `${pct}%` }} />
-          </div>
-        )}
-      </div>
-      {q.canReroll && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 text-muted-foreground"
-          aria-label={`Reroll “${q.title}”`}
-          title="Swap for another (once)"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            await actions.reroll(q.id);
-            setBusy(false);
-          }}
+        <span
+          className={cn(
+            'grid size-6 shrink-0 place-items-center rounded-full border-2',
+            done
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-muted-foreground/30',
+          )}
+          aria-label={done ? 'Done' : 'Open'}
         >
-          <Dices />
-        </Button>
-      )}
-    </li>
+          {done && <Check className="size-3.5 stroke-[3]" />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className={cn('text-sm leading-5', done && 'text-muted-foreground line-through')}>
+            {q.title}
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="rounded bg-muted px-1.5 py-px font-medium">
+              {QUEST_TYPE_LABELS[q.type]}
+            </span>
+            <span className="tabular-nums">+{q.xp} XP</span>
+            {progress && <span className="tabular-nums">{progress}</span>}
+            {q.type === 'follow_up' && !done && <span>until tomorrow</span>}
+          </div>
+          {missing.length > 0 && (
+            <div className="mt-1 text-xs text-muted-foreground">
+              Add any {q.target - q.progress} of: {missing.map((p) => PART_LABELS[p]).join(' · ')}
+            </div>
+          )}
+          {!done && q.target > 1 && (
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-primary/70" style={{ width: `${pct}%` }} />
+            </div>
+          )}
+        </div>
+        {q.canReroll && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground"
+            aria-label={`Reroll “${q.title}”`}
+            title="Swap for another (once)"
+            disabled={busy}
+            onClick={async (e) => {
+              e.stopPropagation();
+              setBusy(true);
+              await actions.reroll(q.id);
+              setBusy(false);
+            }}
+          >
+            <Dices />
+          </Button>
+        )}
+      </li>
+      {/* Outside the row: clicks inside the dialog must not bubble into the row's onClick. */}
+      <QuestDetail quest={q} open={open} onOpenChange={setOpen} />
+    </>
   );
 }

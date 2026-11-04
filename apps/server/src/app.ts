@@ -13,6 +13,7 @@ import { adminRoutes } from './routes/admin';
 import { areaRoutes } from './routes/areas';
 import { columnRoutes } from './routes/columns';
 import { goalRoutes } from './routes/goals';
+import { habitRoutes } from './routes/habits';
 import { healthRoutes } from './routes/health';
 import { meRoutes } from './routes/me';
 import { focusRoutes, gameRoutes, questRoutes, statsRoutes, todayRoutes } from './routes/game';
@@ -36,6 +37,7 @@ const api = new Hono()
   .route('/columns', columnRoutes)
   .route('/goals', goalRoutes)
   .route('/tasks', taskRoutes)
+  .route('/habits', habitRoutes)
   .route('/search', searchRoutes)
   .route('/entities', entityRoutes)
   .route('/snapshots', snapshotRoutes)
