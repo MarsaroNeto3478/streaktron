@@ -7,6 +7,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   BarChart3,
   CalendarPlus,
+  ClipboardCheck,
   FolderPlus,
   Inbox,
   Keyboard,
@@ -168,6 +169,13 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       icon: Repeat,
       hint: 'G H',
       run: run(() => void navigate({ to: '/habits' })),
+    },
+    {
+      id: 'go-review',
+      label: 'Weekly review',
+      icon: ClipboardCheck,
+      hint: 'G R',
+      run: run(() => void navigate({ to: '/review' })),
     },
     {
       id: 'new-event',

@@ -212,6 +212,7 @@ async function boardContext(
   const currentKeys = new Set<string>();
   let hasDayBoard = false;
   let hasWeekBoard = false;
+  let hasReviewQuest = false;
   let pendingFollowUps = 0;
   for (const q of history) {
     const key = questKey(q);
@@ -227,6 +228,7 @@ async function boardContext(
       hasWeekBoard = true;
     }
     if (q.type === 'follow_up' && q.status === 'offered') pendingFollowUps++;
+    if (q.templateKey === 'review.weekly' && q.periodStart === weekStart) hasReviewQuest = true;
   }
 
   return {
@@ -253,6 +255,7 @@ async function boardContext(
     hasDayBoard,
     hasWeekBoard,
     challenge: s.challenge ?? null,
+    hasReviewQuest,
   };
 }
 

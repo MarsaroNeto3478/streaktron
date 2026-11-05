@@ -16,6 +16,7 @@ import type {
   HabitPatch,
   ProjectCreate,
   ProjectPatch,
+  ReviewComplete,
   SettingsPatch,
   TaskCreate,
   TaskPatch,
@@ -587,6 +588,26 @@ export function tutorialActions(qc: QueryClient) {
 export function useTutorialActions() {
   const qc = useQueryClient();
   return useMemo(() => tutorialActions(qc), [qc]);
+}
+
+// --- The weekly review (D38) -----------------------------------------------------------------
+
+export function reviewActions(qc: QueryClient) {
+  return {
+    complete: (answers: ReviewComplete) =>
+      attempt(async () => {
+        const res = await call(api.reviews.complete.$post({ json: answers }));
+        void qc.invalidateQueries({ queryKey: ['review'] });
+        void qc.invalidateQueries({ queryKey: ['game'] });
+        void qc.invalidateQueries({ queryKey: ['today'] });
+        return res;
+      }),
+  };
+}
+
+export function useReviewActions() {
+  const qc = useQueryClient();
+  return useMemo(() => reviewActions(qc), [qc]);
 }
 
 // --- Habits ----------------------------------------------------------------------------------

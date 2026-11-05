@@ -92,6 +92,13 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   challenge: null,
 };
 
+/** The weekly review's two questions (D38): plain text, like habit and event notes. */
+export const reviewCompleteSchema = z.object({
+  wentWell: z.string().trim().max(5000).default(''),
+  change: z.string().trim().max(5000).default(''),
+});
+export type ReviewComplete = z.infer<typeof reviewCompleteSchema>;
+
 export const challengeAnswerSchema = z.object({ challenge: z.enum(CHALLENGES).nullable() });
 
 // --- Structure: areas, projects, columns, goals, tasks --------------------------------------

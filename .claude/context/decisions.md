@@ -195,6 +195,11 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** The user found that creating a habit and checking it in gave 10 XP every time, without limit. Earn-once per habit and day (D34) didn't cover new habits.
 - **Alternatives:** Only the first-day rule (making 100 habits today still pays tomorrow); only a daily cap (create-and-check would still pay up to the cap); counting quests as active days (rejected by the user: too little effort).
 
+### D38 · The weekly review — accepted (2026-11-05, the user chose among Claude's proposals)
+- **Decision:** One review per week, at `/review` (menu, palette, `G R`), in six steps: the last seven days (tasks done, focus, active days, habit check-ins, XP, and where the work went), what stalled (active projects with no finished task and no focus in seven days), the inbox, next actions (pin one per active project), active and parked projects (park or activate), and two plain-text questions ("What went well?", "What will you do differently?"; both optional). Today shows a reminder card in the **review window**: the last two days of the user's week and the first day of the next; a review done on that first day still counts for the week before. Outside the window it can still be done from the menu. Doing it logs `review_completed`: **50 XP once per week**, and it **makes the day active** (the user's call: five minutes of real work on the week). A new quest type `review` ("Do the weekly review", 50 XP, large box) is offered each week, open through the next week's first day, completed only by that week's review. The review is stored in `weekly_reviews` with its numbers, for the history at the bottom of the page.
+- **Why:** The plan's review ritual (§4, Phase 4) fights novelty wearing off and projects stalling. The window matches when people naturally look back; one per week keeps it from being farmed. The reflection is plain text, like habit and event notes (D34, D35): no mentions to resolve from a review.
+- **Alternatives:** Available any day without a reminder; a fixed day chosen in Settings; a review that only gives XP and doesn't count as an active day (the user chose that it counts); a rich-text reflection with mentions.
+
 ---
 
 ## Rejected ideas (don't propose again)

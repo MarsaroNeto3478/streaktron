@@ -8,6 +8,7 @@ import { countdownLabel } from '@streaktron/shared/calendar';
 import { GAME } from '@streaktron/shared/game';
 import { QuestBoard } from '@/components/quest-board';
 import { TaskRow } from '@/components/task-row';
+import { ReviewCard } from '@/components/review-card';
 import { TutorialCard } from '@/components/tutorial-card';
 import { Button } from '@/components/ui/button';
 import { formatDayLong } from '@/lib/days';
@@ -68,6 +69,7 @@ function TodayPage() {
       </div>
 
       <TutorialCard />
+      <ReviewCard />
       <GameHeader />
       <Agenda data={today} today={me.today} />
       <FocusList

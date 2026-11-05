@@ -19,6 +19,8 @@ export const ACTIVITY_TYPES = [
   'quest_bonus',
   /** A habit checked in for a day (`payload.date`; may be yesterday's, D34). */
   'habit_checked',
+  /** The weekly review done, for the week starting `payload.weekStart` (D38). */
+  'review_completed',
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -40,6 +42,7 @@ export interface ActivityPayloads {
    * (D37). Missing on check-ins logged before the rule.
    */
   habit_checked: { date: DateString; projectId: string | null; habitCreatedOn?: DateString };
+  review_completed: { weekStart: DateString };
 }
 
 /** An activity row as the rules read it. */

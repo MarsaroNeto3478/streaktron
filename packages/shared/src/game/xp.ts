@@ -17,6 +17,9 @@ function sourceKey(a: Activity): string | null {
     case 'habit_checked':
       // Once per habit and day: unchecking and checking again earns nothing more.
       return a.entityId ? `${a.type}:${a.entityId}:${a.payload.date}` : null;
+    case 'review_completed':
+      // Once per week, whatever happens to the review row.
+      return `${a.type}:${a.payload.weekStart}`;
     default:
       return null;
   }
@@ -38,6 +41,8 @@ function baseXp(a: Activity): number {
       // A habit made today and checked at once would be free XP, over and over (D37).
       if (a.payload.habitCreatedOn && a.localDate <= a.payload.habitCreatedOn) return 0;
       return GAME.xp.habitCheckin;
+    case 'review_completed':
+      return GAME.xp.weeklyReview;
     default:
       return 0;
   }

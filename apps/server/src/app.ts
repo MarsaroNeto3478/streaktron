@@ -22,6 +22,7 @@ import { entityRoutes, searchRoutes, settingsRoutes, snapshotRoutes } from './ro
 import { projectRoutes } from './routes/projects';
 import { setupRoutes } from './routes/setup';
 import { taskRoutes } from './routes/tasks';
+import { reviewRoutes } from './routes/reviews';
 import { tutorialRoutes } from './routes/tutorial';
 
 const api = new Hono()
@@ -51,7 +52,8 @@ const api = new Hono()
   .route('/today', todayRoutes)
   .route('/focus', focusRoutes)
   .route('/stats', statsRoutes)
-  .route('/tutorial', tutorialRoutes);
+  .route('/tutorial', tutorialRoutes)
+  .route('/reviews', reviewRoutes);
 
 export const app = new Hono();
 

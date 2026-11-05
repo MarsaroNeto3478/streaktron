@@ -64,6 +64,13 @@
       "when": 1793850588274,
       "tag": "0008_tutorial",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793882410571,
+      "tag": "0009_weekly_review",
+      "breakpoints": true
     }
   ]
 }

@@ -134,6 +134,21 @@ export type Tutorial = Awaited<ReturnType<typeof fetchTutorial>>;
 /** Streaky's tour and question (D31, D32); fetching brings the open step up to date. */
 export const tutorialQuery = queryOptions({ queryKey: ['tutorial'], queryFn: fetchTutorial });
 
+const fetchReview = () => call(api.reviews.current.$get());
+export type CurrentReview = Awaited<ReturnType<typeof fetchReview>>;
+
+/** This week's review: due or done, the last seven days, what stalled (D38). */
+export const reviewQuery = queryOptions({ queryKey: ['review', 'current'], queryFn: fetchReview });
+
+const fetchReviews = () => call(api.reviews.$get());
+export type PastReview = Awaited<ReturnType<typeof fetchReviews>>['reviews'][number];
+
+/** Past reviews, newest first. */
+export const reviewsQuery = queryOptions({
+  queryKey: ['review', 'list'],
+  queryFn: async () => (await fetchReviews()).reviews,
+});
+
 const fetchToday = () => call(api.today.$get());
 export type TodayData = Awaited<ReturnType<typeof fetchToday>>;
 export type FocusItem = TodayData['focus'][number];

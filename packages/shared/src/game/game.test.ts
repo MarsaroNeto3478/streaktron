@@ -18,6 +18,7 @@ import {
   type QuestLike,
 } from './quests';
 import { nextTutorialStep, TUTORIAL_STEPS } from './challenge';
+import { inReviewWindow, reviewRange, reviewWeek } from './review';
 import {
   makeFactor,
   median,
@@ -425,6 +426,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     hasDayBoard: false,
     hasWeekBoard: false,
     challenge: null,
+    hasReviewQuest: true,
     ...over,
   };
 }
@@ -945,5 +947,78 @@ describe('habit XP can’t be farmed (D37)', () => {
     // The next day starts over.
     const later = check('hab_0', yesterday, addDays(TODAY, 1));
     expect(xpCredits([...checks, later]).get(later.id)).toBe(10);
+  });
+});
+
+describe('weekly review (D38)', () => {
+  // Weeks start on Monday (1). 2026-11-02 is a Monday.
+  it('reminds at the end of the week and on the next one’s first day', () => {
+    const days = eachDay('2026-11-02', '2026-11-09');
+    expect(days.map((d) => inReviewWindow(d, 1))).toEqual([
+      true, // Mon: still the week before's review
+      false,
+      false,
+      false,
+      false,
+      true, // Sat
+      true, // Sun
+      true, // next Mon
+    ]);
+  });
+
+  it('a review on the first day of a week counts for the week before', () => {
+    expect(reviewWeek('2026-11-07', 1)).toBe('2026-11-02'); // Saturday
+    expect(reviewWeek('2026-11-09', 1)).toBe('2026-11-02'); // next Monday
+    expect(reviewWeek('2026-11-10', 1)).toBe('2026-11-09');
+    expect(reviewRange('2026-11-08')).toEqual({ from: '2026-11-02', to: '2026-11-08' });
+  });
+
+  it('earns once per week and makes the day active', () => {
+    const r1 = act('review_completed', '2026-11-07', { weekStart: '2026-11-02' }, 'rev_1');
+    const r2 = act('review_completed', '2026-11-08', { weekStart: '2026-11-02' }, 'rev_2');
+    const credits = xpCredits([r1, r2]);
+    expect([credits.get(r1.id), credits.get(r2.id)]).toEqual([GAME.xp.weeklyReview, 0]);
+    expect(activeDaysOf([r1]).has('2026-11-07')).toBe(true);
+    expect(affectedTemplates(r1)).toEqual(['review.weekly', 'weekly.target']);
+  });
+
+  it('offers one review quest a week, open through the next week’s first day', () => {
+    const board = planBoard(
+      ctx({ hasReviewQuest: false, hasDayBoard: true, hasWeekBoard: true }),
+      seededRng(1),
+    );
+    expect(board).toHaveLength(1);
+    expect(board[0]).toMatchObject({
+      type: 'review',
+      templateKey: 'review.weekly',
+      periodStart: '2026-11-02',
+      periodEnd: '2026-11-09',
+      boxTier: 'large',
+    });
+    expect(
+      planBoard(
+        ctx({
+          hasReviewQuest: false,
+          restingTypes: ['review'],
+          hasDayBoard: true,
+          hasWeekBoard: true,
+        }),
+        seededRng(1),
+      ),
+    ).toEqual([]);
+  });
+
+  it('only this week’s review completes this week’s quest', () => {
+    const q = stored(
+      planBoard(
+        ctx({ hasReviewQuest: false, hasDayBoard: true, hasWeekBoard: true }),
+        seededRng(1),
+      )[0]!,
+      new Date('2026-11-02T09:00:00Z'),
+    );
+    const mine = act('review_completed', '2026-11-07', { weekStart: '2026-11-02' });
+    const lastWeeks = act('review_completed', '2026-11-02', { weekStart: '2026-10-26' });
+    expect(questProgress(q, [lastWeeks])).toBe(0);
+    expect(questProgress(q, [lastWeeks, mine])).toBe(1);
   });
 });
