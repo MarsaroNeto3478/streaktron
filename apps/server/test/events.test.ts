@@ -108,7 +108,7 @@ describe('events', () => {
     const e = await newEvent({ title: 'Deadline', startDate: addDays(today, 5), countdown: true });
     await newEvent({ title: 'Standup', startDate: today, startTime: '09:30' });
     const t = (await as.get('/api/today')).body;
-    expect(t.countdowns).toMatchObject([{ eventId: e.id, date: addDays(today, 5) }]);
+    expect(t.countdowns).toMatchObject([{ kind: 'event', id: e.id, date: addDays(today, 5) }]);
     expect(t.agenda.map((o: { title: string }) => o.title)).toEqual(['Standup']);
 
     expect((await as.del(`/api/events/${e.id}`)).status).toBe(200);

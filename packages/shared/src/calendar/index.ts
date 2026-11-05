@@ -173,6 +173,15 @@ export function describeRecurrence(r: Recurrence, startDate: DateString, weekSta
 }
 
 /** "Today", "Tomorrow", "In 12 days", "3 days ago". */
+/** A date this many days away or fewer is "soon": countdowns and task dates turn amber (D39). */
+export const SOON_DAYS = 3;
+
+/** Whether `day` is today or within the next `SOON_DAYS` days. */
+export const isSoon = (today: DateString, day: DateString) => {
+  const n = daysBetween(today, day);
+  return n >= 0 && n <= SOON_DAYS;
+};
+
 export function countdownLabel(today: DateString, day: DateString): string {
   const n = daysBetween(today, day);
   if (n === 0) return 'Today';
