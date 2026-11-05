@@ -381,3 +381,28 @@ RESULTADO: conferido no navegador (o campo abriu com 10). Para isso a conta do a
   Nenhuma sessão de foco foi iniciada.
   (continuação) "faz o commit, merge e push": commit no branch "streaky-tutorial", merge na main
   e push para MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O autor fez o tutorial
+-------------------------------------------------------------------------------------------------
+PEDIDO: "ja fiz o tutorial, ficou muito bom".
+O QUE FOI FEITO: nada no código; registro do teste do autor. O tour do Streaky foi feito do
+  começo ao fim na conta real e aprovado.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O tutorial voltava a aparecer depois de feito
+-------------------------------------------------------------------------------------------------
+PEDIDO: "eu fiz o tutorial, ficou bom, mas toda vez ele chama para fazer o tutorial, penso que
+  depois de feito ele não deve mais aparecer".
+CAUSA: um erro meu durante os testes. Enquanto o autor fazia o tour, eu testei o botão dos 10
+  minutos na conta dele e, no fim, "voltei o tour para o convite" direto no banco. Isso apagou o
+  estado de concluído, e o convite voltou. O autor ainda refez o tour pulando os passos (sem
+  ganhar XP de novo, como planejado).
+O QUE FOI FEITO: o tour foi fechado na conta do autor. E o card final ("You're all set") agora
+  aparece uma vez só: depois de mostrado, o tour fica guardado e não chama mais, mesmo sem clicar
+  em "Thanks, Streaky". Só volta se o autor pedir em Settings → "Take the tour".
+RESULTADO: testes do tour passando; no navegador o Today já não mostra o Streaky.
+OBSERVAÇÕES: lição para os próximos testes: não mexer no estado da conta real enquanto o autor
+  está usando o app; preferir uma conta de teste.
+  (continuação) "faz o commit e push": commit da correção na main e push para
+  MarsaroNeto3478/streaktron.

@@ -67,6 +67,8 @@ export async function getTutorial(userId: string) {
   if (s.tutorial === 'active') await evaluateAll(userId);
   return db.transaction(async (tx) => {
     const row = await lock(tx, userId);
+    // The end of the tour shows once: after that it's put away, so it never calls again.
+    if (row.tutorial === 'done') await setState(tx, userId, 'closed');
     const step = row.tutorial === 'active' ? await openStep(tx, userId) : null;
     return {
       state: row.tutorial,

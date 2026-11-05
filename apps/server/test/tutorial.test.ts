@@ -96,7 +96,8 @@ describe('Streaky’s tour', () => {
     ]);
     expect((await xp()) - before).toBe(10 + 50); // the minutes, plus the step
     expect(await tour()).toMatchObject({ state: 'done', step: null });
-
+    // The end shows once; after that the tour is put away and never calls again.
+    expect(await tour()).toMatchObject({ state: 'closed', step: null });
     expect(await ok(as.post('/api/tutorial/close'))).toMatchObject({ state: 'closed' });
   });
 
