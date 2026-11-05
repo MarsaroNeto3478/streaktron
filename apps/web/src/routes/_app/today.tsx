@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
 import { HabitRow } from '@/components/habits';
 import { countdownLabel } from '@streaktron/shared/calendar';
+import { GAME } from '@streaktron/shared/game';
 import { QuestBoard } from '@/components/quest-board';
 import { TaskRow } from '@/components/task-row';
+import { TutorialCard } from '@/components/tutorial-card';
 import { Button } from '@/components/ui/button';
 import { formatDayLong } from '@/lib/days';
 import {
@@ -24,7 +26,10 @@ export const Route = createFileRoute('/_app/today')({
   component: TodayPage,
 });
 
-/** Today shows a few things; the rest waits behind "show more" (plan.md §4.3). */
+/**
+ * Today shows a few things; the rest waits behind "show more" (plan.md §4.3). Fewer when not
+ * knowing what to do next is the user's challenge (D36).
+ */
 const VISIBLE = 5;
 
 const REASON: Record<FocusItem['reason'], string> = {
@@ -62,20 +67,33 @@ function TodayPage() {
         </Button>
       </div>
 
+      <TutorialCard />
       <GameHeader />
       <Agenda data={today} today={me.today} />
-      <FocusList items={today?.focus} today={me.today} />
+      <FocusList
+        items={today?.focus}
+        today={me.today}
+        visible={me.settings.challenge === 'next_step' ? GAME.challenge.todayVisible : VISIBLE}
+      />
       <TodayHabits habits={today?.habits} today={me.today} />
       <QuestBoard />
     </div>
   );
 }
 
-function FocusList({ items, today }: { items: FocusItem[] | undefined; today: string }) {
+function FocusList({
+  items,
+  today,
+  visible,
+}: {
+  items: FocusItem[] | undefined;
+  today: string;
+  visible: number;
+}) {
   const { data: projects = [] } = useQuery(projectsQuery);
   const [all, setAll] = useState(false);
   if (!items) return <div className="h-32 animate-pulse rounded-xl bg-muted/60" />;
-  const shown = all ? items : items.slice(0, VISIBLE);
+  const shown = all ? items : items.slice(0, visible);
 
   return (
     <section className="space-y-3">
@@ -120,12 +138,12 @@ function FocusList({ items, today }: { items: FocusItem[] | undefined; today: st
               </div>
             </div>
           ))}
-          {items.length > VISIBLE && (
+          {items.length > visible && (
             <button
               className="w-full px-3 py-2 text-left text-xs font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setAll((a) => !a)}
             >
-              {all ? 'Show less' : `Show ${items.length - VISIBLE} more`}
+              {all ? 'Show less' : `Show ${items.length - visible} more`}
             </button>
           )}
         </div>

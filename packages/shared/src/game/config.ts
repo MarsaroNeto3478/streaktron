@@ -64,5 +64,21 @@ export const GAME = {
     },
     /** "Check in all habits due today" needs at least this many due. */
     allHabitsMin: 2,
+    /** Tutorial quests (D31): XP per step and for the last one, which also gives a large box. */
+    tutorial: { stepXp: 20, lastXp: 50, days: 365 },
+  },
+  /** What the challenge answer changes (D36). */
+  challenge: {
+    /** forgetting: quick quests a day on top of `quests.quickPerDay`. */
+    extraQuick: 1,
+    /** next_step: Today's visible items, and the weight of "pick the next action" quests. */
+    todayVisible: 3,
+    pinNextNeed: 2,
+    /** missed_day: inactive days that bring the comeback quest. */
+    comebackAfterDays: 1,
+    /** too_many: the active-project limit set when this is the answer (only ever lowered). */
+    activeProjectLimit: 2,
+    /** motivation: a daily quest doesn't come back for this many days. */
+    varietyDays: 3,
   },
 } as const;

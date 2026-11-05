@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { CalendarCheck, Flame, Snowflake } from 'lucide-react';
-import { gameStateQuery, type GameStateView } from '@/lib/queries';
+import { gameStateQuery, meQuery, type GameStateView } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
 export function GameChip() {
@@ -31,12 +31,15 @@ export function GameChip() {
 
 export function GameHeader() {
   const { data: g } = useQuery(gameStateQuery);
+  const { data: me } = useQuery(meQuery);
   if (!g) return <div className="h-[104px] animate-pulse rounded-xl bg-muted/60" />;
+  // When a missed day is what makes the user drop things, the forgiving weekly streak leads (D36).
+  const weekFirst = me?.settings.challenge === 'missed_day';
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <Level g={g} />
-      <DailyStreak g={g} />
-      <WeekTarget g={g} />
+      {weekFirst ? <WeekTarget g={g} /> : <DailyStreak g={g} />}
+      {weekFirst ? <DailyStreak g={g} /> : <WeekTarget g={g} />}
     </div>
   );
 }

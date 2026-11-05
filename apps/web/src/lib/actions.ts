@@ -27,6 +27,7 @@ import {
   type ColumnCategory,
   type ProjectStatus,
 } from '@streaktron/shared/structure';
+import type { Challenge } from '@streaktron/shared/game';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
@@ -41,6 +42,7 @@ import type {
   ProjectPage,
   Task,
   TaskDetail,
+  Tutorial,
 } from './queries';
 import { refreshEntities } from './entities';
 import { attempt, report } from './report';
@@ -556,6 +558,35 @@ export function gameActions(qc: QueryClient) {
 export function useGameActions() {
   const qc = useQueryClient();
   return useMemo(() => gameActions(qc), [qc]);
+}
+
+// --- Streaky's tour (D31, D32) ---------------------------------------------------------------
+
+export function tutorialActions(qc: QueryClient) {
+  const settle = (t: Tutorial) => {
+    qc.setQueryData(['tutorial'], t);
+    void qc.invalidateQueries({ queryKey: ['game', 'quests'] });
+    return t;
+  };
+  return {
+    start: () => attempt(async () => settle(await call(api.tutorial.start.$post()))),
+    /** null: skip the question. */
+    answer: (challenge: Challenge | null) =>
+      attempt(async () => {
+        const res = await call(api.tutorial.challenge.$post({ json: { challenge } }));
+        // The answer tunes Today, the quests and maybe the active limit (D36).
+        void qc.invalidateQueries({ queryKey: ['me'] });
+        void qc.invalidateQueries({ queryKey: ['today'] });
+        return settle(res);
+      }),
+    skip: () => attempt(async () => settle(await call(api.tutorial.skip.$post()))),
+    close: () => attempt(async () => settle(await call(api.tutorial.close.$post()))),
+  };
+}
+
+export function useTutorialActions() {
+  const qc = useQueryClient();
+  return useMemo(() => tutorialActions(qc), [qc]);
 }
 
 // --- Habits ----------------------------------------------------------------------------------

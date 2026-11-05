@@ -1,7 +1,13 @@
-import { QUEST_TYPE_LABELS, RESTABLE_TYPES } from '@streaktron/shared/game';
+import {
+  CHALLENGE_TEXT,
+  CHALLENGES,
+  QUEST_TYPE_LABELS,
+  RESTABLE_TYPES,
+  type Challenge,
+} from '@streaktron/shared/game';
 import { DAY_SETTINGS_LOCK_DAYS, type SettingsPatch } from '@streaktron/shared/schemas';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { FolderKanban, Plus, Shapes, Trash2 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { toast } from 'sonner';
@@ -18,7 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useGameActions, useStructureActions } from '@/lib/actions';
+import { Streaky } from '@/components/streaky';
+import { useGameActions, useStructureActions, useTutorialActions } from '@/lib/actions';
 import { errorMessage } from '@/lib/api';
 import { meQuery, projectsQuery, snapshotsQuery } from '@/lib/queries';
 
@@ -40,7 +47,8 @@ function SettingsPage() {
       <WeekSettings key={`week-${key}`} />
       <FocusPresets key={`focus-${key}`} />
       <QuestSettings key={`quests-${key}`} />
-      <ProjectLimit />
+      <StreakySettings key={`streaky-${key}`} />
+      <ProjectLimit key={`limit-${key}`} />
       <DeletedItems />
     </div>
   );
@@ -392,6 +400,65 @@ function QuestSettings() {
             onChange={(e) => setMax(e.target.value)}
           />
         </div>
+      </div>
+    </SettingsCard>
+  );
+}
+
+// --- Streaky: the challenge and the tour (D31, D32, D36) --------------------------------------
+
+const NONE = 'none';
+
+function StreakySettings() {
+  const { data: me } = useQuery(meQuery);
+  const tour = useTutorialActions();
+  const navigate = useNavigate();
+  const saved = me?.settings.challenge ?? null;
+  const [value, setValue] = useState<string>(saved ?? NONE);
+  const challenge = value === NONE ? null : (value as Challenge);
+
+  return (
+    <SettingsCard
+      title="Streaky"
+      description="Your biggest challenge with discipline tunes the app a little. Streaky’s tour shows you around."
+      dirty={challenge !== saved}
+      patch={() => ({ challenge })}
+    >
+      <div className="flex items-start gap-3">
+        <Streaky mood="thinking" size={56} />
+        <div className="grid flex-1 gap-1.5">
+          <Label htmlFor="challenge">Biggest challenge</Label>
+          <Select value={value} onValueChange={setValue}>
+            <SelectTrigger id="challenge" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>Not set</SelectItem>
+              {CHALLENGES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CHALLENGE_TEXT[c].label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {challenge ? CHALLENGE_TEXT[challenge].tuning : 'Nothing is tuned.'}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+        <p className="text-sm text-muted-foreground">
+          Take the tour again from Today. Steps you were rewarded for once don’t reward again.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={async () => {
+            if (await tour.start()) void navigate({ to: '/today' });
+          }}
+        >
+          Take the tour
+        </Button>
       </div>
     </SettingsCard>
   );

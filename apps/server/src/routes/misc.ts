@@ -13,6 +13,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/client';
 import { userSettings } from '../db/schema';
+import { challengeTuning } from '../services/tutorial';
 import { HttpError } from '../http/errors';
 import { requireUser, type AuthedEnv } from '../http/session';
 import { validate } from '../http/validate';
@@ -57,7 +58,10 @@ export const settingsRoutes = new Hono<AuthedEnv>()
         .where(eq(userSettings.userId, userId))
         .for('update');
       if (!current) throw new HttpError(404, 'not_found', 'Your settings are missing.');
-      const values: Partial<typeof userSettings.$inferInsert> = { ...patch };
+      const values: Partial<typeof userSettings.$inferInsert> = {
+        ...patch,
+        ...challengeTuning(current, patch.challenge, patch.activeProjectLimit),
+      };
       // The day's boundaries can move once a week, so days can't be farmed (D17). The first change
       // after setup is free.
       const movesDay =

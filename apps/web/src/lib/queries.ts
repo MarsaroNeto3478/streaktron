@@ -128,6 +128,12 @@ export const questsQuery = queryOptions({
   queryFn: async () => (await fetchQuests()).quests,
 });
 
+const fetchTutorial = () => call(api.tutorial.$get());
+export type Tutorial = Awaited<ReturnType<typeof fetchTutorial>>;
+
+/** Streaky's tour and question (D31, D32); fetching brings the open step up to date. */
+export const tutorialQuery = queryOptions({ queryKey: ['tutorial'], queryFn: fetchTutorial });
+
 const fetchToday = () => call(api.today.$get());
 export type TodayData = Awaited<ReturnType<typeof fetchToday>>;
 export type FocusItem = TodayData['focus'][number];

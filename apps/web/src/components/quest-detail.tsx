@@ -48,10 +48,10 @@ function useExplain(q: Quest): Explained {
       : undefined;
   const openTask = (label: string): Go | undefined =>
     target ? { label, run: () => openSheet('task', target) } : undefined;
-  const focus = (label = 'Start a focus session'): Go => ({
+  const focus = (label = 'Start a focus session', minutes?: number): Go => ({
     label,
     icon: <Timer />,
-    run: () => startFocus(projectId ? { projectId } : {}),
+    run: () => startFocus({ ...(projectId ? { projectId } : {}), minutes }),
   });
   const toHabits: Go = { label: 'Go to Habits', run: () => void navigate({ to: '/habits' }) };
   const activeDay =
@@ -140,7 +140,7 @@ function useExplain(q: Quest): Explained {
       return {
         what: 'Welcome back. One short session is enough to restart: 10 minutes of focus.',
         counts: 'A focus session of 10 minutes or more, finished today.',
-        go: focus('Start 10 minutes'),
+        go: focus('Start 10 minutes', 10),
       };
     case 'make.task':
       return {
