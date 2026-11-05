@@ -533,7 +533,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [ ] **Project** quest type generated from goals and deadlines
 - [ ] PWA: manifest, service worker (no offline data), install on phone over Tailscale HTTPS
 - [ ] Web Push reminders: habits due, focus ended, opt-in "streak at risk" nudge (max one per day)
-- [ ] **Streaky**, the guide mascot (D31): the user draws him; appears in the tutorial, as a helper with tips, and in celebrations. A guide, not a pet: no growth, needs or levels
+- [ ] **Streaky**, the guide mascot (D31): the user draws him *(art done 2026-11-05 from the user's drawings and a design prompt: a floating flame with a quiff and four emotions — happy/cocky, celebrating, worried, and thinking as a fiery question mark — animated SVGs in `apps/web/public/streaky/`; the first log-footed shapes stay there as a keepsake)*; appears in the tutorial, as a helper with tips, and in celebrations. A guide, not a pet: no growth, needs or levels
 - [ ] **Tutorial as the first quests** (D31): a chain of welcome quests done in the real app (an area, a project, a task, completing one, 10 minutes of focus), introduced by Streaky
 - [ ] **"What's your biggest challenge with discipline?"** (D32): multiple choice over the five failure modes (§1), asked by Streaky; the answer tunes the app (e.g. a lower active limit, the weekly streak first) and can be changed in Settings
 

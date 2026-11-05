@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="streaky-titulo" id="streaky">
+  <title id="streaky-titulo">Streaky preocupado</title>
+  <style>
+    #streaky {
+      --contorno: #6B1020;      /* vinho */
+      --borda: #E8262B;         /* vermelho das bordas */
+      --corpo: #FF4D2D;         /* vermelho-alaranjado */
+      --laranja: #FF8A1F;       /* miolo laranja */
+      --miolo: #FFB938;
+      --centro: #FFF1A8;        /* amarelo-claro do centro */
+      --olho: #FFFFFF;
+      --pupila: #2A0710;
+      --boca: #7A0F1F;
+      --lingua: #FFD166;
+    }
+
+    /* Animações: leves, em loop, só CSS. */
+    #flutua { animation: flutua 3.2s ease-in-out infinite; }
+    #chama { transform-origin: 256px 440px; animation: oscila 2.6s ease-in-out infinite; }
+    #chama-interna { transform-origin: 256px 420px; animation: pulsa 1.8s ease-in-out infinite; }
+    #olhos { transform-box: fill-box; transform-origin: center; animation: pisca 5s infinite; }
+
+    @keyframes flutua { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes oscila {
+      0%, 100% { transform: skewX(0) scale(1, 1); }
+      25% { transform: skewX(-2deg) scale(1.01, .99); }
+      75% { transform: skewX(2deg) scale(.99, 1.01); }
+    }
+    @keyframes pulsa { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03, .97); } }
+    @keyframes pisca { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.08); } }
+    #chama { animation-duration: 4s; }
+    #flutua { animation-duration: 4.5s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #streaky * { animation: none !important; }
+    }
+  </style>
+
+  <defs>
+    <!-- Do amarelo-claro no centro ao vermelho nas bordas -->
+    <radialGradient id="grad-corpo" cx="256" cy="330" r="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" style="stop-color: var(--centro)"/>
+      <stop offset=".32" style="stop-color: var(--miolo)"/>
+      <stop offset=".6" style="stop-color: var(--corpo)"/>
+      <stop offset="1" style="stop-color: var(--borda)"/>
+    </radialGradient>
+    <radialGradient id="grad-interna" cx="256" cy="345" r="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" style="stop-color: var(--centro)"/>
+      <stop offset=".55" style="stop-color: var(--miolo)"/>
+      <stop offset="1" style="stop-color: var(--laranja)"/>
+    </radialGradient>
+    <linearGradient id="grad-brilho" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="grad-sombra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--contorno)" stop-opacity="0"/>
+      <stop offset="1" style="stop-color: var(--contorno)" stop-opacity=".35"/>
+    </linearGradient>
+    <!-- Três pontas: esquerda pequena, principal curvada como um topete, direita média -->
+    <path id="forma-corpo" d="M256 446
+      C178 446 120 396 120 324
+      C120 266 138 228 146 166
+      C164 190 182 200 202 206
+      C198 150 226 100 272 76
+      C294 64 316 58 338 64
+      C316 72 298 88 292 110
+      C286 132 296 150 312 166
+      C338 160 366 150 392 128
+      C384 170 394 214 394 270
+      C394 380 332 446 256 446 Z"/>
+    <clipPath id="recorte-corpo"><use href="#forma-corpo"/></clipPath>
+  </defs>
+
+  <g id="flutua">
+    <g id="chama">
+      <g id="corpo" transform="translate(256 446) scale(1.04 .84) translate(-256 -446)">
+        <use href="#forma-corpo" fill="url(#grad-corpo)"/>
+        <g clip-path="url(#recorte-corpo)">
+          <!-- sombra sutil na parte inferior -->
+          <ellipse cx="256" cy="452" rx="150" ry="70" fill="url(#grad-sombra)"/>
+        </g>
+        <!-- brilhos suaves na parte de cima -->
+        <path d="M232 104 C252 86 276 76 300 72 C282 84 266 100 256 122 C248 116 240 110 232 104 Z" fill="#fff" opacity=".45"/>
+        <ellipse cx="166" cy="250" rx="12" ry="30" transform="rotate(14 166 250)" fill="url(#grad-brilho)"/>
+        <use href="#forma-corpo" fill="none" stroke="var(--contorno)" stroke-width="10" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(256 446) scale(1.04 .84) translate(-256 -446)"><path id="chama-interna" fill="url(#grad-interna)" opacity=".9" d="M256 420 C200 420 164 384 166 334 C168 296 186 270 200 244 C212 260 222 266 236 270 C234 222 254 182 290 158 C286 196 310 220 330 244 C348 266 352 296 350 334 C348 388 312 420 256 420 Z"/></g>
+      <g id="olhos">
+        <g id="olho-esquerdo">
+          <ellipse cx="214" cy="326" rx="28.5" ry="34.199999999999996" fill="var(--olho)"/>
+          <ellipse cx="214.0" cy="333.6" rx="16.15" ry="19.0" fill="var(--pupila)"/>
+          <circle cx="219.7" cy="325.05" r="6.175" fill="#fff"/>
+          <path d="M181.5 285.8 H246.5 V322.58 Q214 330.58 181.5 322.58 Z" fill="var(--miolo)"/>
+          <path d="M187.5 323.58 Q214 331.58 240.5 323.58" fill="none" stroke="var(--contorno)" stroke-width="6" stroke-linecap="round"/>
+          <ellipse cx="214" cy="326" rx="28.5" ry="34.199999999999996" fill="none" stroke="var(--contorno)" stroke-width="7"/>
+        </g>
+        <g id="olho-direito">
+          <ellipse cx="298" cy="326" rx="28.5" ry="34.199999999999996" fill="var(--olho)"/>
+          <ellipse cx="298.0" cy="333.6" rx="16.15" ry="19.0" fill="var(--pupila)"/>
+          <circle cx="303.7" cy="325.05" r="6.175" fill="#fff"/>
+          <path d="M265.5 285.8 H330.5 V322.58 Q298 330.58 265.5 322.58 Z" fill="var(--miolo)"/>
+          <path d="M271.5 323.58 Q298 331.58 324.5 323.58" fill="none" stroke="var(--contorno)" stroke-width="6" stroke-linecap="round"/>
+          <ellipse cx="298" cy="326" rx="28.5" ry="34.199999999999996" fill="none" stroke="var(--contorno)" stroke-width="7"/>
+        </g>
+      </g>
+      <!-- pontas de dentro erguidas: preocupado -->
+      <g id="sobrancelhas" fill="none" stroke="var(--contorno)" stroke-width="9" stroke-linecap="round">
+        <path d="M190 278 Q212 274 236 262"/>
+        <path d="M276 262 Q300 274 322 278"/>
+      </g>
+      <!-- boquinha ondulada -->
+      <g id="boca">
+        <path d="M230 392 Q243 382 256 392 Q269 402 282 392" fill="none" stroke="var(--contorno)" stroke-width="8" stroke-linecap="round"/>
+      </g>
+    </g>
+  </g>
+</svg>
