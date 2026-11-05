@@ -13,6 +13,8 @@ export interface UiState {
   focusDialog: null | { taskId?: string; projectId?: string };
   /** The habit dialog: new (optionally for a project) or editing one. */
   habitDialog: null | { habitId?: string; projectId?: string };
+  /** The event dialog: new (on a day) or editing one (opened from one of its occurrences). */
+  eventDialog: null | { eventId?: string; date?: string; occurrence?: string; projectId?: string };
 }
 
 let state: UiState = {
@@ -22,6 +24,7 @@ let state: UiState = {
   shortcuts: false,
   focusDialog: null,
   habitDialog: null,
+  eventDialog: null,
 };
 const listeners = new Set<() => void>();
 
@@ -49,3 +52,7 @@ export const startFocus = (attach: { taskId?: string; projectId?: string } = {})
   setUi({ focusDialog: attach });
 export const newHabit = (projectId?: string) => setUi({ habitDialog: { projectId } });
 export const editHabit = (habitId: string) => setUi({ habitDialog: { habitId } });
+export const newEvent = (date?: string, projectId?: string) =>
+  setUi({ eventDialog: { date, projectId } });
+export const editEvent = (eventId: string, occurrence?: string) =>
+  setUi({ eventDialog: { eventId, occurrence } });

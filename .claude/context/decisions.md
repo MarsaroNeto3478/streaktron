@@ -179,6 +179,11 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** Forgetting to tap is common and shouldn't break a habit's run; letting yesterday's tap also save yesterday's daily streak would make streaks farmable. Keeping habits out of mentions avoids a second backlink source for little gain.
 - **Alternatives:** Any past day (farmable); no backdating at all (punishes a forgotten tap); rich-text descriptions (more plumbing, little use).
 
+### D35 · How the calendar stores and shows events — accepted (2026-11-04, Claude's)
+- **Decision:** Events live on the user's **local dates and wall-clock times** ("floating"): `start_date`, optional `end_date` (all-day events spanning days), optional `start_time`/`end_time` ("HH:MM", same day; none = all day). This replaces the `start_at`/`end_at` timestamps sketched in plan.md §7. Repetition is a tested subset of RFC 5545 RRULE (every day / week on chosen weekdays / month on the same day / year, every N, until a date or N times), stored as a real RRULE string; skipped occurrences are a list of dates (EXDATE). Editing the rule (or the start date) clears the skips; "Only this one" skips one occurrence; editing a single occurrence isn't supported yet. A **countdown** is a flag on an event: Today shows the next occurrence of each countdown event. On the calendar, a task shows on its scheduled day (else its due day); **dragging a task to a day sets its scheduled date** (the due date, a deadline, is never moved by a drag). Event notes are plain text (like habits, D34).
+- **Why:** Lectures and exams are wall-clock things: a 9:00 class must stay at 9:00 across DST and time-zone changes, and day arithmetic on `YYYY-MM-DD` is already the codebase's rule. A small, exhaustively tested expander beats a dependency for the five patterns people use; storing real RRULE keeps an iCal import or a full library possible later.
+- **Alternatives:** UTC timestamps plus a time zone (DST bugs, more code everywhere); the `rrule` library (bigger, time-zone pitfalls); dragging moving the due date (it would silently change deadlines).
+
 ---
 
 ## Rejected ideas (don't propose again)

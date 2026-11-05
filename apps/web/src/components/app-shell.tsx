@@ -12,6 +12,7 @@ import { Logo } from '@/components/logo';
 import { NAV } from '@/components/nav';
 import { ProjectStatusProvider } from '@/components/project-status';
 import { GlobalShortcuts } from '@/components/shortcuts';
+import { EventDialog } from '@/components/event-dialog';
 import { HabitDialog } from '@/components/habits';
 import { StructureDialogs } from '@/components/structure-dialogs';
 import { AreaSheet } from '@/components/area-sheet';
@@ -153,6 +154,7 @@ export function AppShell({
       <Celebration />
       <StructureDialogs />
       <HabitDialog />
+      <EventDialog />
       <GlobalShortcuts />
     </ProjectStatusProvider>
   );

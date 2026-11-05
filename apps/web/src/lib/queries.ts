@@ -129,7 +129,8 @@ export const questsQuery = queryOptions({
 });
 
 const fetchToday = () => call(api.today.$get());
-export type FocusItem = Awaited<ReturnType<typeof fetchToday>>['focus'][number];
+export type TodayData = Awaited<ReturnType<typeof fetchToday>>;
+export type FocusItem = TodayData['focus'][number];
 
 /** Today's focus list. */
 export const todayQuery = queryOptions({ queryKey: ['today'], queryFn: fetchToday });
@@ -163,3 +164,18 @@ export const habitsQuery = (archived = false) =>
     queryKey: ['habits', archived],
     queryFn: async () => (await fetchHabits(archived)).habits,
   });
+
+const fetchCalendar = (from: string, to: string) =>
+  call(api.calendar.$get({ query: { from, to } }));
+export type CalendarRange = Awaited<ReturnType<typeof fetchCalendar>>;
+export type Occurrence = CalendarRange['events'][number];
+
+/** Event occurrences, dated tasks and focus minutes for [from, to]. */
+export const calendarQuery = (from: string, to: string) =>
+  queryOptions({ queryKey: ['calendar', from, to], queryFn: () => fetchCalendar(from, to) });
+
+const fetchEvent = (id: string) => call(api.events[':id'].$get({ param: { id } }));
+export type CalendarEvent = Awaited<ReturnType<typeof fetchEvent>>;
+
+export const eventQuery = (id: string) =>
+  queryOptions({ queryKey: ['event', id], queryFn: () => fetchEvent(id) });

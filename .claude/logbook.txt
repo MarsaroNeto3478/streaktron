@@ -185,3 +185,49 @@ O QUE FOI FEITO:
   - Criado .claude/referencias.md com artigos e livros de psicologia e de tecnologia ligados a
     cada parte do projeto.
 RESULTADO: commit e push a pedido do autor ("sim, faz o commit e push").
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Fase 4, parte 2: Calendário
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para o calendário".
+  No meio do trabalho, sobre o card "This week" do Today: "penso que o this week poderia ser
+  de 7 dias nao de 4".
+O QUE FOI FEITO:
+  - Eventos: únicos ou repetidos (todo dia, toda semana em dias escolhidos, a cada 2 semanas,
+    todo mês, todo ano; terminando numa data ou depois de N vezes), de dia inteiro ou com
+    horário, ligados a um projeto, com notas. "Only this one" remove só uma ocorrência.
+  - Contagem regressiva: um evento marcado aparece no Today ("In 9 days").
+  - Página Calendar com visão de mês e de semana, minutos de foco por dia, tarefas no dia
+    planejado e um painel "No date": arrastar uma tarefa para um dia agenda ela.
+  - Seção "Agenda" no Today com os eventos do dia e as contagens.
+DECISÕES: D35 (eventos em datas e horários locais, repetição num subconjunto testado do padrão
+  RRULE, arrastar muda a data planejada e nunca o prazo).
+RESULTADO: 246 testes. Verificado no navegador; o evento de teste foi apagado e a tarefa "alou"
+  voltou a ficar sem data.
+OBSERVAÇÕES: nas células estreitas do mês o horário escondia o título; corrigido. Sobre o
+  "This week": a meta semanal é uma configuração (Settings → Week), o padrão 4 é de propósito
+  (plan.md §5) — ver a resposta ao autor.
+PEDIDO (seguinte): "vou testar primeiro" — o autor vai testar o calendário antes do commit.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Testes do autor no calendário: três problemas
+-------------------------------------------------------------------------------------------------
+PEDIDO: "coloquei o alou em um dia mas quando fui tirar ele para colocar no 'no date' nao foi;
+  Eu não sei se faz sentido colocar em um dia que ja passou, acho interessante um alerta para o
+  usuário como tem certeza? esse dia ja passou; quando eu tirei os dias de alou, ele bugou, nao
+  consigo mexer".
+O QUE FOI FEITO:
+  - O painel "No date" agora aceita receber uma tarefa: soltar ali tira o dia planejado (se a
+    tarefa tiver prazo, ela continua no dia do prazo e um aviso explica isso).
+  - Soltar num dia que já passou abre a pergunta "That day has already passed", com três
+    opções: cancelar, planejar para hoje, ou confirmar aquele dia.
+  - Causa do "bugou": mudar a data pela ficha da tarefa não atualizava o calendário, então a
+    tarefa aparecia duas vezes (no dia antigo e no "No date") e o arrastar se confundia.
+    Agora mudar uma data atualiza o calendário e o Today, e cada tarefa aparece uma vez só.
+  - Achado no teste: o alvo era escolhido pela área do cartão arrastado, não pelo ponteiro;
+    um cartão largo caía no dia ao lado. Agora vale o dia embaixo do ponteiro.
+RESULTADO: verificado no navegador (soltar no "No date", aviso de dia passado com o dia certo,
+  limpar a data na ficha e arrastar de novo). A tarefa "alou" ficou sem data, como estava.
+OBSERVAÇÕES: três problemas achados só usando o app de verdade; nenhum aparecia nos testes
+  automáticos, que testam o servidor e as regras, não o arrastar na tela.
+PEDIDO (seguinte): "faz o commit, merge e push" — calendário commitado, mesclado no main e enviado.

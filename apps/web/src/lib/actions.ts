@@ -10,6 +10,8 @@ import type {
   AreaPatch,
   GoalCreate,
   GoalPatch,
+  EventCreate,
+  EventPatch,
   HabitCreate,
   HabitPatch,
   ProjectCreate,
@@ -111,6 +113,10 @@ export function taskActions(qc: QueryClient) {
         mergeTasks(qc, updated);
         if (patch.projectId !== undefined || patch.goalId !== undefined) {
           refreshAfterTaskWrite(qc, [task.projectId, updated.projectId]);
+        } else if (patch.dueDate !== undefined || patch.scheduledDate !== undefined) {
+          // Dates decide where it shows on the calendar and Today's list.
+          void qc.invalidateQueries({ queryKey: ['calendar'] });
+          void qc.invalidateQueries({ queryKey: ['today'] });
         }
         return updated;
       }),
@@ -631,4 +637,59 @@ export function habitActions(qc: QueryClient) {
 export function useHabitActions() {
   const qc = useQueryClient();
   return useMemo(() => habitActions(qc), [qc]);
+}
+
+// --- Calendar events -------------------------------------------------------------------------
+
+export function eventActions(qc: QueryClient) {
+  const refresh = (id?: string) => {
+    void qc.invalidateQueries({ queryKey: ['calendar'] });
+    void qc.invalidateQueries({ queryKey: ['today'] });
+    if (id) void qc.invalidateQueries({ queryKey: ['event', id] });
+  };
+  return {
+    create: (input: EventCreate) =>
+      attempt(async () => {
+        const e = await call(api.events.$post({ json: input }));
+        refresh();
+        toast.success(`Added “${e.title}”`);
+        return e;
+      }),
+
+    update: (id: string, patch: EventPatch) =>
+      attempt(async () => {
+        const e = await call(api.events[':id'].$patch({ param: { id }, json: patch }));
+        refresh(id);
+        return e;
+      }),
+
+    /** Remove one occurrence of a repeating event. */
+    skip: (id: string, title: string, date: string) =>
+      attempt(async () => {
+        await call(api.events[':id'].skip.$post({ param: { id }, json: { date } }));
+        refresh(id);
+        toast(`Removed “${title}” on ${date}`);
+      }),
+
+    remove: (id: string, title: string) =>
+      attempt(async () => {
+        await call(api.events[':id'].$delete({ param: { id } }));
+        refresh(id);
+        toast(`Deleted “${title}”`, {
+          action: {
+            label: 'Undo',
+            onClick: () =>
+              void attempt(async () => {
+                await call(api.events[':id'].restore.$post({ param: { id } }));
+                refresh(id);
+              }),
+          },
+        });
+      }),
+  };
+}
+
+export function useEventActions() {
+  const qc = useQueryClient();
+  return useMemo(() => eventActions(qc), [qc]);
 }
