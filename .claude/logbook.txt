@@ -231,3 +231,100 @@ RESULTADO: verificado no navegador (soltar no "No date", aviso de dia passado co
 OBSERVAÇÕES: três problemas achados só usando o app de verdade; nenhum aparecia nos testes
   automáticos, que testam o servidor e as regras, não o arrastar na tela.
 PEDIDO (seguinte): "faz o commit, merge e push" — calendário commitado, mesclado no main e enviado.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — O Streaky ganha forma
+-------------------------------------------------------------------------------------------------
+PEDIDO: o autor mandou um desenho com quatro formas do Streaky (chama, seta, interrogação e
+  exclamação) e as especificações: corpo "#FF4D2D", contorno "#B71C1C", pés de lenha
+  "#D4A373" com borda marrom, olhos grandes com brilho, sobrancelhas pequenas, boca aberta com
+  língua amarela "#FFD166". "faça uma branch para ele apenas dps faremos a branch das
+  perguntas tutoriais e etc".
+O QUE FOI FEITO: branch "streaky" com as quatro formas em SVG (apps/web/public/streaky/) e uma
+  folha com as quatro lado a lado para revisão. Adicionado um leve brilho no corpo e bochechas
+  rosadas para dar vida (fácil de tirar se o autor não quiser).
+DECISÕES: segue D31 (Streaky é guia, não pet).
+RESULTADO: SVGs conferidos no navegador. Sem commit ainda.
+
+-------------------------------------------------------------------------------------------------
+2026-11-04 — Como melhorar e animar o Streaky
+-------------------------------------------------------------------------------------------------
+PEDIDO: "como vc melhoraria esse personagem? teria como animar ele?"
+O QUE FOI FEITO: sugestões de melhoria (expressões por situação, uma forma por papel, chama
+  "acesa" ligada ao streak, silhueta simples para ícones pequenos) e uma demonstração animada
+  da chama (respira, pisca, brilho pulsando; para sozinha se o sistema pedir menos movimento):
+  apps/web/public/streaky/streaky-flame-animated.svg.
+OBSERVAÇÕES: animação feita só com CSS dentro do SVG, sem biblioteca; Lottie/Rive ficam como
+  opção se um dia quiserem animações desenhadas quadro a quadro.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Um prompt de desenho para o Streaky
+-------------------------------------------------------------------------------------------------
+PEDIDO: "irei te enviar um prompt feito para desenhar ele ta?"
+O QUE FOI FEITO: nada ainda; aguardando o prompt para redesenhar os SVGs a partir dele.
+  (continuação) O autor mandou o prompt: redesenhar o Streaky com mais personalidade, sem as
+  lenhas (a chama flutua sozinha), três pontas assimétricas com a principal curvada como um
+  topete, gradiente do amarelo-claro ao vermelho, contorno vinho, camada interna, brilhos e
+  sombra, pupilas grandes com dois brilhos, sobrancelhas assimétricas, sorriso travesso de lado
+  com um dentinho, dois bracinhos (um comemorando), faíscas e animação só em CSS respeitando
+  prefers-reduced-motion. Personalidade: animado, competitivo, um pouco convencido.
+O QUE FOI FEITO: novo SVG único apps/web/public/streaky/streaky.svg (viewBox 512x512, fundo
+  transparente, cores em variáveis CSS, grupos corpo, chama-interna, olhos, sobrancelhas, boca,
+  bracos, faiscas). Animações: flutuar, oscilar a chama, pulsar o miolo, piscar, o braço
+  comemorando balança, faíscas sobem e somem. Com menos movimento, fica parado.
+RESULTADO: conferido no navegador em 512, 160, 96 e 48 px, em fundo claro e escuro; continua
+  legível em 48 px. As quatro formas antigas (com lenha) continuam na pasta até serem refeitas
+  no estilo novo. Sem commit ainda.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Ajustes no novo Streaky
+-------------------------------------------------------------------------------------------------
+PEDIDO: "eu gostei da forma da chama, nao gostei dos olhos, do dente e das maos, retire as
+  bochechas, os braços e as bochecas".
+O QUE FOI FEITO: removidos os braços, as bochechas e o dentinho. Os olhos ficaram mais
+  simples: oval branco, pupila grande e um brilho só, sem pálpebra nem cílio. Mantidos a
+  forma da chama, o gradiente, as sobrancelhas, o sorriso de lado e as faíscas.
+RESULTADO: conferido no navegador. Sem commit ainda.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — As emoções do Streaky
+-------------------------------------------------------------------------------------------------
+PEDIDO: "so tem um problema no olho direito corrige ai pra mim, e tire os e faça as emoçoes".
+  Escolhidas por ele: tirar as faíscas; emoções feliz/convencido, comemorando, pensativo e
+  preocupado/sonolento. Depois: "pensativo faça ele como um ponto de interrogação, mude a forma
+  fisica dele, vai ser bem legal"; "só tire os chifres de diabo do ponto de interrogação, e tem
+  um bug no olho direito da primeira emoç"; "retire a cova".
+O QUE FOI FEITO: quatro SVGs com as mesmas cores, gradientes e animações:
+  - streaky.svg (feliz/convencido, o padrão): sem faíscas e sem covinha; a boca desceu.
+  - streaky-comemorando.svg: olhos fechados em "^ ^", boca bem aberta, ele dá pulinhos.
+  - streaky-preocupado.svg: chama mais baixa, olhos meio fechados, sobrancelhas preocupadas,
+    boquinha ondulada; anima mais devagar. Nunca bravo ou triste.
+  - streaky-pensativo.svg: o corpo vira um ponto de interrogação de fogo (bordas vermelhas,
+    miolo amarelo), olhando para cima, e o ponto é um Streaky pequenininho; ele balança.
+BUGS ACHADOS PELO AUTOR: o olho direito tinha um risco; era a covinha do canto da boca
+  encostando no olho. Duas pontas no alto do ponto de interrogação pareciam chifres de diabo
+  e foram tiradas.
+RESULTADO: conferido no navegador em 300 e 48 px. As formas antigas (com lenha) continuam na
+  pasta. Sem commit ainda.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Guardar as formas antigas e commitar
+-------------------------------------------------------------------------------------------------
+PEDIDO: "nao precisa apagar, deixe como forma de lembrança, apos isso pode commitar".
+O QUE FOI FEITO: as formas antigas com lenha ficaram na pasta como lembrança. plan.md e
+  progress.md atualizados e commit no branch "streaky" (sem push, que não foi pedido).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O Streaky em tamanho de ícone
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faça uma ultima cosia, faça uma versão dele pequena para uso como vc tinha dito".
+O QUE FOI FEITO: apps/web/public/streaky/streaky-icone.svg: só a silhueta da chama, o miolo
+  laranja e os olhos, com contorno mais grosso, cores chapadas e sem animação. O enquadramento
+  é quadrado e justo na chama, para ocupar o ícone todo.
+RESULTADO: conferido em 16, 24, 32, 48 e 128 px, em fundo claro e escuro; continua
+  reconhecível até 16 px, onde o desenho completo vira um borrão.
+  (continuação) "nao consegue fazer nem uma animação? so de estado, e o sexto ali pode remover".
+  O ícone ganhou uma animação discreta: a chama respira, o miolo tremula e ele pisca; fica
+  parado com prefers-reduced-motion. O "sexto" era só o desenho completo em 24 px que eu pus na
+  prévia para comparar, não um arquivo; saiu da prévia.
+  (continuação) "boa ficou muito bom pode commitar": commit do ícone no branch "streaky".
