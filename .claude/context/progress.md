@@ -131,3 +131,4 @@
 - Four emotions: `streaky.svg` (happy/cocky, the default), `streaky-comemorando.svg` (^ ^ eyes, big grin, hops), `streaky-preocupado.svg` (lower flame, half-shut eyes, wavy mouth, slower; never angry or sad), `streaky-pensativo.svg` (the body becomes a fiery question mark whose dot is a tiny Streaky; it rocks).
 - Bugs the user caught: a line inside the right eye (the dimple touching it) and two tips on the question mark that looked like devil horns. Both fixed.
 - The first log-footed shapes (`streaky-{flame,arrow,question,exclamation}.svg`, `streaky-sheet.svg`, `streaky-flame-animated.svg`) stay as a keepsake, by the user's choice.
+- **Icon version:** `streaky-icone.svg`, the flame silhouette, inner flame and eyes only (thicker outline, flat colours, square and tight framing), readable down to 16 px; a quiet idle loop (breathe, flicker, blink) that stops under `prefers-reduced-motion`. For the favicon, the PWA icon and small spots in the UI.

@@ -313,3 +313,18 @@ RESULTADO: conferido no navegador em 300 e 48 px. As formas antigas (com lenha) 
 PEDIDO: "nao precisa apagar, deixe como forma de lembrança, apos isso pode commitar".
 O QUE FOI FEITO: as formas antigas com lenha ficaram na pasta como lembrança. plan.md e
   progress.md atualizados e commit no branch "streaky" (sem push, que não foi pedido).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O Streaky em tamanho de ícone
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faça uma ultima cosia, faça uma versão dele pequena para uso como vc tinha dito".
+O QUE FOI FEITO: apps/web/public/streaky/streaky-icone.svg: só a silhueta da chama, o miolo
+  laranja e os olhos, com contorno mais grosso, cores chapadas e sem animação. O enquadramento
+  é quadrado e justo na chama, para ocupar o ícone todo.
+RESULTADO: conferido em 16, 24, 32, 48 e 128 px, em fundo claro e escuro; continua
+  reconhecível até 16 px, onde o desenho completo vira um borrão.
+  (continuação) "nao consegue fazer nem uma animação? so de estado, e o sexto ali pode remover".
+  O ícone ganhou uma animação discreta: a chama respira, o miolo tremula e ele pisca; fica
+  parado com prefers-reduced-motion. O "sexto" era só o desenho completo em 24 px que eu pus na
+  prévia para comparar, não um arquivo; saiu da prévia.
+  (continuação) "boa ficou muito bom pode commitar": commit do ícone no branch "streaky".

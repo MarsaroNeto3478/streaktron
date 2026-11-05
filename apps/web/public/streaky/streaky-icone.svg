@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="47 36 420 420" width="64" height="64" role="img" aria-labelledby="streaky-icone-titulo" id="streaky-icone">
+  <title id="streaky-icone-titulo">Streaky</title>
+  <!-- Versão pequena para ícones (16 a 48 px): só a silhueta da chama, o miolo e os olhos.
+       Sem gradiente fino, sombra ou sobrancelhas; contorno mais grosso.
+       Animação de estado, discreta: a chama "respira", o miolo tremula e ele pisca. -->
+  <style>
+    #streaky-icone {
+      --contorno: #6B1020;
+      --corpo: #FF4D2D;
+      --miolo: #FFB938;
+      --olho: #FFFFFF;
+      --pupila: #2A0710;
+    }
+    #corpo { transform-origin: 256px 446px; animation: respira 2.4s ease-in-out infinite; }
+    #chama-interna { transform-origin: 256px 418px; animation: tremula 1.2s ease-in-out infinite alternate; }
+    #olhos { transform-box: fill-box; transform-origin: center; animation: pisca 4.5s infinite; }
+    @keyframes respira { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, .96); } }
+    @keyframes tremula { from { transform: scale(1); } to { transform: scale(.94, 1.04); } }
+    @keyframes pisca { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+    @media (prefers-reduced-motion: reduce) {
+      #streaky-icone * { animation: none !important; }
+    }
+  </style>
+  <g id="corpo">
+    <path fill="var(--corpo)" stroke="var(--contorno)" stroke-width="22" stroke-linejoin="round"
+      d="M256 446 C178 446 120 396 120 324 C120 266 138 228 146 166 C164 190 182 200 202 206
+         C198 150 226 100 272 76 C294 64 316 58 338 64 C316 72 298 88 292 110
+         C286 132 296 150 312 166 C338 160 366 150 392 128 C384 170 394 214 394 270
+         C394 380 332 446 256 446 Z"/>
+  </g>
+  <path id="chama-interna" fill="var(--miolo)"
+    d="M256 418 C204 418 170 384 172 336 C174 300 192 274 206 250 C222 268 238 274 256 276
+       C300 276 346 296 346 344 C346 390 310 418 256 418 Z"/>
+  <g id="olhos">
+    <ellipse cx="212" cy="318" rx="38" ry="46" fill="var(--olho)" stroke="var(--contorno)" stroke-width="14"/>
+    <ellipse cx="302" cy="318" rx="38" ry="46" fill="var(--olho)" stroke="var(--contorno)" stroke-width="14"/>
+    <ellipse cx="220" cy="324" rx="20" ry="25" fill="var(--pupila)"/>
+    <ellipse cx="310" cy="324" rx="20" ry="25" fill="var(--pupila)"/>
+    <circle cx="228" cy="312" r="8" fill="#fff"/>
+    <circle cx="318" cy="312" r="8" fill="#fff"/>
+  </g>
+</svg>
