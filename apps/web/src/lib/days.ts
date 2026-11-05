@@ -1,7 +1,7 @@
 // Showing days. A `YYYY-MM-DD` day is formatted at noon UTC, read in UTC, so no local offset can
 // turn it into its neighbour.
 
-import { daysBetween } from '@streaktron/shared/time';
+import { daysBetween } from '@strekatron/shared/time';
 
 const long = new Intl.DateTimeFormat('en-US', {
   weekday: 'long',

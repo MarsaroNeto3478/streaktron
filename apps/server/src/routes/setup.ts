@@ -1,4 +1,4 @@
-import { setupSchema } from '@streaktron/shared/schemas';
+import { setupSchema } from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { validate } from '../http/validate';
 import { createOwner } from '../services/setup';

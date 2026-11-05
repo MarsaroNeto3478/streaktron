@@ -3,9 +3,9 @@
 //
 //   const me = await call(api.me.$get());
 
-import type { AppType } from '@streaktron/server';
-import type { GameEvents } from '@streaktron/shared/game';
-import { apiErrorSchema } from '@streaktron/shared/schemas';
+import type { AppType } from '@strekatron/server';
+import type { GameEvents } from '@strekatron/shared/game';
+import { apiErrorSchema } from '@strekatron/shared/schemas';
 import { hc, type ClientResponse } from 'hono/client';
 import type { SuccessStatusCode } from 'hono/utils/http-status';
 

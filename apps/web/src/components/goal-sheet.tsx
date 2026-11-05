@@ -1,7 +1,7 @@
 // A goal's details, in a side sheet opened by the `goal` search param from anywhere (a mention
 // chip, a backlink, the palette, the goals panel). Title and description save as you type.
 
-import type { RichDoc } from '@streaktron/shared/rich';
+import type { RichDoc } from '@strekatron/shared/rich';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Check, CircleOff, Pencil, RotateCcw, Target, Timer, Trash2 } from 'lucide-react';
@@ -25,6 +25,7 @@ import { EntityIcon } from './entity-icon';
 import { GoalForm } from './goals-panel';
 import { RichEditor } from './rich-editor';
 import { SheetBar, TitleField } from './sheet-parts';
+import { CommitmentProgress } from './commitment-progress';
 import { TaskRow } from './task-row';
 
 export function GoalSheet({ goalId }: { goalId: string | undefined }) {
@@ -179,6 +180,13 @@ function GoalEditor({ goal }: { goal: Goal }) {
               : '—'}
           </dd>
         </dl>
+
+        {goal.progress && goal.period && (
+          <section className="grid gap-1.5" aria-label="Progress">
+            <h3 className="text-sm font-medium text-muted-foreground">Focus on this project</h3>
+            <CommitmentProgress progress={goal.progress} period={goal.period} detailed />
+          </section>
+        )}
 
         <div className="grid gap-1.5">
           <Label className="text-muted-foreground">Description</Label>

@@ -1,6 +1,6 @@
 // One error shape for every failed request: `{ error: { code, message, details? } }`.
 
-import type { ApiErrorBody } from '@streaktron/shared/schemas';
+import type { ApiErrorBody } from '@strekatron/shared/schemas';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';

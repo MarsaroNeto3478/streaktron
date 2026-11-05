@@ -2,7 +2,7 @@
 // asks the challenge question first, answering (or skipping) opens the first step, and each step
 // done or skipped opens the next (game.ts `advanceTutorial`). The state lives on the settings row.
 
-import { GAME, isTutorialStep, type Challenge, type TutorialState } from '@streaktron/shared/game';
+import { GAME, isTutorialStep, type Challenge, type TutorialState } from '@strekatron/shared/game';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/client';
 import { quests, userSettings } from '../db/schema';

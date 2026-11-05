@@ -2,7 +2,7 @@
 // to mark (D39): events marked "count down" (D35), the due dates of active projects, and the next
 // few open tasks (their due date, or else the day they're planned for).
 
-import type { DateString } from '@streaktron/shared/time';
+import type { DateString } from '@strekatron/shared/time';
 import { and, asc, eq, gte, isNull, or, sql } from 'drizzle-orm';
 import { projects, tasks } from '../db/schema';
 import type { Conn } from './common';

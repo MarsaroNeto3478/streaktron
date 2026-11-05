@@ -1,6 +1,6 @@
 // Helpers every structure service uses: transactions, scoped lookups, ordering, rich text.
 
-import { textFromDoc, type RichDoc } from '@streaktron/shared/rich';
+import { textFromDoc, type RichDoc } from '@strekatron/shared/rich';
 import { and, eq, inArray, sql, type SQL } from 'drizzle-orm';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { Db } from '../db/client';

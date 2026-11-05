@@ -155,3 +155,14 @@
 - **Server:** `services/countdowns.ts`: `todayCountdowns` (countdown events plus active projects' due dates from today on) for `/api/today`, and `projectCountdowns` (the project's due date, its countdown events, its next three open task deadlines) in `GET /api/projects/:id`. Countdowns now share one shape `{ kind: event | project | task, id, title, date, projectId }`. 2 API tests (272 in all).
 - **Web:** `components/countdowns.tsx` (chips with an icon per kind, amber within 3 days, click opens the event, project or task) on Today's Agenda and under a project page's next action (D39).
 - **From the user's testing:** tasks join Today's countdowns (the next three, by due date or else planned day), and task rows show a due or planned date within 3 days in amber (`isSoon` in shared calendar). 274 tests.
+
+### 2026-11-05 — Phase 4: commitment goal progress (branch `phase-4-goals`)
+- **Shared:** `structure/goals.ts`: `goalPeriodOf` (user's week or calendar month), `goalMinutesFrom`, `commitmentProgress` (minutes, even-pace `expected`, `perDay`, pace on_track/behind/done/ended, streak of periods met, last four periods; cut by the goal's "Until"). 8 unit tests.
+- **Server:** `services/goals.ts`: every goal the API returns carries `progress` (commitments only), from `focus_completed` minutes per project and day. 1 API test (283 in all).
+- **Web:** `components/commitment-progress.tsx` (bar with an even-pace tick, pace line, streak; the last periods in detail) on the goals panel and the goal sheet; finishing a focus session refreshes project pages and goals.
+- **Not checked in the browser** (the pane is at the sign-in page).
+
+### 2026-11-05 — Renamed to Strekatron (D41)
+- Every tracked file: Streaktron → Strekatron, `@streaktron/*` → `@strekatron/*` (lockfile reinstalled). Repository URLs, the partner's repo and the folder path kept.
+- Database: role `streaktron` → `strekatron` (password `strekatron`), databases `strekatron` and `strekatron_test`, renamed in place; Compose project `name: strekatron`, container `strekatron-db`, data copied to the `strekatron_pgdata` volume (the old `streaktron_pgdata` kept). Local `.env` updated; backups renamed; a pre-rename dump in `data/backups/pre-rename/`.
+- 283 tests passing; the API and web restarted on the renamed database.

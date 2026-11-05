@@ -3,7 +3,7 @@
 // their ids, so mentions of them work again, and rebuilds the links their own descriptions make
 // (the purge job drops links whose source is gone).
 
-import { newId } from '@streaktron/shared/ids';
+import { newId } from '@strekatron/shared/ids';
 import { and, desc, eq, gt, inArray, isNull, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { areas, boardColumns, goals, projects, snapshots, tasks } from '../db/schema';

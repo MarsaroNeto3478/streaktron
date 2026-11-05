@@ -1,4 +1,4 @@
-import type { ProjectStatus } from '@streaktron/shared/structure';
+import type { ProjectStatus } from '@strekatron/shared/structure';
 import { createContext, useContext } from 'react';
 
 export type ChangeStatus = (

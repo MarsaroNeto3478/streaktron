@@ -20,15 +20,15 @@ import type {
   SettingsPatch,
   TaskCreate,
   TaskPatch,
-} from '@streaktron/shared/schemas';
+} from '@strekatron/shared/schemas';
 import {
   firstColumnOf,
   firstOpenColumn,
   placeAt,
   type ColumnCategory,
   type ProjectStatus,
-} from '@streaktron/shared/structure';
-import type { Challenge } from '@streaktron/shared/game';
+} from '@strekatron/shared/structure';
+import type { Challenge } from '@strekatron/shared/game';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
@@ -529,6 +529,9 @@ export function gameActions(qc: QueryClient) {
           mergeTasks(qc, res.task);
           refreshAfterTaskWrite(qc, [res.task.projectId]);
         }
+        // Commitment goals count focus minutes (D40).
+        void qc.invalidateQueries({ queryKey: ['project'] });
+        void qc.invalidateQueries({ queryKey: ['goal'] });
         return res;
       }),
 

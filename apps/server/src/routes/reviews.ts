@@ -1,6 +1,6 @@
 // The weekly review (D38).
 
-import { reviewCompleteSchema } from '@streaktron/shared/schemas';
+import { reviewCompleteSchema } from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { requireUser, type AuthedEnv } from '../http/session';
 import { validate } from '../http/validate';

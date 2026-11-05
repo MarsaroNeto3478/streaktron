@@ -1,5 +1,5 @@
 {
-  "name": "@streaktron/shared",
+  "name": "@strekatron/shared",
   "private": true,
   "type": "module",
   "exports": {

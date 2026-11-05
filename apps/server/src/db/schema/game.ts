@@ -1,8 +1,8 @@
 // Gamification (D8): the append-only activity log everything is computed from, focus sessions, and
 // quest instances. XP, levels and streaks are never stored; they're derived from `activity`.
 
-import type { ActivityPayloads, ActivityType } from '@streaktron/shared/game';
-import { ACTIVITY_TYPES, BOX_TIERS, QUEST_STATUSES, QUEST_TYPES } from '@streaktron/shared/game';
+import type { ActivityPayloads, ActivityType } from '@strekatron/shared/game';
+import { ACTIVITY_TYPES, BOX_TIERS, QUEST_STATUSES, QUEST_TYPES } from '@strekatron/shared/game';
 import { sql } from 'drizzle-orm';
 import {
   check,

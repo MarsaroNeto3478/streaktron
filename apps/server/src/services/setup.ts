@@ -1,6 +1,6 @@
 // First run: making the owner's account. The only way an account is made until sign-up opens.
 
-import type { SetupInput } from '@streaktron/shared/schemas';
+import type { SetupInput } from '@strekatron/shared/schemas';
 import { eq } from 'drizzle-orm';
 import { auth } from '../auth';
 import { db } from '../db/client';

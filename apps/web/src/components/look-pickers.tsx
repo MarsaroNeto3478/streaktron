@@ -1,4 +1,4 @@
-import { COLORS, ICONS, type ColorKey, type IconKey } from '@streaktron/shared/structure';
+import { COLORS, ICONS, type ColorKey, type IconKey } from '@strekatron/shared/structure';
 import { Check } from 'lucide-react';
 import { COLOR, ICON } from '@/lib/look';
 import { cn } from '@/lib/utils';

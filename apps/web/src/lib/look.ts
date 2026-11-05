@@ -1,7 +1,7 @@
 // How color and icon keys (shared/structure) look. Class names are spelled out so Tailwind sees
 // them.
 
-import type { ColorKey, IconKey } from '@streaktron/shared/structure';
+import type { ColorKey, IconKey } from '@strekatron/shared/structure';
 import {
   BookOpen,
   Brain,

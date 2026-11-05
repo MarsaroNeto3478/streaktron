@@ -1,7 +1,7 @@
 // Better Auth: email + password, sessions in Postgres. Sign-up is closed once the first user exists
 // (the owner); it opens behind invites in the social phase.
 
-import { newId, type IdKind } from '@streaktron/shared/ids';
+import { newId, type IdKind } from '@strekatron/shared/ids';
 import { APIError, betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '../db/client';
@@ -17,7 +17,7 @@ const ID_KIND: Record<string, IdKind> = {
 };
 
 export const auth = betterAuth({
-  appName: 'Streaktron',
+  appName: 'Strekatron',
   secret: env.BETTER_AUTH_SECRET,
   basePath: '/api/auth',
   // Opened from localhost, the Vite dev server and the tailnet: each origin is its own base URL.

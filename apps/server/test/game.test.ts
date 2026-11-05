@@ -1,5 +1,5 @@
-import { newId } from '@streaktron/shared/ids';
-import { addDays } from '@streaktron/shared/time';
+import { newId } from '@strekatron/shared/ids';
+import { addDays } from '@strekatron/shared/time';
 import { and, eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../src/db/client';

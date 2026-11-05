@@ -578,3 +578,58 @@ DECISÕES: D39 atualizada.
 RESULTADO: 274 testes passando (2 novos).
   (continuação) "faz o commit, merge e push": commit no branch "phase-4-countdowns", merge na
   main e push para MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Progresso das metas de compromisso
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para a proxima" (o próximo item da Fase 4: progresso das metas de compromisso a
+  partir dos minutos de foco, com ritmo).
+O QUE FOI FEITO:
+  - Uma meta de compromisso ("4 h de foco por semana") agora mostra o progresso: todo o foco
+    concluído no projeto dela na semana (ou no mês), numa barra com uma marca de onde o ritmo
+    constante estaria hoje.
+  - O ritmo em palavras: "On track", "Behind" (amarelo) ou "Target met" (verde), com quantos
+    minutos por dia faltam para bater a meta. Depois da data "Until", a meta aparece como
+    encerrada.
+  - Sequência de períodos cumpridos ("3 weeks in a row") e, na ficha da meta, as últimas quatro
+    semanas (ou meses), verdes quando cumpridas.
+  - Ao terminar uma sessão de foco, a página do projeto e a meta se atualizam.
+DECISÕES: D40 (seguindo o plano, §4.6): conta o foco de todo o projeto, não só das tarefas da meta;
+  bater a meta não dá XP extra (o foco já deu XP, D15); o tipo de quest de projeto vai usar esse
+  progresso depois.
+RESULTADO: 283 testes passando (9 novos). Não deu para ver no navegador: o painel está na tela de
+  login.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O projeto passa a se chamar Strekatron
+-------------------------------------------------------------------------------------------------
+PEDIDO: "renomeie para strekatron".
+  Pergunta ao autor: renomear só o nome do app ou o projeto inteiro? Resposta: "O projeto
+  inteiro".
+O QUE FOI FEITO:
+  - O nome mudou em tudo: a interface (título, logo, tela de cadastro, aba do foco), os pacotes
+    (@strekatron/shared, server e web), o Docker, o banco de dados, os backups e a documentação.
+  - Os dados reais foram preservados: antes de tudo, um backup completo do banco
+    (data/backups/pre-rename/). O usuário e os bancos do Postgres foram renomeados sem recriar
+    nada, e o volume do Docker foi copiado para um novo (strekatron_pgdata). O antigo continua
+    guardado como reserva.
+  - O Docker Compose agora tem um nome fixo ("strekatron"), então o volume não depende mais do
+    nome da pasta.
+  - Ficaram como estavam: a URL do repositório no GitHub (renomear por lá), o repositório do
+    parceiro (JVGdev/streaktron), a pasta local e as entradas antigas deste diário.
+DECISÕES: D41.
+RESULTADO: 283 testes passando; a API e o site voltaram a rodar no banco renomeado.
+OBSERVAÇÕES: Um processo antigo da API tinha ficado aberto, ainda conectado ao banco; foi
+  encerrado antes da troca.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Ligar o ambiente
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos ligar."
+O QUE FOI FEITO: O Docker Desktop estava desligado (a API tinha caído junto). Foi aberto, o banco
+  strekatron-db subiu com o volume novo (strekatron_pgdata, os 6 projetos intactos), e a API
+  (porta 3001) e o site (porta 5173) voltaram a rodar.
+RESULTADO: Tudo no ar.
+  (continuação) "faz o commit, merge e push": commit no branch "phase-4-goals" (progresso das
+  metas de compromisso e a troca de nome para Strekatron), merge na main e push para
+  MarsaroNeto3478/streaktron.

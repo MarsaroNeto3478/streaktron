@@ -202,15 +202,24 @@ The canonical record of what was decided, why, and what was considered instead. 
 
 ### D39 · Countdowns are automatic — accepted (2026-11-05, the user chose Claude's recommendation)
 - **Decision:** Nothing is marked by hand besides events (D35). **Today** counts down to events marked "count down" and to the due dates of **active** projects (not parked, not overdue). A **project page** counts down to its own due date, its countdown events and the next **three** due dates of its open tasks. Past dates don't show; a countdown within 3 days turns amber; clicking one opens the event, project or task. One component (`components/countdowns.tsx`) draws both.
-- **Changed the same day (the user's call):** tasks count down on Today too, with the others: the next **three** open tasks (inbox or active projects), by their due date or, without one, the day they're planned for; a project page uses the same date for its tasks. And a task's due or planned date in task rows turns **amber** within 3 days, like the countdowns (`isSoon`, `SOON_DAYS` in `@streaktron/shared/calendar`); an overdue date stays red.
+- **Changed the same day (the user's call):** tasks count down on Today too, with the others: the next **three** open tasks (inbox or active projects), by their due date or, without one, the day they're planned for; a project page uses the same date for its tasks. And a task's due or planned date in task rows turns **amber** within 3 days, like the countdowns (`isSoon`, `SOON_DAYS` in `@strekatron/shared/calendar`); an overdue date stays red.
 - **Why:** Deadlines already live on projects and tasks; asking to mark them again would be busywork. Three tasks keep Today short.
 - **Alternatives:** A "count down" flag on tasks and projects too; automatic with a way to hide one.
+
+### D40 · Commitment goal progress and pace — accepted (2026-11-05, Claude, following plan §4.6)
+- **Decision:** A commitment goal counts **all finished focus on its project** (from the `focus_completed` log, by the day it counted for) in the current period: the user's week (their week start) or the calendar month, cut short by the goal's "Until" date. It shows a bar with a tick where an even pace would be by today, and the **pace**: *on track* (at or above the even pace), *behind* (amber, "Behind · 25 min a day to go"), *target met* (green) or *ended* (after "Until", the last period stays on show). "Minutes a day to go" is what's left over the days left, today included, rounded up. It also counts the **streak** of periods met (the finished ones before this, plus this one once met) and, in the goal sheet, the last four periods. Periods that ended before the goal was created don't count. Two commitment goals on one project share its focus. **No XP or quest** for hitting the target: the focus already earned its XP (D15); the project quest type (plan §5) will use this progress later. Pure rule in `packages/shared/structure/goals.ts`; the API sends `progress` with each commitment goal.
+- **Why:** It's the plan's spec (§4.6: "progress bar from focus minutes on the project in the current period; pace"). Counting the whole project avoids asking to tie each session to a goal.
+- **Alternatives:** Only focus on the goal's own tasks; XP or a box when the target is met.
+
+### D41 · The project is renamed Strekatron — accepted (2026-11-05, the user's call)
+- **Decision:** This repo's app is now **Strekatron** everywhere: the UI, the packages (`@strekatron/shared`, `/server`, `/web`), the Docker Compose project (`name: strekatron`, so its volume `strekatron_pgdata` no longer depends on the folder's name), the database, its role and the test database (`strekatron`, `strekatron_test`), the backup files (`strekatron-YYYY-MM-DD.dump`) and the docs. The live data moved over intact: the role and databases were renamed in place, the old volume `streaktron_pgdata` was copied to the new one and kept as a fallback, and a dump taken just before is in `data/backups/pre-rename/`. Not renamed: the GitHub repository (the user renames it on GitHub; the remote follows), the partner's `JVGdev/streaktron`, the local folder, and the past entries of the logbook and progress log (they're a record).
+- **Why:** The user's choice of name for their version of the two parallel apps.
 
 ---
 
 ## Rejected ideas (don't propose again)
 
-- **Quire integration** (Quire writing days counting as Streaktron activity) — rejected by the user, 2026-11-03.
+- **Quire integration** (Quire writing days counting as Strekatron activity) — rejected by the user, 2026-11-03.
 - **Familiar / pet companion** that grows with level and reacts (from Quire) — rejected by the user, 2026-11-03.
 - **Spaced repetition / Anki-style flashcards inside the app** — left out by the user, 2026-11-04: conflicts with D6 (no study-specific features) and would be a product of its own; Anki already exists.
 - **All data in Firestore** — rejected by Claude's analysis (breaks the relational model); superseded anyway by D14.

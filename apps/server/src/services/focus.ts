@@ -2,8 +2,8 @@
 // pauses) so it survives reloads and devices. Finishing credits the minutes actually worked, at most
 // the planned length (a forgotten timer doesn't keep counting), and logs `focus_completed`.
 
-import type { FocusFinish, FocusStart } from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
+import type { FocusFinish, FocusStart } from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { db } from '../db/client';
 import { focusSessions, projects, tasks } from '../db/schema';

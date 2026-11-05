@@ -2,7 +2,7 @@
 // short, quiet toast says what changed (plan.md §4.5: immediate, subtle feedback). Also the chime
 // for focus sessions (Web Audio, no files).
 
-import { TUTORIAL_TITLES, type DetailPart, type GameEvents } from '@streaktron/shared/game';
+import { TUTORIAL_TITLES, type DetailPart, type GameEvents } from '@strekatron/shared/game';
 import type { QueryClient } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { toast } from 'sonner';

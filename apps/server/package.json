@@ -1,5 +1,5 @@
 {
-  "name": "@streaktron/server",
+  "name": "@strekatron/server",
   "private": true,
   "type": "module",
   "exports": {
@@ -17,7 +17,7 @@
   "dependencies": {
     "@hono/node-server": "^2.1.6",
     "@hono/zod-validator": "^0.9.1",
-    "@streaktron/shared": "workspace:*",
+    "@strekatron/shared": "workspace:*",
     "better-auth": "^1.7.15",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.16",

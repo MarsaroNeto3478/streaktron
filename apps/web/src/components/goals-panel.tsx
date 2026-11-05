@@ -1,8 +1,7 @@
 // A project's goals: outcomes (with an optional deadline) and commitments (focus minutes per
-// week or month). Commitment progress needs focus sessions (Phase 3); until then it shows the
-// target only.
+// week or month). A commitment shows its progress from focus on the project and its pace (D40).
 
-import type { GoalKind, GoalPeriod, GoalStatus } from '@streaktron/shared/structure';
+import type { GoalKind, GoalPeriod, GoalStatus } from '@strekatron/shared/structure';
 import {
   Check,
   CircleOff,
@@ -36,9 +35,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOpenSheet } from '@/hooks/use-open-task';
 import { useStructureActions } from '@/lib/actions';
-import { countdown, formatMinutes } from '@/lib/days';
+import { countdown } from '@/lib/days';
 import type { Goal, Task } from '@/lib/queries';
 import { cn } from '@/lib/utils';
+import { CommitmentProgress } from './commitment-progress';
 
 export function GoalsPanel({
   projectId,
@@ -139,12 +139,6 @@ function GoalRow({
           )}
         </div>
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {goal.kind === 'commitment' && goal.targetMinutes && goal.period && (
-            <span title="Progress is tracked from focus sessions, which arrive in the MVP">
-              {formatMinutes(goal.targetMinutes)} of focus a {goal.period} · tracking starts with
-              focus sessions
-            </span>
-          )}
           {goal.dueDate && goal.status === 'open' && (
             <span className={cn(goal.dueDate < today && 'text-destructive')}>
               {countdown(goal.dueDate, today)}
@@ -156,6 +150,11 @@ function GoalRow({
             </span>
           )}
         </div>
+        {goal.progress && goal.period && goal.status === 'open' && (
+          <div className="mt-2 max-w-md">
+            <CommitmentProgress progress={goal.progress} period={goal.period} />
+          </div>
+        )}
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

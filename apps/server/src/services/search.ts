@@ -6,7 +6,7 @@
 // (titles weigh more than descriptions), then similarity; open things before closed ones, shorter
 // titles, recent ones. An empty query lists recently changed open things (the picker's first view).
 
-import { SNIPPET_CHARS, snippetAround, type LinkableKind } from '@streaktron/shared/rich';
+import { SNIPPET_CHARS, snippetAround, type LinkableKind } from '@strekatron/shared/rich';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { ENTITY_COLUMNS, entitiesSql, toRef, type EntityRef, type EntityRow } from './entities';

@@ -1,4 +1,4 @@
-import { PROJECT_TRANSITIONS, type ProjectStatus } from '@streaktron/shared/structure';
+import { PROJECT_TRANSITIONS, type ProjectStatus } from '@strekatron/shared/structure';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import {
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { z } from 'zod';
-import type { RichDoc } from '@streaktron/shared/rich';
+import type { RichDoc } from '@strekatron/shared/rich';
 import { Backlinks } from '@/components/backlinks';
 import { Board } from '@/components/board';
 import { Countdowns } from '@/components/countdowns';

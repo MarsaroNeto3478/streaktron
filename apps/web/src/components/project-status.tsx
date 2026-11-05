@@ -1,7 +1,7 @@
 // Changing a project's status, with the hard active-project limit (D5): when activating would go
 // over it, a dialog lists the active projects and parks the one you pick in the same step.
 
-import type { ColorKey, IconKey } from '@streaktron/shared/structure';
+import type { ColorKey, IconKey } from '@strekatron/shared/structure';
 import { Link } from '@tanstack/react-router';
 import { useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';

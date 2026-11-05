@@ -1,4 +1,4 @@
-import { setupSchema } from '@streaktron/shared/schemas';
+import { setupSchema } from '@strekatron/shared/schemas';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
@@ -123,7 +123,7 @@ function SetupForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Set up Streaktron</CardTitle>
+        <CardTitle>Set up Strekatron</CardTitle>
         <CardDescription>Create the owner account. Sign-up closes once it exists.</CardDescription>
       </CardHeader>
       <CardContent>

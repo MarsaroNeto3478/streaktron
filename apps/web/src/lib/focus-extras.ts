@@ -34,7 +34,7 @@ export interface Break {
   minutes: number;
 }
 
-const BREAK_KEY = 'streaktron.break';
+const BREAK_KEY = 'strekatron.break';
 
 function readBreak(): Break | null {
   try {
@@ -117,7 +117,7 @@ export function useTabClock(
   useEffect(() => {
     if (text === undefined || !kind) return;
     const before = document.title;
-    document.title = `${kind === 'focus' ? '⏱' : '☕'} ${text} · Streaktron`;
+    document.title = `${kind === 'focus' ? '⏱' : '☕'} ${text} · Strekatron`;
     return () => {
       document.title = before;
     };
@@ -156,7 +156,7 @@ export async function openMiniClock() {
   const api = pip();
   if (!api || miniStore.get()) return;
   const win = await api.requestWindow({ width: 240, height: 120 });
-  win.document.title = 'Streaktron focus';
+  win.document.title = 'Strekatron focus';
   win.document.body.style.margin = '0';
   win.addEventListener('pagehide', () => miniStore.set(null));
   miniStore.set(win);

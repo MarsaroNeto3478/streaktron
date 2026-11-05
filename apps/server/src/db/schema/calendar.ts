@@ -22,7 +22,7 @@ export const calendarEvents = pgTable(
     /** "HH:MM"; null = all day. */
     startTime: text(),
     endTime: text(),
-    /** RFC 5545 RRULE value (the subset in `@streaktron/shared/calendar`). */
+    /** RFC 5545 RRULE value (the subset in `@strekatron/shared/calendar`). */
     recurrence: text(),
     /** Occurrences removed from a repeating event (EXDATE). */
     skipDates: jsonb().$type<string[]>().notNull().default([]),

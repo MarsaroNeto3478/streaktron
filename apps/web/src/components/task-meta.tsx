@@ -1,4 +1,4 @@
-import { isSoon } from '@streaktron/shared/calendar';
+import { isSoon } from '@strekatron/shared/calendar';
 import { CalendarClock, CalendarDays, ListChecks, Target } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatDayShort } from '@/lib/days';

@@ -1,29 +1,32 @@
 # Dev: `docker compose up -d --wait db` (or `pnpm db:up`), then `pnpm dev`.
 # Daily use over Tailscale: `docker compose up -d --build`, then `tailscale serve --bg 3001`.
 
+# A fixed project name, so the volume (`strekatron_pgdata`) doesn't depend on the folder's name.
+name: strekatron
+
 services:
   db:
     image: postgres:17
-    container_name: streaktron-db
+    container_name: strekatron-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: streaktron
-      POSTGRES_PASSWORD: streaktron
-      POSTGRES_DB: streaktron
+      POSTGRES_USER: strekatron
+      POSTGRES_PASSWORD: strekatron
+      POSTGRES_DB: strekatron
     ports:
       - '127.0.0.1:${DB_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/db-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U streaktron -d streaktron']
+      test: ['CMD-SHELL', 'pg_isready -U strekatron -d strekatron']
       interval: 2s
       timeout: 3s
       retries: 30
 
   app:
     build: .
-    container_name: streaktron-app
+    container_name: strekatron-app
     restart: unless-stopped
     depends_on:
       db:
@@ -32,7 +35,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3001
-      DATABASE_URL: postgres://streaktron:streaktron@db:5432/streaktron
+      DATABASE_URL: postgres://strekatron:strekatron@db:5432/strekatron
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
       APP_ORIGINS: ${APP_ORIGINS:-http://localhost:3001}
       DATA_DIR: /app/data

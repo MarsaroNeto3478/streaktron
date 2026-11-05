@@ -2,7 +2,7 @@
 // plain explanation, how its progress counts, and a button that goes to the right place (the
 // task, the project, the inbox, the habits, or the focus timer).
 
-import { PART_LABELS, QUEST_TYPE_LABELS, type DetailPart } from '@streaktron/shared/game';
+import { PART_LABELS, QUEST_TYPE_LABELS, type DetailPart } from '@strekatron/shared/game';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowRight, Check, Dices, Flame, Gift, Timer } from 'lucide-react';
 import { useState, type ReactNode } from 'react';

@@ -4,7 +4,7 @@ import { CalendarDays, ListTodo, Plus, Repeat, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
 import { HabitRow } from '@/components/habits';
-import { GAME } from '@streaktron/shared/game';
+import { GAME } from '@strekatron/shared/game';
 import { QuestBoard } from '@/components/quest-board';
 import { Countdowns } from '@/components/countdowns';
 import { TaskRow } from '@/components/task-row';

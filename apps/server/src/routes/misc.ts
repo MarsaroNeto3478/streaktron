@@ -7,7 +7,7 @@ import {
   resolveQuerySchema,
   searchQuerySchema,
   settingsPatchSchema,
-} from '@streaktron/shared/schemas';
+} from '@strekatron/shared/schemas';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';

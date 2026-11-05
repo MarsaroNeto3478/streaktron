@@ -1,4 +1,4 @@
-# Streaktron — Development Plan
+# Strekatron — Development Plan
 
 > A web app that builds consistency for studies and personal projects with light gamification (quests, streaks, XP) and a cosmetic reward layer (loot boxes, collectibles, a bedroom) on top of real project management (areas, projects, goals, tasks, Kanban, calendar). Built for one user first, designed to become a product.
 
@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D40 | Commitment goals: focus on the project this week or month, a bar with the even pace, minutes a day to go, a streak of periods met; no extra XP |
 | D39 | Countdowns are automatic: Today shows countdown events and active projects' due dates; a project page adds its next three task deadlines |
 | D38 | Weekly review: six steps at `/review`, a reminder at the end of the week, once a week, 50 XP, makes the day active, a `review` quest each week |
 | D37 | Habit XP can't be farmed: 0 XP on a habit's first day, at most 50 XP a day from habits; quests don't make an active day by themselves |
@@ -364,7 +365,7 @@ Svelte 5 would be a perfectly good web framework; the deciding factors are Postg
 ### Repository layout
 
 ```
-streaktron/
+strekatron/
 ├── apps/
 │   ├── web/                # React + Vite SPA
 │   │   └── src/
@@ -531,7 +532,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Calendar view: month + week, showing events, task due/scheduled dates, focus minutes per day; drag a task onto a day (or from "No date") to schedule it (D35)
 - [x] Countdowns: pin events/due dates; countdown widgets on Today and project page (D35, D39: automatic; Today shows countdown events, active projects' due dates and the next three tasks; a project page its due date, its countdown events and its next three tasks; task dates turn amber within 3 days)
 - [x] Weekly review flow (summary, stalled projects, inbox triage, next actions, active/parked swap, reflection) (D38)
-- [ ] Commitment goal progress from focus minutes, with pace
+- [x] Commitment goal progress from focus minutes, with pace (D40: all focus on the project this week or month, on track / behind / met, minutes a day to go, a streak of periods met)
 - [ ] Weekly quests fully wired (touch all active projects, weekly target)
 - [ ] **Review** quest type (weekly review, revisit a parked project) — *the weekly review quest is done (D38); "revisit a parked project" is still to do*
 - [ ] **Project** quest type generated from goals and deadlines
@@ -614,11 +615,11 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 
 ## 11. Lessons and reuse from Quire
 
-Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and writing app with XP, levels, streaks, daily quests, mentions, search, backups and Google Calendar sync, plus several review documents of what went wrong. Not integrated with Streaktron (rejected, §2), but its code and lessons are reused.
+Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and writing app with XP, levels, streaks, daily quests, mentions, search, backups and Google Calendar sync, plus several review documents of what went wrong. Not integrated with Strekatron (rejected, §2), but its code and lessons are reused.
 
 ### Code worth porting (framework-agnostic TypeScript)
 
-| Quire | Streaktron use |
+| Quire | Strekatron use |
 |---|---|
 | `shared/quests.ts`: `questWeight`, `pickWeighted`, `questWords` (median-based sizing), reroll and bonus flow | Quest engine selection and sizing (§5) |
 | `server/activity.ts`: "marks" (count only growth past the highest value reached), `quietly()` for imports, game events on responses | Earn-once rule (D15), imports that don't count as work, immediate feedback |

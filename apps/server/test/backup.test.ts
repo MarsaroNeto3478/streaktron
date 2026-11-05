@@ -19,7 +19,7 @@ describe('filesToPrune', () => {
   });
 
   it('leaves other files alone', () => {
-    expect(filesToPrune(['notes.txt', 'streaktron-2026-10-01.dump.partial', ...days], 15)).toEqual([
+    expect(filesToPrune(['notes.txt', 'strekatron-2026-10-01.dump.partial', ...days], 15)).toEqual([
       backupFileName('2026-10-01'),
     ]);
   });
@@ -40,7 +40,7 @@ describe('runBackup', () => {
     const first = await runBackup();
     expect(first.status).toBe('created');
     const file = first.file;
-    expect(file).toMatch(/streaktron-\d{4}-\d{2}-\d{2}\.dump$/);
+    expect(file).toMatch(/strekatron-\d{4}-\d{2}-\d{2}\.dump$/);
     expect(await readFile(file, 'utf8')).toContain('--format=custom');
 
     const again = await runBackup();

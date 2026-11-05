@@ -1,4 +1,4 @@
-import { userDay } from '@streaktron/shared/time';
+import { userDay } from '@strekatron/shared/time';
 import { Hono } from 'hono';
 import { HttpError } from '../http/errors';
 import { requireUser, type AuthedEnv } from '../http/session';

@@ -2,7 +2,7 @@
 // wall-clock and dates are the user's days (D35); repetition is a small set of choices that maps
 // onto an RRULE on the server.
 
-import { describeRecurrence, type Freq, type Recurrence } from '@streaktron/shared/calendar';
+import { describeRecurrence, type Freq, type Recurrence } from '@strekatron/shared/calendar';
 import { useQuery } from '@tanstack/react-query';
 import { CalendarX, Trash2 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';

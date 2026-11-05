@@ -23,7 +23,7 @@ const schema = z.object({
   /** Built web app to serve; empty to serve none (dev, where Vite serves it). */
   STATIC_DIR: z.string().optional(),
   DATA_DIR: z.string().default(DEFAULT_DATA_DIR),
-  /** Command that runs pg_dump (`docker exec -i streaktron-db pg_dump` when it isn't installed). */
+  /** Command that runs pg_dump (`docker exec -i strekatron-db pg_dump` when it isn't installed). */
   PG_DUMP: z.string().default('pg_dump'),
   BACKUP_KEEP: z.coerce.number().int().min(1).default(14),
   JOBS_ENABLED: z

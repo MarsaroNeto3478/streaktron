@@ -1,8 +1,8 @@
 // The area and project dialogs (new and edit), mounted once in the shell and opened through
 // ui-store, so the palette, sidebar and pages all open the same ones.
 
-import type { RichDoc } from '@streaktron/shared/rich';
-import type { ColorKey, IconKey } from '@streaktron/shared/structure';
+import type { RichDoc } from '@strekatron/shared/rich';
+import type { ColorKey, IconKey } from '@strekatron/shared/structure';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useState, type FormEvent, type ReactNode } from 'react';

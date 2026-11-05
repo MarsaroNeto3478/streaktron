@@ -1,5 +1,5 @@
 // Habits (Phase 4): CRUD, check-ins and the views Today and the Habits page show. Schedules and
-// streaks are pure rules in `@streaktron/shared/habits`; this file loads the dates and asks them.
+// streaks are pure rules in `@strekatron/shared/habits`; this file loads the dates and asks them.
 //
 // A check-in writes a `habit_checked` activity (10 XP once per habit and day, an active day).
 // Unchecking deletes the row only: the activity stays, so nothing is taken away (D15) and checking
@@ -14,10 +14,10 @@ import {
   recentDays,
   weekCount,
   type HabitStreak,
-} from '@streaktron/shared/habits';
-import { newId } from '@streaktron/shared/ids';
-import type { HabitCheckin, HabitCreate, HabitPatch } from '@streaktron/shared/schemas';
-import { addDays, type DateString } from '@streaktron/shared/time';
+} from '@strekatron/shared/habits';
+import { newId } from '@strekatron/shared/ids';
+import type { HabitCheckin, HabitCreate, HabitPatch } from '@strekatron/shared/schemas';
+import { addDays, type DateString } from '@strekatron/shared/time';
 import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '../db/client';
 import { habitCheckins, habits, userSettings } from '../db/schema';

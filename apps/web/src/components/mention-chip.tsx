@@ -2,7 +2,7 @@
 // Hovering previews it; clicking opens it. A target deleted for good (or soft-deleted) shows as a
 // broken link with the label it had when it was mentioned.
 
-import { linkableKind } from '@streaktron/shared/rich';
+import { linkableKind } from '@strekatron/shared/rich';
 import { useQuery } from '@tanstack/react-query';
 import { Unlink } from 'lucide-react';
 import { HoverCard } from 'radix-ui';

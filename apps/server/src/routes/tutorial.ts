@@ -1,6 +1,6 @@
 // Streaky's tour and question (D31, D32).
 
-import { challengeAnswerSchema } from '@streaktron/shared/schemas';
+import { challengeAnswerSchema } from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { requireUser, type AuthedEnv } from '../http/session';
 import { validate } from '../http/validate';

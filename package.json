@@ -1,5 +1,5 @@
 {
-  "name": "streaktron",
+  "name": "strekatron",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.24.0",
@@ -7,9 +7,9 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter @streaktron/server --filter @streaktron/web dev",
-    "build": "pnpm --filter @streaktron/web build && pnpm --filter @streaktron/server build",
-    "start": "pnpm --filter @streaktron/server start",
+    "dev": "pnpm --parallel --filter @strekatron/server --filter @strekatron/web dev",
+    "build": "pnpm --filter @strekatron/web build && pnpm --filter @strekatron/server build",
+    "start": "pnpm --filter @strekatron/server start",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "pnpm -r typecheck",
@@ -17,9 +17,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d --wait db",
-    "db:generate": "pnpm --filter @streaktron/server db:generate",
-    "db:migrate": "pnpm --filter @streaktron/server db:migrate",
-    "db:seed": "pnpm --filter @streaktron/server db:seed"
+    "db:generate": "pnpm --filter @strekatron/server db:generate",
+    "db:migrate": "pnpm --filter @strekatron/server db:migrate",
+    "db:seed": "pnpm --filter @strekatron/server db:seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

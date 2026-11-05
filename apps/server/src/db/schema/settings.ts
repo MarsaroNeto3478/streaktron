@@ -1,5 +1,5 @@
-import { CHALLENGES, TUTORIAL_STATES, type TutorialState } from '@streaktron/shared/game';
-import { DEFAULT_USER_SETTINGS, type UserSettings } from '@streaktron/shared/schemas';
+import { CHALLENGES, TUTORIAL_STATES, type TutorialState } from '@strekatron/shared/game';
+import { DEFAULT_USER_SETTINGS, type UserSettings } from '@strekatron/shared/schemas';
 import { sql } from 'drizzle-orm';
 import { check, jsonb, pgTable, smallint, text, timestamp } from 'drizzle-orm/pg-core';
 import { users } from './auth';

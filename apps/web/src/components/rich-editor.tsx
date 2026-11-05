@@ -7,7 +7,7 @@
 // `value` is read once, at mount: the editor owns the document after that, and `onChange` reports
 // every edit (null when empty). Remount it (a `key`) to load another document.
 
-import type { RichDoc } from '@streaktron/shared/rich';
+import type { RichDoc } from '@strekatron/shared/rich';
 import { Mention, type MentionNodeAttrs } from '@tiptap/extension-mention';
 import { Placeholder } from '@tiptap/extensions';
 import {

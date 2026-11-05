@@ -1,14 +1,14 @@
 // Board columns. A board always keeps a done column and an open one (boardProblem); a column's
 // category decides whether its tasks are done, so changing it completes or reopens them.
 
-import type { ColumnCreate, ColumnPatch } from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
+import type { ColumnCreate, ColumnPatch } from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
 import {
   boardProblem,
   checkedOrder,
   firstColumnOf,
   firstOpenColumn,
-} from '@streaktron/shared/structure';
+} from '@strekatron/shared/structure';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { db } from '../db/client';
 import { boardColumns, tasks } from '../db/schema';

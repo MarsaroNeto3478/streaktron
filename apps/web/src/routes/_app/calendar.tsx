@@ -17,8 +17,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import { countdownLabel } from '@streaktron/shared/calendar';
-import { addDays, startOfWeek } from '@streaktron/shared/time';
+import { countdownLabel } from '@strekatron/shared/calendar';
+import { addDays, startOfWeek } from '@strekatron/shared/time';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {

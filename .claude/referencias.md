@@ -1,6 +1,6 @@
 # Referências para o TCC
 
-Artigos e livros por trás das ideias do Streaktron, cada um ligado à parte do projeto que ele
+Artigos e livros por trás das ideias do Strekatron, cada um ligado à parte do projeto que ele
 sustenta. Antes de citar, **confira cada referência no Google Scholar ou na base da sua
 faculdade**: a lista foi montada de memória pelo Claude, e ano, revista ou página podem ter
 algum detalhe errado. Prefira os artigos aos livros populares; os livros servem para contexto.
@@ -10,7 +10,7 @@ algum detalhe errado. Prefira os artigos aos livros populares; os livros servem 
 ## 1. Psicologia: motivação e gamificação
 
 **Gamificação (o que é, se funciona)**
-- Deterding, S.; Dixon, D.; Khaled, R.; Nacke, L. (2011). *From game design elements to gamefulness: defining "gamification".* Proceedings of the 15th International Academic MindTrek Conference. — A definição mais citada de gamificação. Base para dizer o que o Streaktron é.
+- Deterding, S.; Dixon, D.; Khaled, R.; Nacke, L. (2011). *From game design elements to gamefulness: defining "gamification".* Proceedings of the 15th International Academic MindTrek Conference. — A definição mais citada de gamificação. Base para dizer o que o Strekatron é.
 - Hamari, J.; Koivisto, J.; Sarsa, H. (2014). *Does gamification work? A literature review of empirical studies on gamification.* 47th Hawaii International Conference on System Sciences (HICSS). — Revisão: os efeitos são positivos, mas dependem do contexto e do usuário. Bom para a seção de "trabalhos relacionados".
 - Sailer, M.; Hense, J. U.; Mayr, S. K.; Mandl, H. (2017). *How gamification motivates: An experimental study of the effects of specific game design elements on psychological need satisfaction.* Computers in Human Behavior, 69. — Liga elementos específicos (pontos, níveis, quests) às necessidades psicológicas. Ótimo para justificar XP, níveis e quests.
 

@@ -5,7 +5,7 @@ import {
   focusFinishSchema,
   focusStartSchema,
   idOf,
-} from '@streaktron/shared/schemas';
+} from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/client';

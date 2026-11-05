@@ -7,7 +7,7 @@ export function Logo({ className }: { className?: string }) {
         <rect width="32" height="32" rx="8" className="fill-foreground" />
         <path d="M17.5 4 9 18h6l-1.5 10L23 13h-6.2z" className="fill-primary" />
       </svg>
-      Streaktron
+      Strekatron
     </span>
   );
 }

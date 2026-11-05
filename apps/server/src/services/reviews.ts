@@ -9,10 +9,10 @@ import {
   reviewWeek,
   xpCredits,
   type Activity,
-} from '@streaktron/shared/game';
-import { newId } from '@streaktron/shared/ids';
-import type { ReviewComplete } from '@streaktron/shared/schemas';
-import type { DateString } from '@streaktron/shared/time';
+} from '@strekatron/shared/game';
+import { newId } from '@strekatron/shared/ids';
+import type { ReviewComplete } from '@strekatron/shared/schemas';
+import type { DateString } from '@strekatron/shared/time';
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db/client';
 import { projects, userSettings, weeklyReviews, type ReviewSummary } from '../db/schema';
