@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D37 | Habit XP can't be farmed: 0 XP on a habit's first day, at most 50 XP a day from habits; quests don't make an active day by themselves |
 | D36 | Streaky's tour is a `tutorial` quest chain on Today (invitation, question, five steps, rewards once per account); the challenge answer tunes quick quests, Today's size, the comeback, the active limit or daily variety |
 | D35 | Calendar: events on local dates and wall-clock times, a tested RRULE subset with skips, countdown flag, dragging a task sets its scheduled date |
 | D34 | Habits: weekday or N-a-week schedules, own streaks, 10 XP once per habit-day, a forgotten check-in allowed for yesterday but counted today |
@@ -247,7 +248,7 @@ All values live in one config module in `packages/shared/game` and are applied b
 
 ### Active day & streaks
 
-- **Active day**: at least one of — a completed focus session ≥ 10 min, a completed task, a habit check-in.
+- **Active day**: at least one of — a completed focus session ≥ 10 min, a completed task, a habit check-in. Finishing a quest or creating things doesn't count by itself (the user's call, D37: if it takes very little, nobody improves); the app says so on the streak card, in the quest toast and in quest details.
 - **The user's day** comes from their stored timezone and day-start hour (D17). Changing the timezone is allowed but rate-limited (e.g. once a week) so it can't be used to farm streaks.
 - **Daily streak**: consecutive active days.
   - Earn **1 streak freeze** per 7 consecutive active days; bank at most 2.

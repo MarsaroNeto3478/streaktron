@@ -35,7 +35,11 @@ export interface ActivityPayloads {
   /** `replay`: a tutorial step taken again, which earns no XP and (Phase 5) no box. */
   quest_completed: { questType: string; xp: number; boxTier: string; replay?: boolean };
   quest_bonus: { xp: number };
-  habit_checked: { date: DateString; projectId: string | null };
+  /**
+   * `habitCreatedOn`: the user's day the habit was made; a check-in on that day earns no XP
+   * (D37). Missing on check-ins logged before the rule.
+   */
+  habit_checked: { date: DateString; projectId: string | null; habitCreatedOn?: DateString };
 }
 
 /** An activity row as the rules read it. */

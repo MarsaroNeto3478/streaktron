@@ -286,8 +286,8 @@ function HabitForm({
         <DialogHeader>
           <DialogTitle>{habit ? 'Edit habit' : 'New habit'}</DialogTitle>
           <DialogDescription>
-            Something you want to keep doing. Each check-in is worth 10 XP and counts as an active
-            day.
+            Something you want to keep doing. Each check-in is worth 10 XP (from the day after you
+            make it; up to 50 XP a day from habits) and counts as an active day.
           </DialogDescription>
         </DialogHeader>
         <Input

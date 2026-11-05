@@ -918,3 +918,32 @@ describe('challenge tuning (D36)', () => {
     expect(any).toContain('daily.two_tasks:');
   });
 });
+
+describe('habit XP can’t be farmed (D37)', () => {
+  const check = (habit: string, createdOn?: string, day = TODAY) =>
+    act('habit_checked', day, { date: day, projectId: null, habitCreatedOn: createdOn }, habit);
+
+  it('a check-in on the day the habit was made earns nothing, but the day still counts', () => {
+    const fresh = check('hab_new', TODAY);
+    expect(xpCredits([fresh]).get(fresh.id)).toBe(0);
+    expect(activeDaysOf([fresh]).has(TODAY)).toBe(true);
+    // From the next day on it pays as usual.
+    const tomorrow = addDays(TODAY, 1);
+    const next = check('hab_new', TODAY, tomorrow);
+    expect(xpCredits([fresh, next]).get(next.id)).toBe(GAME.xp.habitCheckin);
+    // Check-ins logged before the rule (no creation day) keep their XP.
+    const old = check('hab_old');
+    expect(xpCredits([old]).get(old.id)).toBe(GAME.xp.habitCheckin);
+  });
+
+  it('habits earn at most the daily cap', () => {
+    const yesterday = addDays(TODAY, -1);
+    const checks = Array.from({ length: 8 }, (_, i) => check(`hab_${i}`, yesterday));
+    const credits = xpCredits(checks);
+    expect(totalXp(credits)).toBe(GAME.xp.habitDailyCap);
+    expect(checks.map((c) => credits.get(c.id))).toEqual([10, 10, 10, 10, 10, 0, 0, 0]);
+    // The next day starts over.
+    const later = check('hab_0', yesterday, addDays(TODAY, 1));
+    expect(xpCredits([...checks, later]).get(later.id)).toBe(10);
+  });
+});

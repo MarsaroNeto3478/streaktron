@@ -8,6 +8,22 @@ import { useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import type { Quest } from './queries';
 
+/**
+ * What makes a day count for the streak. Creating things or finishing a quest doesn't, on purpose:
+ * a streak kept by too little doesn't help anyone get better (plan.md §5).
+ */
+export const STREAK_RULE = 'Complete a task, focus for 10 minutes or check in a habit';
+
+/** Quests whose completion alone doesn't make the day count (they don't need a task, focus or habit). */
+export const notForStreak = (templateKey: string) =>
+  templateKey.startsWith('make.') ||
+  templateKey.startsWith('follow_up.') ||
+  templateKey === 'quick.pin_next' ||
+  templateKey === 'quick.triage' ||
+  templateKey === 'tutorial.area' ||
+  templateKey === 'tutorial.project' ||
+  templateKey === 'tutorial.task';
+
 // --- The burst (components/celebration.tsx draws it) -----------------------------------------
 
 export interface Burst {
@@ -53,8 +69,10 @@ export function celebrate(qc: QueryClient, e: GameEvents) {
   for (const q of e.questsDone) {
     if (!e.levelUp) chime('quest');
     const tour = q.type === 'tutorial';
+    // A quest alone doesn't keep the streak: say so while today doesn't count yet.
+    const hint = e.state.daily.activeToday ? null : `${STREAK_RULE} to keep your streak.`;
     toast.success(`${tour ? 'Step done' : 'Quest done'}: ${q.title}`, {
-      description: q.xp > 0 ? `+${q.xp} XP` : undefined,
+      description: [q.xp > 0 ? `+${q.xp} XP` : null, hint].filter(Boolean).join(' · ') || undefined,
     });
   }
   // The tour's next step shows in Streaky's card, not as a toast.

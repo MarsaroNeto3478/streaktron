@@ -1,6 +1,7 @@
 // XP and levels. XP is never taken away and each source earns once (D15): a task's completion
 // earns the first time only; reopening keeps it, completing it again earns 0, deleting it changes
-// nothing (the log is append-only).
+// nothing (the log is append-only). Habits can't be farmed by making new ones (D37): a check-in on
+// the day its habit was made earns nothing, and habits earn at most a capped amount a day.
 
 import { byTime, type Activity } from './activity';
 import { GAME } from './config';
@@ -34,6 +35,8 @@ function baseXp(a: Activity): number {
     case 'quest_bonus':
       return Math.max(0, Math.floor(a.payload.xp));
     case 'habit_checked':
+      // A habit made today and checked at once would be free XP, over and over (D37).
+      if (a.payload.habitCreatedOn && a.localDate <= a.payload.habitCreatedOn) return 0;
       return GAME.xp.habitCheckin;
     default:
       return 0;
@@ -48,6 +51,7 @@ export function xpCredits(activities: readonly Activity[]): Map<string, number> 
   const credits = new Map<string, number>();
   const earned = new Set<string>();
   const taskXpByDay = new Map<string, number>();
+  const habitXpByDay = new Map<string, number>();
   const cap = GAME.xp.taskDailySoftCap;
 
   for (const a of [...activities].sort(byTime)) {
@@ -63,6 +67,12 @@ export function xpCredits(activities: readonly Activity[]): Map<string, number> 
       const full = Math.max(0, Math.min(xp, cap - before));
       taskXpByDay.set(a.localDate, before + xp);
       xp = full + Math.floor((xp - full) / 2);
+    }
+    if (a.type === 'habit_checked' && xp > 0) {
+      // Habits earn up to a cap a day; past it, check-ins still make the day active.
+      const before = habitXpByDay.get(a.localDate) ?? 0;
+      xp = Math.max(0, Math.min(xp, GAME.xp.habitDailyCap - before));
+      habitXpByDay.set(a.localDate, before + xp);
     }
     credits.set(a.id, xp);
   }

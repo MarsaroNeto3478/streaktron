@@ -89,8 +89,22 @@ describe('habits', () => {
     expect(missing.status).toBe(404);
   });
 
+  it('a habit made today earns no XP at once, but its check-in counts for the day (D37)', async () => {
+    const h = await newHabit('Drink water');
+    const res = await as.post(`/api/habits/${h.id}/checkin`, {});
+    expect(res.status).toBe(200);
+    expect(res.body.game?.xp ?? 0).toBe(0);
+    expect(res.body.game?.state.daily).toMatchObject({ current: 1, activeToday: true });
+    const [logged] = await db
+      .select()
+      .from(activity)
+      .where(and(eq(activity.userId, userId), eq(activity.type, 'habit_checked')));
+    expect(logged?.payload).toMatchObject({ habitCreatedOn: today });
+  });
+
   it('checks in once a day for 10 XP; unchecking keeps the XP (D15)', async () => {
     const h = await newHabit('Stretch');
+    await age(h.id, 2); // made earlier: a check-in on a habit's first day earns nothing (D37)
     const first = await as.post(`/api/habits/${h.id}/checkin`, {});
     expect(first.status).toBe(200);
     expect(first.body).toMatchObject({ checkedToday: true, streak: { current: 1 } });

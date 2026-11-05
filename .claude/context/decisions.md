@@ -189,6 +189,12 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** The quest system already does chains and rewards, so the tour costs little and teaches by doing. An invitation (not a forced tour) respects someone who already uses the app. Earning each reward once keeps "replay the tour" from being an XP farm (D15). Each tuning maps one failure mode (plan.md §1) to something the app already controls.
 - **Alternatives:** A tour only for new accounts (the author couldn't try it); a forced tour; tutorial quests on the normal board (lost among the day's quests); only storing the answer without tuning anything.
 
+### D37 · Habit XP can't be farmed — accepted (2026-11-05, found by the user; the rules are Claude's proposal, chosen by the user)
+- **Decision:** A habit check-in on the day the habit was made earns **0 XP** (it still makes the day active and starts the habit's streak). From the next day on it earns 10 XP as before, and habits earn **at most 50 XP a day** in all (`GAME.xp.habitDailyCap`); past the cap check-ins still count for the day. The check-in's activity carries `habitCreatedOn`; check-ins logged before this rule have none and keep their XP (D15: XP is never taken away; no past day went over the cap).
+- **Also decided (the user, same day):** the active-day rule stays as it is: finishing a quest or creating things doesn't make a day active, only a completed task, 10+ minutes of focus or a habit check-in. "If it takes very little, the person doesn't improve." The app now says so where it matters (the streak card, the "Quest done" toast while today doesn't count yet, and the detail of quests that don't count by themselves).
+- **Why:** The user found that creating a habit and checking it in gave 10 XP every time, without limit. Earn-once per habit and day (D34) didn't cover new habits.
+- **Alternatives:** Only the first-day rule (making 100 habits today still pays tomorrow); only a daily cap (create-and-check would still pay up to the cap); counting quests as active days (rejected by the user: too little effort).
+
 ---
 
 ## Rejected ideas (don't propose again)

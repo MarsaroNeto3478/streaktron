@@ -4,7 +4,7 @@
 
 import { PART_LABELS, QUEST_TYPE_LABELS, type DetailPart } from '@streaktron/shared/game';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowRight, Check, Dices, Gift, Timer } from 'lucide-react';
+import { ArrowRight, Check, Dices, Flame, Gift, Timer } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { useOpenSheet } from '@/hooks/use-open-task';
 import { useGameActions } from '@/lib/actions';
+import { notForStreak, STREAK_RULE } from '@/lib/game';
 import { formatDayLong, formatMinutes } from '@/lib/days';
 import type { Quest } from '@/lib/queries';
 import { startFocus } from '@/lib/ui-store';
@@ -54,8 +55,7 @@ function useExplain(q: Quest): Explained {
     run: () => startFocus({ ...(projectId ? { projectId } : {}), minutes }),
   });
   const toHabits: Go = { label: 'Go to Habits', run: () => void navigate({ to: '/habits' }) };
-  const activeDay =
-    'An active day is one where you complete a task, finish a focus session of 10+ minutes, or check in a habit.';
+  const activeDay = `An active day is one where you ${STREAK_RULE.toLowerCase()}.`;
 
   switch (q.templateKey) {
     case 'quick.triage':
@@ -269,6 +269,14 @@ function Body({ quest: q, close }: { quest: Quest; close: () => void }) {
           <span className="text-muted-foreground">{done ? ' earned' : ' when it’s done'}</span>
         </span>
       </div>
+      {notForStreak(q.templateKey) && (
+        <p className="flex items-start gap-2 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+          <Flame className="mt-px size-3.5 shrink-0 text-primary" />
+          <span>
+            This quest doesn’t keep your streak by itself. {STREAK_RULE} for today to count.
+          </span>
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center justify-end gap-2">
         {q.canReroll && !done && (

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { CalendarCheck, Flame, Snowflake } from 'lucide-react';
 import { gameStateQuery, meQuery, type GameStateView } from '@/lib/queries';
+import { STREAK_RULE } from '@/lib/game';
 import { cn } from '@/lib/utils';
 
 export function GameChip() {
@@ -98,10 +99,10 @@ function DailyStreak({ g }: { g: GameStateView }) {
         {d.activeToday
           ? 'Today counts. Nice.'
           : d.atRisk
-            ? 'Do one thing today to keep it.'
+            ? `${STREAK_RULE} today to keep it.`
             : d.current > 0
-              ? 'A freeze covers today if you need it.'
-              : 'Finish a task or 10 minutes of focus to start one.'}
+              ? `${STREAK_RULE} to keep it. A freeze covers today if you need it.`
+              : `${STREAK_RULE} to start one.`}
       </p>
     </Stat>
   );

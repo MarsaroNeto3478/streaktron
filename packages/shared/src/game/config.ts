@@ -14,8 +14,10 @@ export const GAME = {
     /** Focus sessions earn 1 XP a minute from this length on. */
     focusMinMinutes: 10,
     focusPerMinute: 1,
-    /** A habit check-in, once per habit and day. */
+    /** A habit check-in, once per habit and day… */
     habitCheckin: 10,
+    /** …but none on the day the habit was made, and at most this much a day from habits (D37). */
+    habitDailyCap: 50,
   },
   levels: {
     /** Cumulative XP to reach level n is `step · n · (n − 1)`: L2 = 100, L3 = 300, L10 = 4500. */

@@ -233,10 +233,19 @@ export async function checkIn(userId: string, id: string, input: HabitCheckin) {
       .onConflictDoNothing()
       .returning({ id: habitCheckins.id });
     if (inserted.length) {
+      const [settings] = await tx
+        .select({ timezone: userSettings.timezone, dayStartHour: userSettings.dayStartHour })
+        .from(userSettings)
+        .where(eq(userSettings.userId, userId));
       await recordActivity(tx, userId, {
         type: 'habit_checked',
         entityId: id,
-        payload: { date, projectId: habit.projectId },
+        // The habit's first day: a check-in then earns no XP (D37).
+        payload: {
+          date,
+          projectId: habit.projectId,
+          habitCreatedOn: dayOf(settings, habit.createdAt),
+        },
       });
     }
     return one(tx, userId, id);

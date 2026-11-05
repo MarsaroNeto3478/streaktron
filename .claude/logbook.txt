@@ -406,3 +406,71 @@ OBSERVAÇÕES: lição para os próximos testes: não mexer no estado da conta r
   está usando o app; preferir uma conta de teste.
   (continuação) "faz o commit e push": commit da correção na main e push para
   MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Artefatos de UI para ajustar o front
+-------------------------------------------------------------------------------------------------
+PEDIDO: "uma coisa antes, tem como fazer artefatos de UI? para ver e ajeitar o front".
+O QUE FOI FEITO: explicadas as três formas de ver e ajustar telas: maquetes inline na conversa
+  (para comparar variações), um artefato publicado (página privada no claude.ai, com link) e o
+  app de verdade no painel do navegador. Aguardando o autor escolher a tela e o jeito.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Conferir se o Docker está funcionando
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos fazer entao a primeira" (maquetes na conversa, começando pelo Today) e, antes
+  disso, "antes so confere so o docker ta funcionando".
+O QUE FOI FEITO: o Docker estava funcionando (container streaktron-db saudável, Postgres
+  aceitando conexões). A API e o site estavam parados desde o fim da sessão anterior; os dois
+  foram ligados de novo.
+RESULTADO: API em 127.0.0.1:3001 respondendo {"ok":true,"db":"up"}; site em localhost:5173,
+  com o proxy para a API funcionando. As maquetes do Today vêm em seguida.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — "Concluí uma missão, mas meu streak não aumentou"
+-------------------------------------------------------------------------------------------------
+PEDIDO: "antes, reportar um erro, eu conclui uma missao, mas meu streak nao aumentou".
+INVESTIGAÇÃO (só leitura no banco): a missão concluída hoje foi "Add a goal to “psicanalise”"
+  (uma quest do tipo make: criar uma meta). Pelas regras do jogo, o que faz o dia contar para o
+  streak é concluir uma tarefa, focar 10 minutos ou marcar um hábito. Criar coisas e concluir
+  quests não contam sozinhos. Então hoje (05/11) ainda não é um dia ativo, e o streak continua
+  em 2 (03/11 e 04/11), sem perigo: o dia ainda não acabou.
+CONCLUSÃO: não é um bug de código, é a regra funcionando. Mas a tela não explica a regra: o card
+  só diz "Do one thing today to keep it", e "uma coisa" pareceu incluir a missão. Perguntado ao
+  autor como prefere resolver.
+  RESPOSTA DO AUTOR: escolheu primeiro "Quests também contam", mas logo depois mudou de ideia:
+  "deixe como está apenas explique que para salvar o streak é necessario fazer isso, pois se
+  ficar MUITO pouco a pessoa nao melhora". A regra não foi mudada.
+O QUE FOI FEITO: o app agora explica o que salva o streak, sempre com a mesma frase ("Complete a
+  task, focus for 10 minutes or check in a habit"):
+  - no card do streak no Today, enquanto o dia ainda não conta;
+  - na notificação de "Quest done", quando o dia ainda não conta ("... to keep your streak");
+  - no detalhe das quests que não salvam o streak sozinhas (criar coisas, follow-ups, escolher a
+    próxima ação, triar a inbox, os três primeiros passos do tour), com um aviso e um ícone de
+    chama.
+RESULTADO: tipos e lint passando. Não deu para ver no navegador: a aba nova do painel abriu na
+  tela de login (o navegador foi reiniciado), e senha é com o autor.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — XP infinito nos hábitos
+-------------------------------------------------------------------------------------------------
+PEDIDO: "outra coisa, achei uma forma de ganhar xp infinita, que é nos habitos, eu crio um e
+  marco como concluido, varias vezes e sempre da 10 de xp".
+INVESTIGAÇÃO (só leitura): marcar e desmarcar o MESMO hábito no mesmo dia já não dava XP de novo
+  (só o primeiro check-in rendeu 10). A brecha era criar hábitos NOVOS: cada hábito novo rendia
+  10 XP no primeiro check-in, sem limite ("tomar agua" e "fef" foram criados e marcados em
+  segundos).
+  Pergunta ao autor: como fechar? Resposta: "As duas regras".
+O QUE FOI FEITO:
+  - O check-in no dia em que o hábito foi criado vale 0 XP (mas conta como dia ativo e começa o
+    streak do hábito). A partir do dia seguinte vale 10 XP.
+  - Hábitos rendem no máximo 50 XP por dia no total; depois disso o check-in ainda conta para o
+    dia.
+  - O texto do diálogo de hábito explica as duas regras.
+DECISÕES: D37 (registra também a decisão anterior do autor: concluir quest não salva o streak).
+RESULTADO: 263 testes passando (3 novos). O XP que o autor já tinha não muda: os check-ins
+  antigos não têm a data de criação e ficam como estavam (XP nunca é tirado, D15), e nenhum dia
+  passou do limite.
+OBSERVAÇÕES: bom achado de teste do autor; o mesmo tipo de brecha (criar e concluir) existe nas
+  tarefas, mas lá já há o teto diário de 200 XP que corta pela metade o que passar dele.
+  (continuação) "faz o commit e push": commit na main e push para MarsaroNeto3478/streaktron.
