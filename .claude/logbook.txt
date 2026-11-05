@@ -474,3 +474,38 @@ RESULTADO: 263 testes passando (3 novos). O XP que o autor já tinha não muda: 
 OBSERVAÇÕES: bom achado de teste do autor; o mesmo tipo de brecha (criar e concluir) existe nas
   tarefas, mas lá já há o teto diário de 200 XP que corta pela metade o que passar dele.
   (continuação) "faz o commit e push": commit na main e push para MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Maquetes do Today
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para as maquetes do today".
+O QUE FOI FEITO: três versões da tela Today, no formato do celular, mostradas na conversa
+  (sem mexer no código):
+  - A, a atual: três cards de status em pilha, depois Focus, Habits e Quests.
+  - B, compacta: os status numa linha só, um card "Next up" com a próxima tarefa e o botão de
+    focar nela, hábitos como etiquetas e quests resumidas com "mostrar todas".
+  - C, Streaky em destaque: o streak grande com o Streaky e uma frase dele, nível e semana
+    pequenos, e um botão grande de focar na próxima tarefa.
+RESULTADO: aguardando o autor escolher ou misturar as versões.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Clicar numa área na barra lateral
+-------------------------------------------------------------------------------------------------
+PEDIDO: (com um print da lista "AREAS" na barra lateral) "vamos deixar a UI pra frente, e aqui,
+  seria legal se ao cliclar na area ali fosse para a tela das areas".
+  A escolha da maquete do Today ficou para depois.
+INVESTIGAÇÃO: hoje, clicar no nome da área já leva para a página Projects, rolando até aquela
+  área; a setinha ao lado só abre e fecha a lista. Não existe uma página própria de área; existe
+  um painel lateral com os detalhes da área (descrição, projetos, menções). Perguntado ao autor o
+  que ele espera ver.
+  RESPOSTA DO AUTOR: "Uma página da área".
+O QUE FOI FEITO: nova página /areas/<id> para cada área:
+  - topo com o caminho "Projects > área", ícone, nome, a descrição (ou "Add a description") e
+    os botões Details (abre o painel para editar), cor e ícone, e "+ Project";
+  - números da área: projetos ativos, estacionados, concluídos e tarefas feitas (com barra);
+  - os projetos em grupos: Active, Parked e "Completed and archived" (fechado no começo).
+  Clicar na área na barra lateral (e no nome da área na página Projects) agora abre essa página;
+  na barra lateral a área aberta fica destacada. O card de projeto virou um componente só,
+  usado nas duas páginas.
+RESULTADO: tipos e lint passando. Não deu para ver no navegador: o painel está na tela de login.
+  (continuação) "faz o commit e push": commit na main e push para MarsaroNeto3478/streaktron.

@@ -228,9 +228,10 @@ function AreaBranch({ area, projects }: { area: Area; projects: Project[] }) {
           <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
         </button>
         <Link
-          to="/projects"
-          hash={area.id}
+          to="/areas/$areaId"
+          params={{ areaId: area.id }}
           className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-2 text-sm font-medium"
+          activeProps={{ className: 'text-primary' }}
         >
           <EntityIcon icon={area.icon} color={area.color} size="sm" />
           <span className="truncate">{area.title}</span>

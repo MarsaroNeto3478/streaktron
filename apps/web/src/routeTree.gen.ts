@@ -19,6 +19,7 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppStatsRouteImport } from './routes/_app/stats'
 import { Route as AppTasksRouteImport } from './routes/_app/tasks'
 import { Route as AppTodayRouteImport } from './routes/_app/today'
+import { Route as AppAreasAreaIdRouteImport } from './routes/_app/areas.$areaId'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects.index'
 import { Route as AppProjectsProjectIdRouteImport } from './routes/_app/projects.$projectId'
 
@@ -71,6 +72,11 @@ const AppTodayRoute = AppTodayRouteImport.update({
   path: '/today',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAreasAreaIdRoute = AppAreasAreaIdRouteImport.update({
+  id: '/areas/$areaId',
+  path: '/areas/$areaId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProjectsIndexRoute = AppProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/stats': typeof AppStatsRoute
   '/tasks': typeof AppTasksRoute
   '/today': typeof AppTodayRoute
+  '/areas/$areaId': typeof AppAreasAreaIdRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRoute
   '/projects/': typeof AppProjectsIndexRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/stats': typeof AppStatsRoute
   '/tasks': typeof AppTasksRoute
   '/today': typeof AppTodayRoute
+  '/areas/$areaId': typeof AppAreasAreaIdRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRoute
   '/projects': typeof AppProjectsIndexRoute
 }
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_app/stats': typeof AppStatsRoute
   '/_app/tasks': typeof AppTasksRoute
   '/_app/today': typeof AppTodayRoute
+  '/_app/areas/$areaId': typeof AppAreasAreaIdRoute
   '/_app/projects/$projectId': typeof AppProjectsProjectIdRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
 }
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/stats'
     | '/tasks'
     | '/today'
+    | '/areas/$areaId'
     | '/projects/$projectId'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/stats'
     | '/tasks'
     | '/today'
+    | '/areas/$areaId'
     | '/projects/$projectId'
     | '/projects'
   id:
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/_app/stats'
     | '/_app/tasks'
     | '/_app/today'
+    | '/_app/areas/$areaId'
     | '/_app/projects/$projectId'
     | '/_app/projects/'
   fileRoutesById: FileRoutesById
@@ -244,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTodayRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/areas/$areaId': {
+      id: '/_app/areas/$areaId'
+      path: '/areas/$areaId'
+      fullPath: '/areas/$areaId'
+      preLoaderRoute: typeof AppAreasAreaIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/projects/': {
       id: '/_app/projects/'
       path: '/projects'
@@ -269,6 +288,7 @@ interface AppRouteChildren {
   AppStatsRoute: typeof AppStatsRoute
   AppTasksRoute: typeof AppTasksRoute
   AppTodayRoute: typeof AppTodayRoute
+  AppAreasAreaIdRoute: typeof AppAreasAreaIdRoute
   AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRoute
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
 }
@@ -281,6 +301,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppStatsRoute: AppStatsRoute,
   AppTasksRoute: AppTasksRoute,
   AppTodayRoute: AppTodayRoute,
+  AppAreasAreaIdRoute: AppAreasAreaIdRoute,
   AppProjectsProjectIdRoute: AppProjectsProjectIdRoute,
   AppProjectsIndexRoute: AppProjectsIndexRoute,
 }
