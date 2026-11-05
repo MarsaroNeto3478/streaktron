@@ -2,7 +2,7 @@
 // short, quiet toast says what changed (plan.md §4.5: immediate, subtle feedback). Also the chime
 // for focus sessions (Web Audio, no files).
 
-import type { DetailPart, GameEvents } from '@streaktron/shared/game';
+import { TUTORIAL_TITLES, type DetailPart, type GameEvents } from '@streaktron/shared/game';
 import type { QueryClient } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
@@ -52,10 +52,19 @@ export function celebrate(qc: QueryClient, e: GameEvents) {
   }
   for (const q of e.questsDone) {
     if (!e.levelUp) chime('quest');
-    toast.success(`Quest done: ${q.title}`, { description: `+${q.xp} XP` });
+    const tour = q.type === 'tutorial';
+    toast.success(`${tour ? 'Step done' : 'Quest done'}: ${q.title}`, {
+      description: q.xp > 0 ? `+${q.xp} XP` : undefined,
+    });
   }
+  // The tour's next step shows in Streaky's card, not as a toast.
+  const steps = new Set<string>(Object.values(TUTORIAL_TITLES));
   for (const q of e.questsAdded) {
+    if (steps.has(q.title)) continue;
     toast(`New quest: ${q.title}`, { description: 'Lasts until the end of tomorrow.' });
+  }
+  if (e.questsDone.some((q) => q.type === 'tutorial')) {
+    void qc.invalidateQueries({ queryKey: ['tutorial'] });
   }
   if (e.streak && !e.levelUp) {
     toast(`${e.streak.to}-day streak`, {

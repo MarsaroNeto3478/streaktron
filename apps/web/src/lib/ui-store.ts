@@ -3,14 +3,21 @@
 
 import { useSyncExternalStore } from 'react';
 
+export interface FocusStart {
+  taskId?: string;
+  projectId?: string;
+  /** Minutes to start with instead of the first preset (e.g. 10 for the tour's last step). */
+  minutes?: number;
+}
+
 export interface UiState {
   palette: null | { mode: 'search' | 'capture' };
   /** The project dialog: new (optionally in an area) or editing one. */
   projectDialog: null | { projectId?: string; areaId?: string | null };
   areaDialog: null | { areaId?: string };
   shortcuts: boolean;
-  /** The start-focus dialog, optionally attached to a task or project. */
-  focusDialog: null | { taskId?: string; projectId?: string };
+  /** The start-focus dialog, optionally attached to a task or project, with a suggested length. */
+  focusDialog: null | FocusStart;
   /** The habit dialog: new (optionally for a project) or editing one. */
   habitDialog: null | { habitId?: string; projectId?: string };
   /** The event dialog: new (on a day) or editing one (opened from one of its occurrences). */
@@ -48,8 +55,7 @@ export const newProject = (areaId?: string | null) => setUi({ projectDialog: { a
 export const editProject = (projectId: string) => setUi({ projectDialog: { projectId } });
 export const newArea = () => setUi({ areaDialog: {} });
 export const editArea = (areaId: string) => setUi({ areaDialog: { areaId } });
-export const startFocus = (attach: { taskId?: string; projectId?: string } = {}) =>
-  setUi({ focusDialog: attach });
+export const startFocus = (attach: FocusStart = {}) => setUi({ focusDialog: attach });
 export const newHabit = (projectId?: string) => setUi({ habitDialog: { projectId } });
 export const editHabit = (habitId: string) => setUi({ habitDialog: { habitId } });
 export const newEvent = (date?: string, projectId?: string) =>

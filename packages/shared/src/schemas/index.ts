@@ -17,6 +17,7 @@ import {
 } from '../structure';
 import { isDateString, isValidTimeZone } from '../time';
 import { RESTABLE_TYPES } from '../game/quests';
+import { CHALLENGES } from '../game/challenge';
 import { FREQS, TIME_RE } from '../calendar';
 
 export const dateString = z.string().refine(isDateString, 'Expected a YYYY-MM-DD day');
@@ -72,6 +73,8 @@ export const userSettingsSchema = z.object({
   weeklyActiveDayTarget: z.int().min(1).max(7),
   focusPresets: z.array(focusPresetSchema).min(1).max(6),
   questSettings: questSettingsSchema,
+  /** The answer to Streaky's question (D32, D36); null: not answered or skipped. */
+  challenge: z.enum(CHALLENGES).nullable(),
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 
@@ -86,7 +89,10 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     { focusMinutes: 50, breakMinutes: 10 },
   ],
   questSettings: { restingTypes: [], timeQuestMinMinutes: 15, timeQuestMaxMinutes: 180 },
+  challenge: null,
 };
+
+export const challengeAnswerSchema = z.object({ challenge: z.enum(CHALLENGES).nullable() });
 
 // --- Structure: areas, projects, columns, goals, tasks --------------------------------------
 

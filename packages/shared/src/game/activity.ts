@@ -9,7 +9,7 @@ export const ACTIVITY_TYPES = [
   'task_reopened',
   /** An inbox task given a project. */
   'task_triaged',
-  /** A task, subtask or goal made (make quests). */
+  /** A task, subtask, goal, area or project made (make and tutorial quests). */
   'item_created',
   /** A task pinned as a project's next action. */
   'next_action_set',
@@ -22,7 +22,8 @@ export const ACTIVITY_TYPES = [
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
-export type CreatedKind = 'task' | 'subtask' | 'goal';
+/** What `item_created` made: make quests read tasks, subtasks and goals; the tutorial areas and projects. */
+export type CreatedKind = 'task' | 'subtask' | 'goal' | 'area' | 'project';
 
 export interface ActivityPayloads {
   task_completed: { effort: Effort | null; projectId: string | null; subtask: boolean };
@@ -31,7 +32,8 @@ export interface ActivityPayloads {
   item_created: { kind: CreatedKind; projectId: string | null; parentTaskId: string | null };
   next_action_set: { projectId: string };
   focus_completed: { minutes: number; projectId: string | null; taskId: string | null };
-  quest_completed: { questType: string; xp: number; boxTier: string };
+  /** `replay`: a tutorial step taken again, which earns no XP and (Phase 5) no box. */
+  quest_completed: { questType: string; xp: number; boxTier: string; replay?: boolean };
   quest_bonus: { xp: number };
   habit_checked: { date: DateString; projectId: string | null };
 }

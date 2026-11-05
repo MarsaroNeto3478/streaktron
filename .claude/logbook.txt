@@ -328,3 +328,56 @@ RESULTADO: conferido em 16, 24, 32, 48 e 128 px, em fundo claro e escuro; contin
   parado com prefers-reduced-motion. O "sexto" era só o desenho completo em 24 px que eu pus na
   prévia para comparar, não um arquivo; saiu da prévia.
   (continuação) "boa ficou muito bom pode commitar": commit do ícone no branch "streaky".
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Merge e push do Streaky
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o merge e push".
+O QUE FOI FEITO: branch "streaky" mesclado na main (fc71856) e enviado para
+  MarsaroNeto3478/streaktron, junto com o próprio branch "streaky". Nada foi para o repositório
+  do parceiro (JVGdev).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O tutorial do Streaky e a pergunta do desafio
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para o tutorial do streaky".
+  Perguntas feitas ao autor, com as respostas:
+  - Como o tour aparece para quem já usa o app? "Convite no Today" (com Começar / Agora não, e
+    para refazer pelo Settings).
+  - O tutorial dá recompensa? "Sim, e uma maior no fim" (XP e caixa pequena por passo, caixa
+    grande no último; uma vez só por conta).
+  - A resposta da pergunta ajusta o app? "Sim, pode fazer" (os ajustes propostos abaixo).
+O QUE FOI FEITO:
+  - No Today, um card do Streaky: convite ("Hi, I'm Streaky!"), depois a pergunta "Qual é seu
+    maior desafio com disciplina?" (com o Streaky de ponto de interrogação), depois cinco passos
+    um de cada vez: criar uma área, começar um projeto, pôr uma tarefa num projeto, concluir uma
+    tarefa e focar 10 minutos. Cada passo é uma quest de verdade: fazer a coisa em qualquer lugar
+    do app completa o passo. Dá para pular um passo ou encerrar o tour. No fim, o Streaky
+    comemorando.
+  - Os ajustes da resposta: esquecer de começar → uma quest rápida a mais por dia; não saber o
+    que fazer → o Today mostra 3 itens e pede mais a próxima ação; largar depois de falhar um dia
+    → o streak semanal aparece primeiro e a quest de volta vem depois de 1 dia; projetos demais →
+    limite de 2 projetos ativos; perder a motivação → as quests diárias variam mais.
+  - No Settings: escolher ou mudar o desafio e "Take the tour" para refazer o tour.
+DECISÕES: D36 (como o tour funciona e o que cada resposta ajusta).
+RESULTADO: 260 testes passando (16 novos). Conferido no navegador na conta do autor sem
+  responder a pergunta; depois o tour voltou ao convite, sem mudar o desafio, o limite nem as
+  áreas.
+OBSERVAÇÕES: criar uma área ou um projeto agora conta como atividade (para o tutorial), mas não
+  dá XP nem conta como dia ativo. Refazer o tour não dá XP de novo pelos passos já recompensados,
+  para não virar farm de XP.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O quinto passo começa com 10 minutos
+-------------------------------------------------------------------------------------------------
+PEDIDO: "uma coisa quando o streaky recomenda a qunta missao, vai para o start focus de 25
+  minutos, não de 10, penso que seria interessante ele começar com os 10 minutos de focus".
+O QUE FOI FEITO: o diálogo de foco agora aceita uma duração sugerida. O botão "Start 10 minutes"
+  do quinto passo abre com 10 minutos já preenchidos (dá para mudar). Aproveitei para fazer o
+  mesmo na quest de volta ("Welcome back: one 10-minute focus session"), que tinha o mesmo
+  problema.
+RESULTADO: conferido no navegador (o campo abriu com 10). Para isso a conta do autor ficou por
+  um instante no quinto passo; depois o passo de teste foi apagado e o tour voltou ao convite.
+  Nenhuma sessão de foco foi iniciada.
+  (continuação) "faz o commit, merge e push": commit no branch "streaky-tutorial", merge na main
+  e push para MarsaroNeto3478/streaktron.

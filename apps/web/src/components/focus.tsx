@@ -40,7 +40,7 @@ import {
 } from '@/lib/focus-extras';
 import { chime } from '@/lib/game';
 import { focusQuery, meQuery, projectsQuery, taskQuery, type FocusSession } from '@/lib/queries';
-import { setUi, startFocus, useUi } from '@/lib/ui-store';
+import { setUi, startFocus, useUi, type FocusStart } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
 
 /** Milliseconds worked, ticking while it runs. */
@@ -465,20 +465,14 @@ export function FocusStartDialog() {
   );
 }
 
-function StartForm({
-  attach,
-  close,
-}: {
-  attach: { taskId?: string; projectId?: string };
-  close: () => void;
-}) {
+function StartForm({ attach, close }: { attach: FocusStart; close: () => void }) {
   const { data: me } = useQuery(meQuery);
   const { data: projects = [] } = useQuery(projectsQuery);
   const { data: task } = useQuery({ ...taskQuery(attach.taskId ?? ''), enabled: !!attach.taskId });
   const { data: running } = useQuery(focusQuery);
   const actions = useGameActions();
   const presets = me?.settings.focusPresets ?? [{ focusMinutes: 25, breakMinutes: 5 }];
-  const [minutes, setMinutes] = useState(String(presets[0]?.focusMinutes ?? 25));
+  const [minutes, setMinutes] = useState(String(attach.minutes ?? presets[0]?.focusMinutes ?? 25));
   const [projectId, setProjectId] = useState<string>(attach.projectId ?? NONE);
   const [busy, setBusy] = useState(false);
 

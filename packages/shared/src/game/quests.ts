@@ -5,6 +5,7 @@
 
 import { addDays, daysBetween, startOfWeek, type DateString } from '../time';
 import type { Activity } from './activity';
+import { TUTORIAL_STEPS, TUTORIAL_TITLES, type Challenge, type TutorialStep } from './challenge';
 import { GAME } from './config';
 import {
   makeFactor,
@@ -25,6 +26,8 @@ export const QUEST_TYPES = [
   'follow_up',
   'weekly',
   'comeback',
+  /** The tutorial's steps (D31): one at a time, each spawning the next. */
+  'tutorial',
 ] as const;
 export type QuestType = (typeof QUEST_TYPES)[number];
 
@@ -45,6 +48,7 @@ export const QUEST_TYPE_LABELS: Record<QuestType, string> = {
   follow_up: 'Follow-up',
   weekly: 'Weekly',
   comeback: 'Comeback',
+  tutorial: 'Tutorial',
 };
 
 export const BOX_TIERS = ['small', 'standard', 'large', 'special'] as const;
@@ -129,6 +133,8 @@ export interface BoardContext {
   currentKeys: ReadonlySet<string>;
   hasDayBoard: boolean;
   hasWeekBoard: boolean;
+  /** The answer to Streaky's question, which tunes the board a little (D36). */
+  challenge: Challenge | null;
 }
 
 interface Candidate {
@@ -150,6 +156,7 @@ const BOX: Record<QuestType, BoxTier> = {
   comeback: 'standard',
   time: 'standard',
   weekly: 'large',
+  tutorial: 'small',
 };
 
 const fmtMinutes = (m: number) => {
@@ -199,7 +206,7 @@ function quickCandidates(ctx: BoardContext): Candidate[] {
         targetEntityId: p.id,
         params: { projectId: p.id },
       }),
-      need: 1,
+      need: ctx.challenge === 'next_step' ? GAME.challenge.pinNextNeed : 1,
       projectId: p.id,
     });
   }
@@ -398,10 +405,35 @@ function sinceActive(ctx: Pick<BoardContext, 'activeDays' | 'today'>): number | 
   return last === null ? null : daysBetween(last, ctx.today);
 }
 
-/** After 2+ inactive days in a row (before today), with some history to come back to. */
-export function needsComeback(ctx: Pick<BoardContext, 'activeDays' | 'today'>): boolean {
+/**
+ * After 2+ inactive days in a row (before today), with some history to come back to; after 1 when
+ * missing a day is the user's challenge (D36).
+ */
+export function needsComeback(
+  ctx: Pick<BoardContext, 'activeDays' | 'today'> & { challenge?: Challenge | null },
+): boolean {
   const since = sinceActive(ctx);
-  return since !== null && since > GAME.quests.comebackAfterDays;
+  const after =
+    ctx.challenge === 'missed_day'
+      ? GAME.challenge.comebackAfterDays
+      : GAME.quests.comebackAfterDays;
+  return since !== null && since > after;
+}
+
+/** Quick quests a day: one more when forgetting to start is the challenge (D36). */
+export const quickPerDay = (ctx: Pick<BoardContext, 'challenge'>) =>
+  GAME.quests.quickPerDay + (ctx.challenge === 'forgetting' ? GAME.challenge.extraQuick : 0);
+
+/**
+ * Daily candidates not offered too recently: never yesterday's, and with motivation as the
+ * challenge none of the last few days' either (when enough others are left).
+ */
+function freshDaily(ctx: BoardContext): Candidate[] {
+  const all = dailyCandidates(ctx).filter((c) => !ctx.yesterdayKeys.has(questKey(c.spec)));
+  if (ctx.challenge !== 'motivation') return all;
+  const since = addDays(ctx.today, -GAME.challenge.varietyDays);
+  const varied = all.filter((c) => (ctx.lastOffered.get(questKey(c.spec)) ?? '') < since);
+  return varied.length >= GAME.quests.dailyPerDay ? varied : all;
 }
 
 /**
@@ -427,12 +459,10 @@ export function planBoard(ctx: BoardContext, rng: Rng): QuestSpec[] {
     if (!idle) {
       if (!resting(ctx, 'quick')) {
         const quick = quickCandidates(ctx);
-        out.push(
-          ...pickWeighted(quick, weightOf(ctx), GAME.quests.quickPerDay, rng).map((c) => c.spec),
-        );
+        out.push(...pickWeighted(quick, weightOf(ctx), quickPerDay(ctx), rng).map((c) => c.spec));
       }
       if (!resting(ctx, 'daily')) {
-        const daily = dailyCandidates(ctx).filter((c) => !ctx.yesterdayKeys.has(questKey(c.spec)));
+        const daily = freshDaily(ctx);
         out.push(
           ...pickWeighted(daily, weightOf(ctx), GAME.quests.dailyPerDay, rng).map((c) => c.spec),
         );
@@ -524,6 +554,29 @@ export function filledCount(missing: readonly DetailPart[], filled: MadeItem['fi
   return missing.filter((p) => filled[p]).length;
 }
 
+// --- Tutorial (D31) --------------------------------------------------------------------------
+
+/**
+ * A tutorial step. It stays open a long time: it's done at the user's pace. A replay (the tour
+ * taken again) earns nothing: each step's reward is earned once per account (D15).
+ */
+export function tutorialSpec(step: TutorialStep, today: DateString, replay: boolean): QuestSpec {
+  const last = step === TUTORIAL_STEPS.at(-1);
+  const { stepXp, lastXp, days } = GAME.quests.tutorial;
+  return {
+    type: 'tutorial',
+    templateKey: step,
+    title: TUTORIAL_TITLES[step],
+    periodStart: today,
+    periodEnd: addDays(today, days),
+    target: 1,
+    xp: replay ? 0 : last ? lastXp : stepXp,
+    boxTier: last ? 'large' : 'small',
+    targetEntityId: null,
+    params: replay ? { replay: true } : {},
+  };
+}
+
 // --- Evaluation ------------------------------------------------------------------------------
 
 export interface ProgressExtra {
@@ -604,6 +657,23 @@ export function questProgress(
     case 'follow_up.task':
     case 'follow_up.goal':
       return extra.filledParts ?? 0;
+    case 'tutorial.area':
+      return inPeriod.filter((a) => a.type === 'item_created' && a.payload.kind === 'area').length;
+    case 'tutorial.project':
+      return inPeriod.filter((a) => a.type === 'item_created' && a.payload.kind === 'project')
+        .length;
+    case 'tutorial.task':
+      return inPeriod.filter(
+        (a) =>
+          a.type === 'task_triaged' ||
+          (a.type === 'item_created' && a.payload.kind === 'task' && a.payload.projectId !== null),
+      ).length;
+    case 'tutorial.complete':
+      return inPeriod.filter((a) => a.type === 'task_completed' && !a.payload.subtask).length;
+    case 'tutorial.focus':
+      return inPeriod.filter(
+        (a) => a.type === 'focus_completed' && a.payload.minutes >= GAME.xp.focusMinMinutes,
+      ).length;
     default:
       return 0;
   }
@@ -650,15 +720,30 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'daily.project_task',
         'daily.two_tasks',
         'weekly.target',
+        'tutorial.complete',
       ];
     case 'task_triaged':
-      return ['quick.triage', 'make.task'];
+      return ['quick.triage', 'make.task', 'tutorial.task'];
     case 'next_action_set':
       return ['quick.pin_next'];
     case 'focus_completed':
-      return ['daily.focus_session', 'time.day', 'time.week', 'weekly.target', 'comeback.focus'];
+      return [
+        'daily.focus_session',
+        'time.day',
+        'time.week',
+        'weekly.target',
+        'comeback.focus',
+        'tutorial.focus',
+      ];
     case 'item_created':
-      return ['make.task', 'make.goal', 'make.subtasks'];
+      return [
+        'make.task',
+        'make.goal',
+        'make.subtasks',
+        'tutorial.area',
+        'tutorial.project',
+        'tutorial.task',
+      ];
     case 'habit_checked':
       return ['quick.habit', 'daily.all_habits', 'weekly.target'];
     default:

@@ -16,6 +16,7 @@ import {
   writeOrder,
   type Conn,
 } from './common';
+import { recordActivity } from './activity';
 import { writeLinks } from './links';
 import { snapshotProjects } from './snapshots';
 
@@ -56,6 +57,11 @@ export async function createArea(userId: string, input: AreaCreate) {
       })
       .returning();
     await writeLinks(tx, userId, id, input.description);
+    await recordActivity(tx, userId, {
+      type: 'item_created',
+      entityId: id,
+      payload: { kind: 'area', projectId: null, parentTaskId: null },
+    });
     return view(row!);
   });
 }

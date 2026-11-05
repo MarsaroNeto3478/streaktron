@@ -8,3 +8,4 @@ export * from './streaks';
 export * from './state';
 export * from './select';
 export * from './quests';
+export * from './challenge';

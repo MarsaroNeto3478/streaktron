@@ -18,7 +18,10 @@ const ORDER: QuestType[] = ['comeback', 'follow_up', 'daily', 'time', 'make', 'q
 export function QuestBoard() {
   const { data: quests, isPending } = useQuery(questsQuery);
   if (isPending) return <div className="h-40 animate-pulse rounded-xl bg-muted/60" />;
-  const list = [...(quests ?? [])].sort((a, b) => ORDER.indexOf(a.type) - ORDER.indexOf(b.type));
+  // The tour's steps show in Streaky's card instead (tutorial-card.tsx).
+  const list = [...(quests ?? [])]
+    .filter((q) => q.type !== 'tutorial')
+    .sort((a, b) => ORDER.indexOf(a.type) - ORDER.indexOf(b.type));
   const today = list.filter((q) => q.period !== 'week');
   const week = list.filter((q) => q.period === 'week');
   const daily = list.filter((q) => q.type === 'daily');

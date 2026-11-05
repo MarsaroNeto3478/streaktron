@@ -13,9 +13,11 @@ import {
   questKey,
   questProgress,
   rerollSpec,
+  tutorialSpec,
   type BoardContext,
   type QuestLike,
 } from './quests';
+import { nextTutorialStep, TUTORIAL_STEPS } from './challenge';
 import {
   makeFactor,
   median,
@@ -422,6 +424,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     currentKeys: new Set(),
     hasDayBoard: false,
     hasWeekBoard: false,
+    challenge: null,
     ...over,
   };
 }
@@ -790,3 +793,128 @@ function dailyCandidatesOf(c: BoardContext): string[] {
   }
   return [...keys];
 }
+
+describe('tutorial (D31)', () => {
+  const made = (
+    day: string,
+    kind: 'area' | 'project' | 'task' | 'subtask' | 'goal',
+    projectId: string | null = null,
+  ) => act('item_created', day, { kind, projectId, parentTaskId: null });
+  const step = (key: (typeof TUTORIAL_STEPS)[number], replay = false) =>
+    stored(tutorialSpec(key, TODAY, replay));
+
+  it('chains five steps; the last pays more and gives a large box', () => {
+    expect(TUTORIAL_STEPS.map((s) => nextTutorialStep(s))).toEqual([
+      'tutorial.project',
+      'tutorial.task',
+      'tutorial.complete',
+      'tutorial.focus',
+      null,
+    ]);
+    const first = tutorialSpec('tutorial.area', TODAY, false);
+    const last = tutorialSpec('tutorial.focus', TODAY, false);
+    expect([first.type, first.xp, first.boxTier, first.target]).toEqual([
+      'tutorial',
+      20,
+      'small',
+      1,
+    ]);
+    expect([last.xp, last.boxTier]).toEqual([50, 'large']);
+    // At the user's pace: open for a long time, not just today.
+    expect(first.periodEnd > addDays(TODAY, 300)).toBe(true);
+  });
+
+  it('a replay earns nothing', () => {
+    const again = tutorialSpec('tutorial.focus', TODAY, true);
+    expect([again.xp, again.params.replay]).toEqual([0, true]);
+  });
+
+  it('counts each step from what happens in the app after it appeared', () => {
+    const later = new Date(`${TODAY}T10:00:00Z`);
+    const at = <A extends Activity>(a: A) => ({ ...a, occurredAt: later });
+    expect(questProgress(step('tutorial.area'), [at(made(TODAY, 'area'))])).toBe(1);
+    expect(questProgress(step('tutorial.area'), [at(made(TODAY, 'project', 'prj_x'))])).toBe(0);
+    expect(questProgress(step('tutorial.project'), [at(made(TODAY, 'project', 'prj_x'))])).toBe(1);
+    // A task in a project counts, and so does moving one there from the inbox; an inbox task doesn't.
+    expect(questProgress(step('tutorial.task'), [at(made(TODAY, 'task', null))])).toBe(0);
+    expect(questProgress(step('tutorial.task'), [at(made(TODAY, 'task', 'prj_x'))])).toBe(1);
+    expect(
+      questProgress(step('tutorial.task'), [
+        at(act('task_triaged', TODAY, { projectId: 'prj_x' })),
+      ]),
+    ).toBe(1);
+    expect(questProgress(step('tutorial.complete'), [at(done(TODAY))])).toBe(1);
+    expect(questProgress(step('tutorial.focus'), [at(focus(TODAY, 9))])).toBe(0);
+    expect(questProgress(step('tutorial.focus'), [at(focus(TODAY, 10))])).toBe(1);
+    // What happened before the step appeared doesn't count.
+    const before = { ...made(TODAY, 'area'), occurredAt: new Date(`${TODAY}T08:00:00Z`) };
+    expect(questProgress(step('tutorial.area'), [before])).toBe(0);
+  });
+
+  it('is evaluated after the writes that can complete it', () => {
+    expect(affectedTemplates(made(TODAY, 'area'))).toContain('tutorial.area');
+    expect(affectedTemplates(made(TODAY, 'project'))).toContain('tutorial.project');
+    expect(affectedTemplates(done(TODAY))).toContain('tutorial.complete');
+    expect(affectedTemplates(focus(TODAY, 10))).toContain('tutorial.focus');
+    expect(affectedTemplates(act('task_triaged', TODAY, { projectId: 'p' }))).toContain(
+      'tutorial.task',
+    );
+  });
+
+  it('creating areas and projects earns nothing and doesn’t make an active day', () => {
+    const a = made(TODAY, 'area');
+    expect(xpCredits([a]).get(a.id)).toBe(0);
+    expect(activeDaysOf([a, made(TODAY, 'project', 'p')]).size).toBe(0);
+  });
+});
+
+describe('challenge tuning (D36)', () => {
+  // Four quick candidates: triage, pick the next action, a subtask, a habit.
+  const habitsDue = [{ id: 'hab_1', title: 'Read' }];
+
+  it('forgetting: one more quick quest a day', () => {
+    expect(
+      planBoard(ctx({ habitsDue }), seededRng(7)).filter((q) => q.type === 'quick'),
+    ).toHaveLength(3);
+    const board = planBoard(ctx({ challenge: 'forgetting', habitsDue }), seededRng(7));
+    expect(board.filter((q) => q.type === 'quick')).toHaveLength(4);
+  });
+
+  it('missed_day: the comeback quest after a single missed day', () => {
+    const away2 = { activeDays: new Set(['2026-11-02']) }; // 11-03 missed
+    expect(needsComeback(ctx(away2))).toBe(false);
+    expect(needsComeback(ctx({ ...away2, challenge: 'missed_day' }))).toBe(true);
+    expect(needsComeback(ctx({ challenge: 'missed_day' }))).toBe(false); // active yesterday
+  });
+
+  it('next_step: picking a next action weighs more', () => {
+    const count = (challenge: BoardContext['challenge']) => {
+      let n = 0;
+      for (let seed = 0; seed < 300; seed++) {
+        const board = planBoard(ctx({ challenge, habitsDue }), seededRng(seed));
+        if (board.some((q) => q.templateKey === 'quick.pin_next')) n++;
+      }
+      return n;
+    };
+    expect(count('next_step')).toBeGreaterThan(count(null));
+  });
+
+  it('motivation: a daily quest doesn’t come back for a few days, when there are others', () => {
+    const recent = new Map([
+      ['daily.two_tasks:', addDays(TODAY, -2)],
+      ['daily.focus_session:', addDays(TODAY, -3)],
+    ]);
+    for (let seed = 0; seed < 30; seed++) {
+      const keys = planBoard(ctx({ challenge: 'motivation', lastOffered: recent }), seededRng(seed))
+        .filter((q) => q.type === 'daily')
+        .map(questKey);
+      expect(keys).not.toContain('daily.two_tasks:');
+      expect(keys).toHaveLength(GAME.quests.dailyPerDay);
+    }
+    // Without the challenge they may come back.
+    const any = Array.from({ length: 30 }, (_, seed) =>
+      planBoard(ctx({ lastOffered: recent }), seededRng(seed)).map(questKey),
+    ).flat();
+    expect(any).toContain('daily.two_tasks:');
+  });
+});

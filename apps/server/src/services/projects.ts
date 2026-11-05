@@ -239,6 +239,11 @@ export async function createProject(userId: string, input: ProjectCreate) {
         sortOrder: i,
       })),
     );
+    await recordActivity(tx, userId, {
+      type: 'item_created',
+      entityId: id,
+      payload: { kind: 'project', projectId: id, parentTaskId: null },
+    });
     return projectView(tx, userId, id);
   });
 }

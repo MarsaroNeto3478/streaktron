@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D36 | Streaky's tour is a `tutorial` quest chain on Today (invitation, question, five steps, rewards once per account); the challenge answer tunes quick quests, Today's size, the comeback, the active limit or daily variety |
 | D35 | Calendar: events on local dates and wall-clock times, a tested RRULE subset with skips, countdown flag, dragging a task sets its scheduled date |
 | D34 | Habits: weekday or N-a-week schedules, own streaks, 10 XP once per habit-day, a forgotten check-in allowed for yesterday but counted today |
 
@@ -534,8 +535,8 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [ ] PWA: manifest, service worker (no offline data), install on phone over Tailscale HTTPS
 - [ ] Web Push reminders: habits due, focus ended, opt-in "streak at risk" nudge (max one per day)
 - [ ] **Streaky**, the guide mascot (D31): the user draws him *(art done 2026-11-05 from the user's drawings and a design prompt: a floating flame with a quiff and four emotions — happy/cocky, celebrating, worried, and thinking as a fiery question mark — animated SVGs in `apps/web/public/streaky/`; the first log-footed shapes stay there as a keepsake)*; appears in the tutorial, as a helper with tips, and in celebrations. A guide, not a pet: no growth, needs or levels
-- [ ] **Tutorial as the first quests** (D31): a chain of welcome quests done in the real app (an area, a project, a task, completing one, 10 minutes of focus), introduced by Streaky
-- [ ] **"What's your biggest challenge with discipline?"** (D32): multiple choice over the five failure modes (§1), asked by Streaky; the answer tunes the app (e.g. a lower active limit, the weekly streak first) and can be changed in Settings
+- [x] **Tutorial as the first quests** (D31, D36): a chain of welcome quests done in the real app (an area, a project, a task, completing one, 10 minutes of focus), introduced by Streaky
+- [x] **"What's your biggest challenge with discipline?"** (D32, D36): multiple choice over the five failure modes (§1), asked by Streaky; the answer tunes the app (e.g. a lower active limit, the weekly streak first) and can be changed in Settings
 
 **Acceptance:** Exams/deadlines appear on the calendar with countdowns; a recurring lecture block shows every week; completing the weekly review is guided and takes ~5 minutes; a habit reminder reaches the phone.
 

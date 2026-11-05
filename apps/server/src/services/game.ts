@@ -12,12 +12,14 @@ import {
   gameEvents,
   gameState,
   madeBy,
+  nextTutorialStep,
   planBoard,
   questKey,
   questProgress,
   qualifies,
   rerollable,
   rerollSpec,
+  tutorialSpec,
   type Activity,
   type BoardContext,
   type DetailPart,
@@ -110,7 +112,7 @@ const asQuest = (r: QuestRow): QuestLike => ({
   offeredAt: r.offeredAt,
 });
 
-async function insertQuest(
+export async function insertQuest(
   tx: Tx,
   userId: string,
   spec: QuestSpec,
@@ -218,8 +220,9 @@ async function boardContext(
     if (q.periodEnd >= today && (q.status === 'offered' || q.status === 'completed')) {
       currentKeys.add(key);
     }
-    if (q.periodStart === today && q.periodEnd === today && q.type !== 'follow_up')
+    if (q.periodStart === today && q.periodEnd === today && q.type !== 'follow_up') {
       hasDayBoard = true;
+    }
     if (q.periodStart === weekStart && (q.type === 'weekly' || q.templateKey === 'time.week')) {
       hasWeekBoard = true;
     }
@@ -249,6 +252,7 @@ async function boardContext(
     currentKeys,
     hasDayBoard,
     hasWeekBoard,
+    challenge: s.challenge ?? null,
   };
 }
 
@@ -407,11 +411,21 @@ async function evaluateQuests(
     const recorded = await recordActivity(tx, userId, {
       type: 'quest_completed',
       entityId: q.id,
-      payload: { questType: q.type, xp: q.xp, boxTier: q.boxTier },
+      payload: {
+        questType: q.type,
+        xp: q.xp,
+        boxTier: q.boxTier,
+        ...(q.params.replay ? { replay: true } : {}),
+      },
     });
     out.recorded.push(...recorded);
     acts.push(...recorded);
     out.done.push({ id: q.id, type: q.type, title: q.title, xp: q.xp, boxTier: q.boxTier });
+
+    if (q.type === 'tutorial') {
+      const added = await advanceTutorial(tx, userId, q.templateKey, today);
+      if (added) out.added.push(added);
+    }
 
     if (q.type === 'make') {
       // D16: the new item gets a follow-up asking for its missing details.
@@ -429,6 +443,38 @@ async function evaluateQuests(
     out.recorded.push(...(await boardBonus(tx, userId, today, acts)));
   }
   return out;
+}
+
+/**
+ * The tutorial's next step after `step` (done or skipped), or the end of the tour. A step whose
+ * reward was already earned once (an earlier tour) comes back as a replay, worth nothing (D15).
+ */
+export async function advanceTutorial(
+  tx: Tx,
+  userId: string,
+  step: string | null,
+  today: DateString,
+): Promise<{ id: string; title: string } | null> {
+  const next = step === null ? 'tutorial.area' : nextTutorialStep(step);
+  if (!next) {
+    await tx.update(userSettings).set({ tutorial: 'done' }).where(eq(userSettings.userId, userId));
+    return null;
+  }
+  const [earned] = await tx
+    .select({ id: quests.id })
+    .from(quests)
+    .where(
+      and(
+        eq(quests.userId, userId),
+        eq(quests.templateKey, next),
+        eq(quests.status, 'completed'),
+        sql`${quests.rewardXp} > 0`,
+      ),
+    )
+    .limit(1);
+  const spec = tutorialSpec(next, today, !!earned);
+  const id = await insertQuest(tx, userId, spec);
+  return { id, title: spec.title };
 }
 
 /** Every daily quest of the day done: the board bonus, once a day. */

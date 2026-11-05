@@ -93,7 +93,14 @@ describe('activity and XP', () => {
     expect(again.body.game.state.xp).toBe(25);
 
     const types = (await activities()).map((a) => a.type).sort();
-    expect(types).toEqual(['item_created', 'task_completed', 'task_completed', 'task_reopened']);
+    // The project and the task were made (the tutorial reads projects), then the completions.
+    expect(types).toEqual([
+      'item_created',
+      'item_created',
+      'task_completed',
+      'task_completed',
+      'task_reopened',
+    ]);
     // Deleting doesn't take XP away.
     await as.del(`/api/tasks/${t.id}`);
     expect((await as.get('/api/game/state')).body.xp).toBe(25);
@@ -164,6 +171,8 @@ describe('quests', () => {
   it('builds today’s and this week’s boards once', async () => {
     const p = await newProject('Thesis');
     await newTask('Outline', { projectId: p.id });
+    // Making the project already built a board (before the task existed); start from none.
+    await db.delete(quests).where(eq(quests.userId, userId));
     const first = await as.get('/api/quests');
     expect(first.status).toBe(200);
     const types = first.body.quests.map((q: { type: string }) => q.type);
