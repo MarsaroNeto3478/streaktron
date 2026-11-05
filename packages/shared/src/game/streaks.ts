@@ -10,6 +10,7 @@ export function qualifies(a: Activity): boolean {
   switch (a.type) {
     case 'task_completed':
     case 'habit_checked':
+    case 'review_completed':
       return true;
     case 'focus_completed':
       return a.payload.minutes >= GAME.xp.focusMinMinutes;

@@ -509,3 +509,41 @@ O QUE FOI FEITO: nova página /areas/<id> para cada área:
   usado nas duas páginas.
 RESULTADO: tipos e lint passando. Não deu para ver no navegador: o painel está na tela de login.
   (continuação) "faz o commit e push": commit na main e push para MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — A revisão semanal
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para a revisão semanal".
+  Perguntas ao autor, com as respostas:
+  - Quando a revisão aparece? "Fim de semana" (o Today lembra nos 2 últimos dias da semana e no
+    primeiro da seguinte; cobre os últimos 7 dias; uma por semana; dá para abrir pelo menu fora
+    disso).
+  - Concluir a revisão deixa o dia ativo? "Sim, conta".
+O QUE FOI FEITO:
+  - Página "Weekly review" (menu, paleta de comandos e atalho G R) com seis passos: a sua semana
+    (tarefas, foco, dias ativos, hábitos, XP e em quais projetos o trabalho foi), o que ficou
+    parado, a inbox, as próximas ações (uma por projeto ativo), projetos ativos e estacionados
+    (estacionar ou reativar) e duas perguntas: "O que foi bem?" e "O que fazer diferente?".
+  - No fim: 50 XP (uma vez por semana), o dia conta para o streak, e a nova quest semanal "Do the
+    weekly review" (caixa grande) é concluída. O Streaky comemora, e as revisões antigas ficam
+    listadas embaixo.
+  - No Today, um card com o Streaky pensativo lembra da revisão no fim de semana.
+DECISÕES: D38.
+RESULTADO: 270 testes passando (7 novos). Não deu para ver no navegador: o painel está na tela de
+  login.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Ligar o Docker e a API
+-------------------------------------------------------------------------------------------------
+PEDIDO: "liga o dockers e a api ai".
+O QUE FOI FEITO: o Docker Desktop estava desligado (por isso a API tinha caído). Foi aberto, o
+  container do banco subiu, e a API e o site foram ligados de novo.
+RESULTADO: banco aceitando conexões, API em 127.0.0.1:3001 respondendo {"ok":true,"db":"up"},
+  site em localhost:5173 com o proxy para a API funcionando.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Commit, merge e push da revisão semanal
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push".
+O QUE FOI FEITO: commit no branch "phase-4-review", merge na main e push para
+  MarsaroNeto3478/streaktron (main e o branch).

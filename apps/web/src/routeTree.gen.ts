@@ -15,6 +15,7 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppCalendarRouteImport } from './routes/_app/calendar'
 import { Route as AppHabitsRouteImport } from './routes/_app/habits'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
+import { Route as AppReviewRouteImport } from './routes/_app/review'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppStatsRouteImport } from './routes/_app/stats'
 import { Route as AppTasksRouteImport } from './routes/_app/tasks'
@@ -50,6 +51,11 @@ const AppHabitsRoute = AppHabitsRouteImport.update({
 const AppInboxRoute = AppInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReviewRoute = AppReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof AppCalendarRoute
   '/habits': typeof AppHabitsRoute
   '/inbox': typeof AppInboxRoute
+  '/review': typeof AppReviewRoute
   '/settings': typeof AppSettingsRoute
   '/stats': typeof AppStatsRoute
   '/tasks': typeof AppTasksRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof AppCalendarRoute
   '/habits': typeof AppHabitsRoute
   '/inbox': typeof AppInboxRoute
+  '/review': typeof AppReviewRoute
   '/settings': typeof AppSettingsRoute
   '/stats': typeof AppStatsRoute
   '/tasks': typeof AppTasksRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/_app/calendar': typeof AppCalendarRoute
   '/_app/habits': typeof AppHabitsRoute
   '/_app/inbox': typeof AppInboxRoute
+  '/_app/review': typeof AppReviewRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/stats': typeof AppStatsRoute
   '/_app/tasks': typeof AppTasksRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/habits'
     | '/inbox'
+    | '/review'
     | '/settings'
     | '/stats'
     | '/tasks'
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/habits'
     | '/inbox'
+    | '/review'
     | '/settings'
     | '/stats'
     | '/tasks'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/_app/calendar'
     | '/_app/habits'
     | '/_app/inbox'
+    | '/_app/review'
     | '/_app/settings'
     | '/_app/stats'
     | '/_app/tasks'
@@ -228,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInboxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/review': {
+      id: '/_app/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof AppReviewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -284,6 +303,7 @@ interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
   AppHabitsRoute: typeof AppHabitsRoute
   AppInboxRoute: typeof AppInboxRoute
+  AppReviewRoute: typeof AppReviewRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppStatsRoute: typeof AppStatsRoute
   AppTasksRoute: typeof AppTasksRoute
@@ -297,6 +317,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCalendarRoute: AppCalendarRoute,
   AppHabitsRoute: AppHabitsRoute,
   AppInboxRoute: AppInboxRoute,
+  AppReviewRoute: AppReviewRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppStatsRoute: AppStatsRoute,
   AppTasksRoute: AppTasksRoute,

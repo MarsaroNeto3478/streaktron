@@ -142,6 +142,13 @@ function useExplain(q: Quest): Explained {
         counts: 'A focus session of 10 minutes or more, finished today.',
         go: focus('Start 10 minutes', 10),
       };
+    case 'review.weekly':
+      return {
+        what: 'Look back on your last seven days, sort the inbox, pick next actions and write two lines about the week. About five minutes.',
+        counts:
+          'Finishing the weekly review. Today reminds you at the end of the week; a review on the first day of the next week still counts for this one.',
+        go: { label: 'Start the review', run: () => void navigate({ to: '/review' }) },
+      };
     case 'make.task':
       return {
         what: 'Add a new task to this project.',

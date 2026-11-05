@@ -18,6 +18,14 @@ export const GAME = {
     habitCheckin: 10,
     /** …but none on the day the habit was made, and at most this much a day from habits (D37). */
     habitDailyCap: 50,
+    /** The weekly review, once per week (D38). */
+    weeklyReview: 50,
+  },
+  review: {
+    /** Today reminds about the review on the week's last this-many days (and the next one's first). */
+    windowDays: 2,
+    /** The "Do the weekly review" quest. */
+    questXp: 50,
   },
   levels: {
     /** Cumulative XP to reach level n is `step · n · (n − 1)`: L2 = 100, L3 = 300, L10 = 4500. */

@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D38 | Weekly review: six steps at `/review`, a reminder at the end of the week, once a week, 50 XP, makes the day active, a `review` quest each week |
 | D37 | Habit XP can't be farmed: 0 XP on a habit's first day, at most 50 XP a day from habits; quests don't make an active day by themselves |
 | D36 | Streaky's tour is a `tutorial` quest chain on Today (invitation, question, five steps, rewards once per account); the challenge answer tunes quick quests, Today's size, the comeback, the active limit or daily variety |
 | D35 | Calendar: events on local dates and wall-clock times, a tested RRULE subset with skips, countdown flag, dragging a task sets its scheduled date |
@@ -528,10 +529,10 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Calendar events: one-off + recurring (a tested RRULE subset in `packages/shared/calendar` instead of the `rrule` lib), project association, skip one occurrence (D35)
 - [x] Calendar view: month + week, showing events, task due/scheduled dates, focus minutes per day; drag a task onto a day (or from "No date") to schedule it (D35)
 - [ ] Countdowns: pin events/due dates; countdown widgets on Today and project page — *done on Today for events marked "count down" (D35); still to do: the project page, and counting down to task/project due dates*
-- [ ] Weekly review flow (summary, stalled projects, inbox triage, next actions, active/parked swap, reflection)
+- [x] Weekly review flow (summary, stalled projects, inbox triage, next actions, active/parked swap, reflection) (D38)
 - [ ] Commitment goal progress from focus minutes, with pace
 - [ ] Weekly quests fully wired (touch all active projects, weekly target)
-- [ ] **Review** quest type (weekly review, revisit a parked project)
+- [ ] **Review** quest type (weekly review, revisit a parked project) — *the weekly review quest is done (D38); "revisit a parked project" is still to do*
 - [ ] **Project** quest type generated from goals and deadlines
 - [ ] PWA: manifest, service worker (no offline data), install on phone over Tailscale HTTPS
 - [ ] Web Push reminders: habits due, focus ended, opt-in "streak at risk" nudge (max one per day)

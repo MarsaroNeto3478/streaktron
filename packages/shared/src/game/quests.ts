@@ -28,6 +28,8 @@ export const QUEST_TYPES = [
   'comeback',
   /** The tutorial's steps (D31): one at a time, each spawning the next. */
   'tutorial',
+  /** The weekly review (D38). */
+  'review',
 ] as const;
 export type QuestType = (typeof QUEST_TYPES)[number];
 
@@ -38,6 +40,7 @@ export const RESTABLE_TYPES = [
   'time',
   'make',
   'weekly',
+  'review',
 ] as const satisfies readonly QuestType[];
 
 export const QUEST_TYPE_LABELS: Record<QuestType, string> = {
@@ -49,6 +52,7 @@ export const QUEST_TYPE_LABELS: Record<QuestType, string> = {
   weekly: 'Weekly',
   comeback: 'Comeback',
   tutorial: 'Tutorial',
+  review: 'Review',
 };
 
 export const BOX_TIERS = ['small', 'standard', 'large', 'special'] as const;
@@ -135,6 +139,8 @@ export interface BoardContext {
   hasWeekBoard: boolean;
   /** The answer to Streaky's question, which tunes the board a little (D36). */
   challenge: Challenge | null;
+  /** This week's "Do the weekly review" quest exists already. */
+  hasReviewQuest: boolean;
 }
 
 interface Candidate {
@@ -157,6 +163,7 @@ const BOX: Record<QuestType, BoxTier> = {
   time: 'standard',
   weekly: 'large',
   tutorial: 'small',
+  review: 'large',
 };
 
 const fmtMinutes = (m: number) => {
@@ -313,6 +320,19 @@ function timeWeekSpec(ctx: BoardContext, rng: Rng): QuestSpec {
     ),
     ...weekBounds(ctx),
     boxTier: 'large',
+  };
+}
+
+/**
+ * "Do the weekly review": for this week, open through the next week's first day, when a review
+ * can still count for this week (D38).
+ */
+function reviewSpec(ctx: BoardContext): QuestSpec {
+  const start = startOfWeek(ctx.today, ctx.weekStart);
+  return {
+    ...dayQuest(ctx, 'review', 'review.weekly', 'Do the weekly review', GAME.review.questXp),
+    periodStart: start,
+    periodEnd: addDays(start, 7),
   };
 }
 
@@ -480,6 +500,7 @@ export function planBoard(ctx: BoardContext, rng: Rng): QuestSpec[] {
     if (!resting(ctx, 'weekly')) out.push(weeklyTargetSpec(ctx));
     if (!resting(ctx, 'time')) out.push(timeWeekSpec(ctx, rng));
   }
+  if (!ctx.hasReviewQuest && !idle && !resting(ctx, 'review')) out.push(reviewSpec(ctx));
   return out;
 }
 
@@ -657,6 +678,11 @@ export function questProgress(
     case 'follow_up.task':
     case 'follow_up.goal':
       return extra.filledParts ?? 0;
+    case 'review.weekly':
+      // Only the review of this quest's week: next week's first day can hold last week's review.
+      return inPeriod.filter(
+        (a) => a.type === 'review_completed' && a.payload.weekStart === q.periodStart,
+      ).length;
     case 'tutorial.area':
       return inPeriod.filter((a) => a.type === 'item_created' && a.payload.kind === 'area').length;
     case 'tutorial.project':
@@ -746,6 +772,8 @@ export function affectedTemplates(a: Activity): readonly string[] {
       ];
     case 'habit_checked':
       return ['quick.habit', 'daily.all_habits', 'weekly.target'];
+    case 'review_completed':
+      return ['review.weekly', 'weekly.target'];
     default:
       return [];
   }
