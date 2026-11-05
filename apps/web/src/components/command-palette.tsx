@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   BarChart3,
+  CalendarPlus,
   FolderPlus,
   Inbox,
   Keyboard,
@@ -26,7 +27,7 @@ import { useOpenEntity, useOpenTask } from '@/hooks/use-open-task';
 import { isMac } from '@/hooks/use-hotkeys';
 import { useTaskActions } from '@/lib/actions';
 import { projectsQuery, searchQuery, type Project, type SearchHit } from '@/lib/queries';
-import { newArea, newHabit, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
+import { newArea, newEvent, newHabit, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
 import { EntityIcon, RefIcon } from './entity-icon';
 
 export function CommandPalette() {
@@ -167,6 +168,12 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       icon: Repeat,
       hint: 'G H',
       run: run(() => void navigate({ to: '/habits' })),
+    },
+    {
+      id: 'new-event',
+      label: 'New event',
+      icon: CalendarPlus,
+      run: run(() => newEvent()),
     },
     {
       id: 'new-habit',

@@ -12,6 +12,7 @@ import { gameEvents } from './http/game';
 import { adminRoutes } from './routes/admin';
 import { areaRoutes } from './routes/areas';
 import { columnRoutes } from './routes/columns';
+import { calendarRoutes, eventRoutes } from './routes/events';
 import { goalRoutes } from './routes/goals';
 import { habitRoutes } from './routes/habits';
 import { healthRoutes } from './routes/health';
@@ -38,6 +39,8 @@ const api = new Hono()
   .route('/goals', goalRoutes)
   .route('/tasks', taskRoutes)
   .route('/habits', habitRoutes)
+  .route('/events', eventRoutes)
+  .route('/calendar', calendarRoutes)
   .route('/search', searchRoutes)
   .route('/entities', entityRoutes)
   .route('/snapshots', snapshotRoutes)

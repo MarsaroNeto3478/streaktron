@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ListTodo, Plus, Repeat, Timer } from 'lucide-react';
+import { CalendarDays, Hourglass, ListTodo, Plus, Repeat, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
 import { HabitRow } from '@/components/habits';
+import { countdownLabel } from '@streaktron/shared/calendar';
 import { QuestBoard } from '@/components/quest-board';
 import { TaskRow } from '@/components/task-row';
 import { Button } from '@/components/ui/button';
@@ -15,8 +16,9 @@ import {
   todayQuery,
   type FocusItem,
   type Habit,
+  type TodayData,
 } from '@/lib/queries';
-import { newHabit, openPalette, startFocus } from '@/lib/ui-store';
+import { editEvent, newEvent, newHabit, openPalette, startFocus } from '@/lib/ui-store';
 
 export const Route = createFileRoute('/_app/today')({
   component: TodayPage,
@@ -61,6 +63,7 @@ function TodayPage() {
       </div>
 
       <GameHeader />
+      <Agenda data={today} today={me.today} />
       <FocusList items={today?.focus} today={me.today} />
       <TodayHabits habits={today?.habits} today={me.today} />
       <QuestBoard />
@@ -160,6 +163,59 @@ function TodayHabits({ habits, today }: { habits: Habit[] | undefined; today: st
         <div className="rounded-xl border bg-card p-1">
           {habits.map((h) => (
             <HabitRow key={h.id} habit={h} today={today} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Today's events and the countdowns; hidden when there's neither. */
+function Agenda({ data, today }: { data: TodayData | undefined; today: string }) {
+  if (!data || (!data.agenda.length && !data.countdowns.length)) return null;
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
+          <CalendarDays className="size-4 text-sky-500" /> Agenda
+        </h2>
+        <Button variant="ghost" size="sm" className="h-7" onClick={() => newEvent(today)}>
+          <Plus className="size-3.5" /> Event
+        </Button>
+      </div>
+      {data.countdowns.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {data.countdowns.slice(0, 6).map((c) => (
+            <button
+              key={c.eventId}
+              onClick={() => editEvent(c.eventId, c.date)}
+              className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left hover:bg-muted/50"
+            >
+              <Hourglass className="size-4 text-amber-500" />
+              <span>
+                <span className="block text-sm font-medium">{c.title}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {countdownLabel(today, c.date)}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {data.agenda.length > 0 && (
+        <div className="divide-y rounded-xl border bg-card">
+          {data.agenda.map((e) => (
+            <button
+              key={`${e.eventId}${e.date}`}
+              onClick={() => editEvent(e.eventId, e.date)}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm first:rounded-t-xl last:rounded-b-xl hover:bg-muted/40"
+            >
+              <span className="w-24 shrink-0 text-xs text-muted-foreground tabular-nums">
+                {e.startTime ? `${e.startTime}${e.endTime ? `–${e.endTime}` : ''}` : 'All day'}
+              </span>
+              <span className="truncate font-medium">{e.title}</span>
+              {e.repeats && <Repeat className="ml-auto size-3.5 shrink-0 text-muted-foreground" />}
+            </button>
           ))}
         </div>
       )}

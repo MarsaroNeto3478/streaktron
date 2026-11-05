@@ -4,3 +4,4 @@ export * from './structure';
 export * from './links';
 export * from './game';
 export * from './habits';
+export * from './calendar';

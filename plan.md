@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D35 | Calendar: events on local dates and wall-clock times, a tested RRULE subset with skips, countdown flag, dragging a task sets its scheduled date |
 | D34 | Habits: weekday or N-a-week schedules, own streaks, 10 XP once per habit-day, a forgotten check-in allowed for yesterday but counted today |
 
 Rejected ideas are listed at the end of the decisions log so they aren't proposed again.
@@ -522,9 +523,9 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 ### Phase 4 — Consistency tools, calendar & reminders
 - [x] Habits: CRUD, flexible schedules, check-ins from Today and habit page, habit streaks; habit quests (quick + daily) (D34)
 - [x] *(user's idea, added 2026-11-04)* Clicking a quest opens its details: what to do, what counts, progress, reward, the parts a follow-up still needs, and a button that goes where the quest asks (task, project, Inbox, Habits, focus timer)
-- [ ] Calendar events: one-off + recurring (RRULE via `rrule` lib), project association
-- [ ] Calendar view: month + week, showing events, schedule blocks, task due/scheduled dates, focus sessions; drag a task onto a day to schedule it
-- [ ] Countdowns: pin events/due dates; countdown widgets on Today and project page
+- [x] Calendar events: one-off + recurring (a tested RRULE subset in `packages/shared/calendar` instead of the `rrule` lib), project association, skip one occurrence (D35)
+- [x] Calendar view: month + week, showing events, task due/scheduled dates, focus minutes per day; drag a task onto a day (or from "No date") to schedule it (D35)
+- [ ] Countdowns: pin events/due dates; countdown widgets on Today and project page — *done on Today for events marked "count down" (D35); still to do: the project page, and counting down to task/project due dates*
 - [ ] Weekly review flow (summary, stalled projects, inbox triage, next actions, active/parked swap, reflection)
 - [ ] Commitment goal progress from focus minutes, with pace
 - [ ] Weekly quests fully wired (touch all active projects, weekly target)

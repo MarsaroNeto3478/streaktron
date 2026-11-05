@@ -17,6 +17,7 @@ import {
 } from '../structure';
 import { isDateString, isValidTimeZone } from '../time';
 import { RESTABLE_TYPES } from '../game/quests';
+import { FREQS, TIME_RE } from '../calendar';
 
 export const dateString = z.string().refine(isDateString, 'Expected a YYYY-MM-DD day');
 
@@ -382,3 +383,80 @@ export const habitCheckinSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 export type HabitCheckin = z.infer<typeof habitCheckinSchema>;
+
+// --- Calendar (Phase 4, D35) -----------------------------------------------------------------
+
+const clockTime = z.string().refine((s) => TIME_RE.test(s), 'Expected HH:MM');
+
+export const recurrenceSchema = z.object({
+  freq: z.enum(FREQS),
+  interval: z.int().min(1).max(99).default(1),
+  byDay: z
+    .array(z.int().min(0).max(6))
+    .max(7)
+    .transform((d) => [...new Set(d)].sort())
+    .optional(),
+  until: dateString.optional(),
+  count: z.int().min(1).max(999).optional(),
+});
+export type RecurrenceInput = z.input<typeof recurrenceSchema>;
+
+const eventFields = {
+  title,
+  notes: z.string().trim().max(2000),
+  projectId: idOf('project').nullable(),
+  startDate: dateString,
+  /** All-day events that span days; null = one day. */
+  endDate: dateString.nullable(),
+  /** Null = all day. */
+  startTime: clockTime.nullable(),
+  endTime: clockTime.nullable(),
+  recurrence: recurrenceSchema.nullable(),
+  /** Show a countdown to it on Today (and its project). */
+  countdown: z.boolean(),
+};
+
+/** The shape rules every event must keep, after a create or a merged patch. */
+export function eventShapeProblem(e: {
+  startDate: string;
+  endDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  recurrence: { until?: string } | null;
+}): string | null {
+  if (e.endDate && e.endDate < e.startDate) return 'The end date can’t be before the start';
+  if (e.endTime && !e.startTime) return 'An end time needs a start time';
+  if (e.startTime && e.endTime && e.endTime <= e.startTime)
+    return 'The end time must be after the start';
+  if (e.startTime && e.endDate && e.endDate !== e.startDate)
+    return 'Timed events stay within one day; make it all-day to span days';
+  if (e.recurrence?.until && e.recurrence.until < e.startDate)
+    return 'The repeat can’t end before the event starts';
+  return null;
+}
+
+export const eventCreateSchema = z
+  .object({
+    ...eventFields,
+    notes: eventFields.notes.optional(),
+    projectId: eventFields.projectId.optional(),
+    endDate: eventFields.endDate.optional().default(null),
+    startTime: eventFields.startTime.optional().default(null),
+    endTime: eventFields.endTime.optional().default(null),
+    recurrence: eventFields.recurrence.optional().default(null),
+    countdown: eventFields.countdown.optional(),
+  })
+  .superRefine((e, ctx) => {
+    const problem = eventShapeProblem(e);
+    if (problem) ctx.addIssue({ code: 'custom', path: ['startDate'], message: problem });
+  });
+export type EventCreate = z.input<typeof eventCreateSchema>;
+
+export const eventPatchSchema = z.object(eventFields).partial();
+export type EventPatch = z.infer<typeof eventPatchSchema>;
+
+/** Skip one occurrence of a repeating event ("delete only this one"). */
+export const eventSkipSchema = z.object({ date: dateString });
+
+/** The calendar asks for at most this many days at once (a month view is 42). */
+export const CALENDAR_MAX_DAYS = 120;
