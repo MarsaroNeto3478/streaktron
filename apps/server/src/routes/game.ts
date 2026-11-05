@@ -21,7 +21,8 @@ import {
   startFocus,
 } from '../services/focus';
 import { getGameState, heatmap, questBoard, rerollQuest } from '../services/game';
-import { countdowns, occurrencesIn } from '../services/events';
+import { todayCountdowns } from '../services/countdowns';
+import { occurrencesIn } from '../services/events';
 import { todayHabits } from '../services/habits';
 import { focusList } from '../services/today';
 
@@ -48,7 +49,7 @@ export const todayRoutes = new Hono<AuthedEnv>().use(requireUser).get('/', async
     focusList(db, userId, today),
     todayHabits(db, userId),
     occurrencesIn(db, userId, today, today),
-    countdowns(db, userId, today),
+    todayCountdowns(db, userId, today),
   ]);
   return c.json({ today, focus, habits, agenda, countdowns: upcoming });
 });

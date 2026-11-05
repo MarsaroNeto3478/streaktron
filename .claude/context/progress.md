@@ -150,3 +150,8 @@
 - **Server:** table `weekly_reviews` (migration `0009_weekly_review`); `services/reviews.ts` (`currentReview`: window, the last seven days' numbers, per-project work, stalled projects, this week's review if done; `completeReview`, once per week, 409 `review_done`; `listReviews`); `/api/reviews`, `/api/reviews/current`, `/api/reviews/complete`; the board context knows `hasReviewQuest`. 2 API tests (270 in all).
 - **Web:** `routes/_app/review.tsx`: the six steps (your week, what stalled, inbox, next actions with a picker per project, active and parked with Park / Make active, the two questions), the done state with the celebrating Streaky, and past reviews. `ReviewCard` on Today in the window. Nav "Weekly review", palette, `G R`; the quest detail explains `review.weekly`; Settings can rest review quests.
 - **Not checked in the browser** (the pane is at the sign-in page).
+
+### 2026-11-05 — Phase 4: countdowns on projects (branch `phase-4-countdowns`)
+- **Server:** `services/countdowns.ts`: `todayCountdowns` (countdown events plus active projects' due dates from today on) for `/api/today`, and `projectCountdowns` (the project's due date, its countdown events, its next three open task deadlines) in `GET /api/projects/:id`. Countdowns now share one shape `{ kind: event | project | task, id, title, date, projectId }`. 2 API tests (272 in all).
+- **Web:** `components/countdowns.tsx` (chips with an icon per kind, amber within 3 days, click opens the event, project or task) on Today's Agenda and under a project page's next action (D39).
+- **From the user's testing:** tasks join Today's countdowns (the next three, by due date or else planned day), and task rows show a due or planned date within 3 days in amber (`isSoon` in shared calendar). 274 tests.

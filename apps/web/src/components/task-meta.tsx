@@ -1,3 +1,4 @@
+import { isSoon } from '@streaktron/shared/calendar';
 import { CalendarClock, CalendarDays, ListChecks, Target } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatDayShort } from '@/lib/days';
@@ -41,6 +42,9 @@ export function EffortBadge({ effort }: { effort: 'S' | 'M' | 'L' }) {
   );
 }
 
+/** A date within three days, like the countdowns (D39). */
+const soonClass = 'font-medium text-amber-600 dark:text-amber-400';
+
 /** The small facts under or beside a task title. */
 export function TaskMeta({
   task,
@@ -66,14 +70,21 @@ export function TaskMeta({
       {task.dueDate && (
         <Chip
           title={`Due ${task.dueDate}`}
-          className={cn(late && 'font-semibold text-destructive', done && 'line-through')}
+          className={cn(
+            late && 'font-semibold text-destructive',
+            !late && !done && isSoon(today, task.dueDate) && soonClass,
+            done && 'line-through',
+          )}
         >
           <CalendarDays />
           {formatDayShort(task.dueDate, today)}
         </Chip>
       )}
       {task.scheduledDate && !done && (
-        <Chip title={`Scheduled for ${task.scheduledDate}`}>
+        <Chip
+          title={`Scheduled for ${task.scheduledDate}`}
+          className={cn(isSoon(today, task.scheduledDate) && soonClass)}
+        >
           <CalendarClock />
           {formatDayShort(task.scheduledDate, today)}
         </Chip>

@@ -547,3 +547,34 @@ RESULTADO: banco aceitando conexões, API em 127.0.0.1:3001 respondendo {"ok":tr
 PEDIDO: "faz o commit, merge e push".
 O QUE FOI FEITO: commit no branch "phase-4-review", merge na main e push para
   MarsaroNeto3478/streaktron (main e o branch).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Contagens regressivas no projeto
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para os countdowns no projeto".
+  Pergunta ao autor: o que aparece como contagem? Resposta: "Automático".
+O QUE FOI FEITO:
+  - Na página do projeto, abaixo da próxima ação: contagens para o prazo do projeto, os eventos
+    dele marcados com "count down" e os 3 próximos prazos de tarefas abertas.
+  - No Today (Agenda): além dos eventos marcados, os prazos dos projetos ativos (estacionados e
+    vencidos ficam de fora).
+  - Cada contagem tem um ícone (evento, prazo de projeto, prazo de tarefa), fica amarela quando
+    faltam 3 dias ou menos, e abre o evento, o projeto ou a tarefa ao clicar.
+DECISÕES: D39 (contagens automáticas).
+RESULTADO: 272 testes passando (2 novos).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Tarefas junto das contagens, e amarelo a 3 dias
+-------------------------------------------------------------------------------------------------
+PEDIDO: (com um print do Focus do Today, com "alou" para sábado e "chucuprito" para amanhã) "eu
+  penso que as tasks deveriam ficar com as demais, e quando ficar com 3 dias de ele trocasse para
+  amarelo".
+O QUE FOI FEITO:
+  - As tarefas entram nas contagens do Today, junto com os eventos e os prazos de projeto: as 3
+    próximas, pelo prazo ou, se não tiver prazo, pela data planejada (como as do print).
+  - Nas linhas de tarefa (Today, listas, quadro), a data de prazo ou planejada fica amarela
+    quando faltam 3 dias ou menos; vencida continua vermelha. A regra é a mesma das contagens.
+DECISÕES: D39 atualizada.
+RESULTADO: 274 testes passando (2 novos).
+  (continuação) "faz o commit, merge e push": commit no branch "phase-4-countdowns", merge na
+  main e push para MarsaroNeto3478/streaktron.

@@ -12,7 +12,9 @@ import { z } from 'zod';
 import { db } from '../db/client';
 import { requireUser, type AuthedEnv } from '../http/session';
 import { validate } from '../http/validate';
+import { userToday } from '../services/activity';
 import { createColumn, listColumns, reorderColumns } from '../services/board';
+import { projectCountdowns } from '../services/countdowns';
 import { listGoals } from '../services/goals';
 import {
   createProject,
@@ -32,16 +34,20 @@ export const projectRoutes = new Hono<AuthedEnv>()
   .post('/', validate('json', projectCreateSchema), async (c) =>
     c.json(await createProject(c.get('user').id, c.req.valid('json')), 201),
   )
-  /** The project page: the project, its board columns and its goals. */
+  /** The project page: the project, its board columns, its goals and its countdowns. */
   .get('/:id', param, async (c) => {
     const userId = c.get('user').id;
     const { id } = c.req.valid('param');
-    const project = await projectView(db, userId, id);
-    const [columns, goals] = await Promise.all([
+    const [project, today] = await Promise.all([
+      projectView(db, userId, id),
+      userToday(db, userId),
+    ]);
+    const [columns, goals, countdowns] = await Promise.all([
       listColumns(db, userId, id),
       listGoals(db, userId, id),
+      projectCountdowns(db, userId, project, today),
     ]);
-    return c.json({ project, columns, goals });
+    return c.json({ project, columns, goals, countdowns });
   })
   .patch('/:id', param, validate('json', projectPatchSchema), async (c) =>
     c.json(await updateProject(c.get('user').id, c.req.valid('param').id, c.req.valid('json'))),

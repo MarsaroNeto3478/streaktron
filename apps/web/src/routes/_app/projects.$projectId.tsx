@@ -18,6 +18,7 @@ import { z } from 'zod';
 import type { RichDoc } from '@streaktron/shared/rich';
 import { Backlinks } from '@/components/backlinks';
 import { Board } from '@/components/board';
+import { Countdowns } from '@/components/countdowns';
 import { EntityIcon } from '@/components/entity-icon';
 import { GoalsPanel } from '@/components/goals-panel';
 import { QuickAdd } from '@/components/quick-add';
@@ -133,6 +134,7 @@ function ProjectPage() {
     <div className={cn('mx-auto space-y-5', view === 'board' ? 'max-w-none' : 'max-w-4xl')}>
       <ProjectHeader project={project} today={today} />
       <NextAction project={project} />
+      <Countdowns items={page.countdowns} today={today} />
 
       <Tabs
         value={view}

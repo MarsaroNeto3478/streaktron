@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   countdownLabel,
   describeRecurrence,
+  isSoon,
   nextOccurrence,
   occurrences,
   parseRRule,
@@ -135,5 +136,15 @@ describe('labels', () => {
     expect(countdownLabel('2026-11-04', '2026-11-05')).toBe('Tomorrow');
     expect(countdownLabel('2026-11-04', '2026-11-16')).toBe('In 12 days');
     expect(countdownLabel('2026-11-04', '2026-11-01')).toBe('3 days ago');
+  });
+});
+
+describe('soon (D39)', () => {
+  it('is today and the next three days, never the past', () => {
+    expect(['2026-11-05', '2026-11-08'].map((d) => isSoon('2026-11-05', d))).toEqual([true, true]);
+    expect(['2026-11-09', '2026-11-04'].map((d) => isSoon('2026-11-05', d))).toEqual([
+      false,
+      false,
+    ]);
   });
 });

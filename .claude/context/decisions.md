@@ -200,6 +200,12 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** The plan's review ritual (§4, Phase 4) fights novelty wearing off and projects stalling. The window matches when people naturally look back; one per week keeps it from being farmed. The reflection is plain text, like habit and event notes (D34, D35): no mentions to resolve from a review.
 - **Alternatives:** Available any day without a reminder; a fixed day chosen in Settings; a review that only gives XP and doesn't count as an active day (the user chose that it counts); a rich-text reflection with mentions.
 
+### D39 · Countdowns are automatic — accepted (2026-11-05, the user chose Claude's recommendation)
+- **Decision:** Nothing is marked by hand besides events (D35). **Today** counts down to events marked "count down" and to the due dates of **active** projects (not parked, not overdue). A **project page** counts down to its own due date, its countdown events and the next **three** due dates of its open tasks. Past dates don't show; a countdown within 3 days turns amber; clicking one opens the event, project or task. One component (`components/countdowns.tsx`) draws both.
+- **Changed the same day (the user's call):** tasks count down on Today too, with the others: the next **three** open tasks (inbox or active projects), by their due date or, without one, the day they're planned for; a project page uses the same date for its tasks. And a task's due or planned date in task rows turns **amber** within 3 days, like the countdowns (`isSoon`, `SOON_DAYS` in `@streaktron/shared/calendar`); an overdue date stays red.
+- **Why:** Deadlines already live on projects and tasks; asking to mark them again would be busywork. Three tasks keep Today short.
+- **Alternatives:** A "count down" flag on tasks and projects too; automatic with a way to hide one.
+
 ---
 
 ## Rejected ideas (don't propose again)

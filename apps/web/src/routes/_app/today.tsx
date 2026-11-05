@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { CalendarDays, Hourglass, ListTodo, Plus, Repeat, Timer } from 'lucide-react';
+import { CalendarDays, ListTodo, Plus, Repeat, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
 import { HabitRow } from '@/components/habits';
-import { countdownLabel } from '@streaktron/shared/calendar';
 import { GAME } from '@streaktron/shared/game';
 import { QuestBoard } from '@/components/quest-board';
+import { Countdowns } from '@/components/countdowns';
 import { TaskRow } from '@/components/task-row';
 import { ReviewCard } from '@/components/review-card';
 import { TutorialCard } from '@/components/tutorial-card';
@@ -190,7 +190,7 @@ function TodayHabits({ habits, today }: { habits: Habit[] | undefined; today: st
   );
 }
 
-/** Today's events and the countdowns; hidden when there's neither. */
+/** Today's events and the countdowns (events and project due dates); hidden when there's neither. */
 function Agenda({ data, today }: { data: TodayData | undefined; today: string }) {
   if (!data || (!data.agenda.length && !data.countdowns.length)) return null;
   return (
@@ -203,25 +203,7 @@ function Agenda({ data, today }: { data: TodayData | undefined; today: string })
           <Plus className="size-3.5" /> Event
         </Button>
       </div>
-      {data.countdowns.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {data.countdowns.slice(0, 6).map((c) => (
-            <button
-              key={c.eventId}
-              onClick={() => editEvent(c.eventId, c.date)}
-              className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left hover:bg-muted/50"
-            >
-              <Hourglass className="size-4 text-amber-500" />
-              <span>
-                <span className="block text-sm font-medium">{c.title}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {countdownLabel(today, c.date)}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      <Countdowns items={data.countdowns} today={today} />
       {data.agenda.length > 0 && (
         <div className="divide-y rounded-xl border bg-card">
           {data.agenda.map((e) => (
