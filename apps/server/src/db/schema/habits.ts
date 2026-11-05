@@ -2,7 +2,7 @@
 // The XP and active days a check-in brings come from the activity log (`habit_checked`), not from
 // these rows, so unchecking never takes anything away (D15).
 
-import type { HabitSchedule } from '@streaktron/shared/habits';
+import type { HabitSchedule } from '@strekatron/shared/habits';
 import {
   date,
   index,

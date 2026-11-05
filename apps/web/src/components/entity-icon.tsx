@@ -1,5 +1,5 @@
-import type { LinkableKind } from '@streaktron/shared/rich';
-import type { ColorKey, IconKey } from '@streaktron/shared/structure';
+import type { LinkableKind } from '@strekatron/shared/rich';
+import type { ColorKey, IconKey } from '@strekatron/shared/structure';
 import { CheckCircle2, CircleDashed, Folder, Shapes, Target } from 'lucide-react';
 import { COLOR, ICON } from '@/lib/look';
 import { cn } from '@/lib/utils';

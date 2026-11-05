@@ -1,7 +1,7 @@
 // Areas → projects → goals and tasks, plus board columns and the snapshots kept when a project or
 // area is deleted. Every row has `user_id`; every query is scoped by it (D1).
 
-import type { RichDoc } from '@streaktron/shared/rich';
+import type { RichDoc } from '@strekatron/shared/rich';
 import {
   COLORS,
   COLUMN_CATEGORIES,
@@ -11,7 +11,7 @@ import {
   GOAL_STATUSES,
   ICONS,
   PROJECT_STATUSES,
-} from '@streaktron/shared/structure';
+} from '@strekatron/shared/structure';
 import { sql } from 'drizzle-orm';
 import {
   check,

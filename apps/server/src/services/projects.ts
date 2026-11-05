@@ -6,15 +6,15 @@ import type {
   ProjectMove,
   ProjectPatch,
   ProjectStatusInput,
-} from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
+} from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
 import {
   canTransition,
   DEFAULT_COLUMNS,
   pickNextAction,
   placeAt,
   type ProjectStatus,
-} from '@streaktron/shared/structure';
+} from '@strekatron/shared/structure';
 import { and, asc, count, eq, inArray, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { areas, boardColumns, projects, tasks, userSettings } from '../db/schema';

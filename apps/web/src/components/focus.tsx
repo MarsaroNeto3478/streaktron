@@ -66,7 +66,7 @@ const clock = (ms: number) => {
 function notify(title: string, body: string) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   try {
-    new Notification(title, { body, tag: 'streaktron-focus' });
+    new Notification(title, { body, tag: 'strekatron-focus' });
   } catch {
     // Some browsers (Android) only notify from a service worker; Web Push comes in Phase 4.
   }

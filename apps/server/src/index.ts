@@ -9,7 +9,7 @@ await runMigrations();
 const boss = env.JOBS_ENABLED ? await startJobs() : null;
 
 const server = serve({ fetch: app.fetch, hostname: env.HOST, port: env.PORT }, (info) => {
-  console.log(`Streaktron server on http://${info.address}:${info.port}`);
+  console.log(`Strekatron server on http://${info.address}:${info.port}`);
 });
 
 let stopping = false;

@@ -4,7 +4,7 @@ import {
   taskListQuerySchema,
   taskMoveSchema,
   taskPatchSchema,
-} from '@streaktron/shared/schemas';
+} from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireUser, type AuthedEnv } from '../http/session';

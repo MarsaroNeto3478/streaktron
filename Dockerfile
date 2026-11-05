@@ -20,7 +20,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
 COPY packages/shared/package.json packages/shared/
-RUN pnpm install --frozen-lockfile --prod --filter @streaktron/server
+RUN pnpm install --frozen-lockfile --prod --filter @strekatron/server
 
 FROM node:26-trixie-slim
 # pg_dump for the nightly backups; Debian trixie's client matches the Postgres 17 server.

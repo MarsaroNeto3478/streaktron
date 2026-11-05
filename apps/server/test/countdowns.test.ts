@@ -1,4 +1,4 @@
-import { addDays } from '@streaktron/shared/time';
+import { addDays } from '@strekatron/shared/time';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { client, resetDb, setUpOwner, type Client } from './helpers';
 

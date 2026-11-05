@@ -5,7 +5,7 @@ import { defineProject } from 'vitest/config';
 
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ??
-  'postgres://streaktron:streaktron@localhost:5432/streaktron_test';
+  'postgres://strekatron:strekatron@localhost:5432/strekatron_test';
 
 export default defineProject({
   test: {
@@ -20,7 +20,7 @@ export default defineProject({
       DATABASE_URL: TEST_DATABASE_URL,
       BETTER_AUTH_SECRET: 'test-secret-test-secret-test-secret-00',
       APP_ORIGINS: 'http://localhost:3001',
-      DATA_DIR: mkdtempSync(join(tmpdir(), 'streaktron-test-')),
+      DATA_DIR: mkdtempSync(join(tmpdir(), 'strekatron-test-')),
       PG_DUMP: `sh ${join(import.meta.dirname, 'test/fixtures/fake-pg-dump.sh')}`,
       JOBS_ENABLED: 'false',
     },

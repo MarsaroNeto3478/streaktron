@@ -1,5 +1,5 @@
-import { newId } from '@streaktron/shared/ids';
-import type { RichDoc, RichNode } from '@streaktron/shared/rich';
+import { newId } from '@strekatron/shared/ids';
+import type { RichDoc, RichNode } from '@strekatron/shared/rich';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../src/db/client';
 import { goals, links, projects, snapshots, users } from '../src/db/schema';

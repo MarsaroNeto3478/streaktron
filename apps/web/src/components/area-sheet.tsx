@@ -1,7 +1,7 @@
 // An area's details, in a side sheet opened by the `area` search param from anywhere: its
 // description, its projects and what mentions it. Title and description save as you type.
 
-import type { RichDoc } from '@streaktron/shared/rich';
+import type { RichDoc } from '@strekatron/shared/rich';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Palette } from 'lucide-react';

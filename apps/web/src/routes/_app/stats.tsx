@@ -1,4 +1,4 @@
-import { addDays, startOfWeek } from '@streaktron/shared/time';
+import { addDays, startOfWeek } from '@strekatron/shared/time';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { GameHeader } from '@/components/game-header';

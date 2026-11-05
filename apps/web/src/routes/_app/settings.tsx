@@ -4,8 +4,8 @@ import {
   QUEST_TYPE_LABELS,
   RESTABLE_TYPES,
   type Challenge,
-} from '@streaktron/shared/game';
-import { DAY_SETTINGS_LOCK_DAYS, type SettingsPatch } from '@streaktron/shared/schemas';
+} from '@strekatron/shared/game';
+import { DAY_SETTINGS_LOCK_DAYS, type SettingsPatch } from '@strekatron/shared/schemas';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { FolderKanban, Plus, Shapes, Trash2 } from 'lucide-react';

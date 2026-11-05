@@ -2,14 +2,14 @@
 // set. On a board it agrees with the column's category: moving into a done column completes a task,
 // completing one moves it there, and the other way round.
 
-import type { TaskCreate, TaskListQuery, TaskMove, TaskPatch } from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
+import type { TaskCreate, TaskListQuery, TaskMove, TaskPatch } from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
 import {
   firstColumnOf,
   firstOpenColumn,
   placeAt,
   type TaskStatus,
-} from '@streaktron/shared/structure';
+} from '@strekatron/shared/structure';
 import { and, asc, eq, inArray, isNotNull, isNull, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/client';
 import { boardColumns, goals, tasks } from '../db/schema';

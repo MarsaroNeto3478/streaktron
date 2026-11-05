@@ -1,7 +1,7 @@
 // "Mentioned in…" (D4): what mentions this entity, grouped by kind, with the line each mention is
 // in. Shown on every task, goal, area and project.
 
-import type { LinkableKind } from '@streaktron/shared/rich';
+import type { LinkableKind } from '@strekatron/shared/rich';
 import { useQuery } from '@tanstack/react-query';
 import { useOpenEntity } from '@/hooks/use-open-task';
 import { backlinksQuery, KIND_PLURAL, type Backlink } from '@/lib/entities';

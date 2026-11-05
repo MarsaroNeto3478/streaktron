@@ -1,9 +1,9 @@
 // Areas: long-lived spheres of life holding projects. Ordered by hand; deleting one keeps a
 // snapshot, and its projects are either moved out of it or deleted with it.
 
-import type { AreaCreate, AreaPatch } from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
-import { checkedOrder } from '@streaktron/shared/structure';
+import type { AreaCreate, AreaPatch } from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
+import { checkedOrder } from '@strekatron/shared/structure';
 import { and, asc, eq } from 'drizzle-orm';
 import { db } from '../db/client';
 import { areas, projects } from '../db/schema';

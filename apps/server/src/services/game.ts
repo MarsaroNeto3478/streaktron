@@ -31,9 +31,9 @@ import {
   type QuestSpec,
   type Rng,
   xpCredits,
-} from '@streaktron/shared/game';
-import { newId } from '@streaktron/shared/ids';
-import { addDays, startOfWeek, type DateString } from '@streaktron/shared/time';
+} from '@strekatron/shared/game';
+import { newId } from '@strekatron/shared/ids';
+import { addDays, startOfWeek, type DateString } from '@strekatron/shared/time';
 import { and, asc, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { activity, goals, projects, quests, tasks, userSettings } from '../db/schema';

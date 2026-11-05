@@ -2,7 +2,7 @@
 // action of each active project. Habits join it in Phase 4. Tasks of parked, completed or archived
 // projects stay out: putting a project away also quiets it here.
 
-import type { DateString } from '@streaktron/shared/time';
+import type { DateString } from '@strekatron/shared/time';
 import { and, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { tasks } from '../db/schema';
 import type { Conn } from './common';

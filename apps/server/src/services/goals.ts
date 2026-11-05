@@ -1,18 +1,112 @@
 // Goals of a project: outcomes (optionally with a deadline) and commitments (focus minutes per
-// week or month; progress arrives with focus sessions in Phase 3).
+// week or month). A commitment carries its progress: focus on its project this period, and the
+// pace to hit the target (D40).
 
-import type { GoalCreate, GoalPatch } from '@streaktron/shared/schemas';
-import { goalShapeProblem } from '@streaktron/shared/schemas';
-import { newId } from '@streaktron/shared/ids';
-import { and, asc, eq, isNotNull, isNull } from 'drizzle-orm';
+import type { GoalCreate, GoalPatch } from '@strekatron/shared/schemas';
+import { goalShapeProblem } from '@strekatron/shared/schemas';
+import { newId } from '@strekatron/shared/ids';
+import {
+  commitmentProgress,
+  goalMinutesFrom,
+  type CommitmentProgress,
+} from '@strekatron/shared/structure';
+import type { DateString } from '@strekatron/shared/time';
+import { and, asc, eq, gte, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { db } from '../db/client';
-import { goals } from '../db/schema';
+import { activity, goals, userSettings } from '../db/schema';
 import { defined, edgeOrder, invalid, notFound, richColumns, type Conn } from './common';
-import { recordActivity, touch } from './activity';
+import { dayOf, recordActivity, touch } from './activity';
 import { writeLinks } from './links';
 import { ownedProject } from './projects';
 
-const view = ({ userId: _, deletedAt: __, ...g }: typeof goals.$inferSelect) => g;
+type GoalRow = typeof goals.$inferSelect;
+export type GoalView = Omit<GoalRow, 'userId' | 'deletedAt'> & {
+  /** Commitment goals only. */
+  progress: CommitmentProgress | null;
+};
+
+/** The goals as the API shows them, commitments with their progress (D40). */
+async function views(conn: Conn, userId: string, rows: GoalRow[]): Promise<GoalView[]> {
+  const commitments = rows.filter((g) => g.kind === 'commitment' && g.targetMinutes && g.period);
+  const progress = new Map<string, CommitmentProgress>();
+  if (commitments.length) {
+    const [s] = await conn
+      .select({
+        timezone: userSettings.timezone,
+        dayStartHour: userSettings.dayStartHour,
+        weekStart: userSettings.weekStart,
+      })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId));
+    const today = dayOf(s);
+    const weekStart = s?.weekStart ?? 1;
+    const plans = commitments.map((g) => {
+      const createdOn = dayOf(s, g.createdAt);
+      const ref = g.dueDate && g.dueDate < today ? g.dueDate : today;
+      return { g, createdOn, from: goalMinutesFrom(ref, g.period!, weekStart, createdOn) };
+    });
+    const from = plans.reduce((a, p) => (p.from < a ? p.from : a), today);
+    const byProject = await focusMinutesByDay(
+      conn,
+      userId,
+      [...new Set(commitments.map((g) => g.projectId))],
+      from,
+    );
+    for (const { g, createdOn } of plans) {
+      progress.set(
+        g.id,
+        commitmentProgress({
+          today,
+          period: g.period!,
+          weekStart,
+          target: g.targetMinutes!,
+          until: g.dueDate,
+          createdOn,
+          minutesByDay: byProject.get(g.projectId) ?? new Map(),
+        }),
+      );
+    }
+  }
+  return rows.map(({ userId: _, deletedAt: __, ...g }) => ({
+    ...g,
+    progress: progress.get(g.id) ?? null,
+  }));
+}
+
+/** Finished focus per project and day, from the activity log. */
+async function focusMinutesByDay(
+  conn: Conn,
+  userId: string,
+  projectIds: string[],
+  from: DateString,
+): Promise<Map<string, Map<DateString, number>>> {
+  const projectId = sql<string>`${activity.payload}->>'projectId'`;
+  const rows = await conn
+    .select({
+      projectId,
+      day: activity.localDate,
+      minutes: sql<number>`sum((${activity.payload}->>'minutes')::int)::int`,
+    })
+    .from(activity)
+    .where(
+      and(
+        eq(activity.userId, userId),
+        eq(activity.type, 'focus_completed'),
+        gte(activity.localDate, from),
+        inArray(projectId, projectIds),
+      ),
+    )
+    .groupBy(projectId, activity.localDate);
+  const out = new Map<string, Map<DateString, number>>();
+  for (const r of rows) {
+    if (!out.has(r.projectId)) out.set(r.projectId, new Map());
+    out.get(r.projectId)!.set(r.day, r.minutes);
+  }
+  return out;
+}
+
+const view = async (conn: Conn, userId: string, row: GoalRow) =>
+  (await views(conn, userId, [row]))[0]!;
 
 export async function listGoals(conn: Conn, userId: string, projectId: string) {
   const rows = await conn
@@ -20,7 +114,7 @@ export async function listGoals(conn: Conn, userId: string, projectId: string) {
     .from(goals)
     .where(and(eq(goals.userId, userId), eq(goals.projectId, projectId), isNull(goals.deletedAt)))
     .orderBy(asc(goals.sortOrder), asc(goals.createdAt));
-  return rows.map(view);
+  return views(conn, userId, rows);
 }
 
 async function ownedGoal(conn: Conn, userId: string, id: string, { deleted = false } = {}) {
@@ -63,13 +157,13 @@ export async function createGoal(userId: string, input: GoalCreate) {
       entityId: id,
       payload: { kind: 'goal', projectId: input.projectId, parentTaskId: null },
     });
-    return view(row!);
+    return view(tx, userId, row!);
   });
 }
 
 /** One goal (the goal sheet). */
 export async function getGoal(userId: string, id: string) {
-  return view(await ownedGoal(db, userId, id));
+  return view(db, userId, await ownedGoal(db, userId, id));
 }
 
 export async function updateGoal(userId: string, id: string, patch: GoalPatch) {
@@ -93,7 +187,7 @@ export async function updateGoal(userId: string, id: string, patch: GoalPatch) {
       .returning();
     await writeLinks(tx, userId, id, description);
     touch(userId, id);
-    return view(row!);
+    return view(tx, userId, row!);
   });
 }
 
@@ -113,5 +207,5 @@ export async function restoreGoal(userId: string, id: string) {
     .set({ deletedAt: null })
     .where(and(eq(goals.id, id), isNotNull(goals.deletedAt)))
     .returning();
-  return view(row!);
+  return view(db, userId, row!);
 }

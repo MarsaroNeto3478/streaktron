@@ -1,6 +1,6 @@
 // An inline "add a task" field: Enter adds and keeps the field open for the next one.
 
-import type { TaskCreate } from '@streaktron/shared/schemas';
+import type { TaskCreate } from '@strekatron/shared/schemas';
 import { Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTaskActions } from '@/lib/actions';

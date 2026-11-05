@@ -1,8 +1,8 @@
 // The `links` table (D4): what each rich-text field mentions, rewritten on every save of that
 // field, in the same transaction. Links have no behavioral effect; they power backlinks.
 
-import { mentionsOf, type RichDoc } from '@streaktron/shared/rich';
-import { newId } from '@streaktron/shared/ids';
+import { mentionsOf, type RichDoc } from '@strekatron/shared/rich';
+import { newId } from '@strekatron/shared/ids';
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { links } from '../db/schema';

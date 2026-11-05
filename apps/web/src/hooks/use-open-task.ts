@@ -1,4 +1,4 @@
-import type { LinkableKind } from '@streaktron/shared/rich';
+import type { LinkableKind } from '@strekatron/shared/rich';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
 

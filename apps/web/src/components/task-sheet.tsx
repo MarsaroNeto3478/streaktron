@@ -1,8 +1,8 @@
 // A task's details, in a side sheet opened by the `task` search param from anywhere in the app.
 // Title and description save as you type (useAutosave); the other fields save on change.
 
-import type { RichDoc } from '@streaktron/shared/rich';
-import { EFFORTS, type Effort } from '@streaktron/shared/structure';
+import type { RichDoc } from '@strekatron/shared/rich';
+import { EFFORTS, type Effort } from '@strekatron/shared/structure';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Pin, PinOff, Trash2, X } from 'lucide-react';

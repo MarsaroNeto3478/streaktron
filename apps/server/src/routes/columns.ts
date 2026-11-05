@@ -1,4 +1,4 @@
-import { columnDeleteQuerySchema, columnPatchSchema, idOf } from '@streaktron/shared/schemas';
+import { columnDeleteQuerySchema, columnPatchSchema, idOf } from '@strekatron/shared/schemas';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireUser, type AuthedEnv } from '../http/session';

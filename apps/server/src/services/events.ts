@@ -1,6 +1,6 @@
 // Calendar events (Phase 4, D35) and the calendar's view of a range: event occurrences, tasks with
 // a due or scheduled date in it, and focus minutes per day. Repetition is expanded here with the
-// pure rules in `@streaktron/shared/calendar`; nothing about occurrences is stored but skips.
+// pure rules in `@strekatron/shared/calendar`; nothing about occurrences is stored but skips.
 
 import {
   nextOccurrence,
@@ -8,16 +8,16 @@ import {
   parseRRule,
   toRRule,
   type Recurrence,
-} from '@streaktron/shared/calendar';
-import { newId } from '@streaktron/shared/ids';
+} from '@strekatron/shared/calendar';
+import { newId } from '@strekatron/shared/ids';
 import {
   CALENDAR_MAX_DAYS,
   eventShapeProblem,
   type EventCreate,
   type EventPatch,
   type RecurrenceInput,
-} from '@streaktron/shared/schemas';
-import { addDays, daysBetween, type DateString } from '@streaktron/shared/time';
+} from '@strekatron/shared/schemas';
+import { addDays, daysBetween, type DateString } from '@strekatron/shared/time';
 import { and, asc, between, eq, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { activity, calendarEvents, tasks } from '../db/schema';

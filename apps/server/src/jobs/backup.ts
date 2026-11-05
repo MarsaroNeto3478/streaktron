@@ -6,13 +6,13 @@ import { spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { userDay, type DateString } from '@streaktron/shared/time';
+import { userDay, type DateString } from '@strekatron/shared/time';
 import { env } from '../env';
 import { getOwnerSettings } from '../services/users';
 
-const NAME_RE = /^streaktron-(\d{4}-\d{2}-\d{2})\.dump$/;
+const NAME_RE = /^strekatron-(\d{4}-\d{2}-\d{2})\.dump$/;
 
-export const backupFileName = (day: DateString) => `streaktron-${day}.dump`;
+export const backupFileName = (day: DateString) => `strekatron-${day}.dump`;
 
 /** Backup files to delete so that only the newest `keep` remain (other files are left alone). */
 export function filesToPrune(names: string[], keep: number): string[] {

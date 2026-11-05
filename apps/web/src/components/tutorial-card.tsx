@@ -8,7 +8,7 @@ import {
   TUTORIAL_STEPS,
   type Challenge,
   type TutorialStep,
-} from '@streaktron/shared/game';
+} from '@strekatron/shared/game';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowRight, Gift, Timer, X } from 'lucide-react';

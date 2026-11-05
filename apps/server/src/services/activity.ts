@@ -4,9 +4,9 @@
 // middleware evaluates quests and answers with the events (http/game.ts).
 
 import { AsyncLocalStorage } from 'node:async_hooks';
-import type { Activity, ActivityPayloads, ActivityType } from '@streaktron/shared/game';
-import { newId } from '@streaktron/shared/ids';
-import { userDay, type DateString } from '@streaktron/shared/time';
+import type { Activity, ActivityPayloads, ActivityType } from '@strekatron/shared/game';
+import { newId } from '@strekatron/shared/ids';
+import { userDay, type DateString } from '@strekatron/shared/time';
 import { eq } from 'drizzle-orm';
 import { activity, userSettings } from '../db/schema';
 import type { Conn } from './common';

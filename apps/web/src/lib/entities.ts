@@ -7,7 +7,7 @@
 // tick into one `/api/entities/resolve` call. Writes that change titles or states call
 // `refreshEntities`, which refetches the chips and backlinks on screen.
 
-import { MAX_RESOLVE_IDS } from '@streaktron/shared/schemas';
+import { MAX_RESOLVE_IDS } from '@strekatron/shared/schemas';
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { api, call } from './api';
 

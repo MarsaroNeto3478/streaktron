@@ -2,8 +2,8 @@
 // (`resolve`) and backlinks. One function per question (plan.md §11): "what is this id", "what
 // mentions it".
 
-import { mentionsOf, type LinkableKind, type RichDoc } from '@streaktron/shared/rich';
-import type { ColorKey, IconKey } from '@streaktron/shared/structure';
+import { mentionsOf, type LinkableKind, type RichDoc } from '@strekatron/shared/rich';
+import type { ColorKey, IconKey } from '@strekatron/shared/structure';
 import { sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/client';
 import { notFound } from './common';

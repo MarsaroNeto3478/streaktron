@@ -1,7 +1,7 @@
 // The quest board on Today: today's quests, this week's, and follow-ups. Each shows its progress;
 // most can be rerolled once. Clicking one opens what it asks and a button to go do it.
 
-import { PART_LABELS, QUEST_TYPE_LABELS, type QuestType } from '@streaktron/shared/game';
+import { PART_LABELS, QUEST_TYPE_LABELS, type QuestType } from '@strekatron/shared/game';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Dices, Swords } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

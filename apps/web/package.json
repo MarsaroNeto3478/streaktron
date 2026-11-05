@@ -1,5 +1,5 @@
 {
-  "name": "@streaktron/web",
+  "name": "@strekatron/web",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/manrope": "^5.3.0",
-    "@streaktron/shared": "workspace:*",
+    "@strekatron/shared": "workspace:*",
     "@tanstack/react-query": "^5.105.3",
     "@tanstack/react-router": "^1.170.46",
     "@tiptap/core": "^3.32.2",
@@ -37,7 +37,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@streaktron/server": "workspace:*",
+    "@strekatron/server": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/router-plugin": "^1.168.48",
     "@types/node": "^26.6.6",

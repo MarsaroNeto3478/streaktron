@@ -1,7 +1,7 @@
 // Countdown chips (Phase 4): events marked "count down", project due dates and task due dates, with
 // how many days are left. Clicking one opens what it's about. Used on Today and on a project page.
 
-import { countdownLabel, isSoon } from '@streaktron/shared/calendar';
+import { countdownLabel, isSoon } from '@strekatron/shared/calendar';
 import { useNavigate } from '@tanstack/react-router';
 import { CalendarClock, Flag, Hourglass, type LucideIcon } from 'lucide-react';
 import { useOpenSheet } from '@/hooks/use-open-task';

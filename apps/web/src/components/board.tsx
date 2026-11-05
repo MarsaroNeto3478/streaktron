@@ -25,7 +25,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { COLUMN_CATEGORIES, type ColumnCategory } from '@streaktron/shared/structure';
+import { COLUMN_CATEGORIES, type ColumnCategory } from '@strekatron/shared/structure';
 import {
   ArrowLeft,
   ArrowRight,

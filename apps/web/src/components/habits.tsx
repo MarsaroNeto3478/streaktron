@@ -1,8 +1,8 @@
 // Habits on screen: the row (check-in, streak, the last week), the list Today and the Habits page
 // share, and the new/edit dialog (mounted once in the shell, opened through ui-store).
 
-import { scheduleLabel, type HabitSchedule } from '@streaktron/shared/habits';
-import { addDays } from '@streaktron/shared/time';
+import { scheduleLabel, type HabitSchedule } from '@strekatron/shared/habits';
+import { addDays } from '@strekatron/shared/time';
 import { useQuery } from '@tanstack/react-query';
 import {
   Archive,

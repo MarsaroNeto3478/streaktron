@@ -1,6 +1,6 @@
 // The list view's filters, sorts and groups, as pure functions over loaded tasks.
 
-import { addDays, daysBetween, startOfWeek } from '@streaktron/shared/time';
+import { addDays, daysBetween, startOfWeek } from '@strekatron/shared/time';
 import type { Project, Task } from './queries';
 
 export const STATUS_FILTERS = ['open', 'todo', 'in_progress', 'done', 'all'] as const;

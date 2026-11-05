@@ -1,5 +1,5 @@
-import { isId } from '@streaktron/shared/ids';
-import { userDay } from '@streaktron/shared/time';
+import { isId } from '@strekatron/shared/ids';
+import { userDay } from '@strekatron/shared/time';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { auth } from '../src/auth';
