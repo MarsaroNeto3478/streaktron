@@ -220,6 +220,11 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** It fights the failure mode "projects stall unnoticed" (§1) next to the weekly review, and rewards spreading effort without asking for much in each project.
 - **Alternatives:** Counting any activity (a created task, a next action) as touching a project (too little effort, like D37's call on quests); requiring the parked project anyway.
 
+### D43 · "Revisit a parked project" quest — accepted (2026-11-05, the user chose this slice; Claude's design, following plan §5)
+- **Decision:** A new activity `project_revisited { decision }` (migration `0010_project_revisited`) is logged when a **parked** project is moved on (made active, completed or archived) or when the user presses **"Keep parked"** (`POST /api/projects/:id/keep-parked`, only for parked projects). It earns no XP and doesn't make an active day (a decision, not work). A `review` quest **"Revisit “X”"** is offered once a week for the parked project decided on longest ago (parked or last revisited), once it has waited **7 days**; it's done by **any** decision on that project during the week, keeping it parked included. 50 XP, large box; resting "review" turns it off. A parked project's page shows a banner with Keep parked / Make active / Complete / Archive, and the weekly review's parked list gets "Keep parked".
+- **Why:** Plan §5's review type ("Revisit one parked project and decide keep/drop"). Parked projects otherwise sit forgotten; the quest asks for a decision, not for taking the project back on, so it never pushes past the active limit (D5).
+- **Alternatives:** Only counting reactivation or closing (would nudge people over their active limit); a decision on any parked project instead of a named one.
+
 ---
 
 ## Rejected ideas (don't propose again)

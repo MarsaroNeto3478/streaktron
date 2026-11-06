@@ -364,6 +364,17 @@ export function structureActions(qc: QueryClient) {
       return projects;
     },
 
+    /** A parked project revisited and left parked (D43): it counts for the revisit quest. */
+    keepParked: (project: Pick<Project, 'id' | 'title'>) =>
+      attempt(async () => {
+        const updated = await call(
+          api.projects[':id']['keep-parked'].$post({ param: { id: project.id } }),
+        );
+        refreshStructure(qc, project.id);
+        toast.success(`“${project.title}” stays parked`);
+        return updated;
+      }),
+
     deleteProject: (project: Project) =>
       attempt(async () => {
         const res = await call(api.projects[':id'].$delete({ param: { id: project.id } }));

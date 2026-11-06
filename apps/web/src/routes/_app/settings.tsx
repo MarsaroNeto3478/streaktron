@@ -329,7 +329,7 @@ const QUEST_HELP: Record<Restable, string> = {
   time: 'Focus time, sized from your own recent days',
   make: 'Add a task or goal, then fill in its details',
   weekly: 'Your weekly target, and working on every active project',
-  review: 'Do the weekly review, at the end of the week',
+  review: 'Do the weekly review, and revisit a parked project',
 };
 
 function QuestSettings() {

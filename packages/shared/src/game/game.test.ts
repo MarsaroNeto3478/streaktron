@@ -428,6 +428,8 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     challenge: null,
     hasReviewQuest: true,
     hasProjectsQuest: true,
+    parkedProjects: [],
+    hasParkedQuest: true,
     ...over,
   };
 }
@@ -1065,5 +1067,48 @@ describe('work on every active project (D42)', () => {
     // prj_b was parked during the week.
     expect(questProgress(q, acts, { activeProjects: new Set(['prj_a']) })).toBe(2);
     expect(affectedTemplates(longFocus)).toContain('weekly.projects');
+  });
+});
+
+describe('revisit a parked project (D43)', () => {
+  const parked = [
+    { id: 'prj_new', title: 'Just parked', since: '2026-11-01' },
+    { id: 'prj_old', title: 'Old idea', since: '2026-09-10' },
+    { id: 'prj_mid', title: 'Side thing', since: '2026-10-01' },
+  ];
+  const revisit = (over: Partial<BoardContext> = {}) =>
+    planBoard(
+      ctx({
+        hasDayBoard: true,
+        hasWeekBoard: true,
+        hasParkedQuest: false,
+        parkedProjects: parked,
+        ...over,
+      }),
+      seededRng(1),
+    ).find((q) => q.templateKey === 'review.parked');
+
+  it('picks the parked project decided on longest ago, once it has waited a week', () => {
+    expect(revisit()).toMatchObject({
+      type: 'review',
+      title: 'Revisit “Old idea”',
+      targetEntityId: 'prj_old',
+      xp: 50,
+      boxTier: 'large',
+      periodStart: '2026-11-02',
+      periodEnd: '2026-11-08',
+    });
+    expect(revisit({ parkedProjects: parked.slice(0, 1) })).toBeUndefined();
+    expect(revisit({ hasParkedQuest: true })).toBeUndefined();
+    expect(revisit({ restingTypes: ['review'] })).toBeUndefined();
+  });
+
+  it('is done by any decision on that project, keeping it parked included', () => {
+    const q = stored(revisit()!, new Date('2026-11-02T00:00:00Z'));
+    const keep = act('project_revisited', TODAY, { decision: 'keep' }, 'prj_old');
+    const other = act('project_revisited', TODAY, { decision: 'active' }, 'prj_mid');
+    expect(questProgress(q, [other])).toBe(0);
+    expect(questProgress(q, [other, keep])).toBe(1);
+    expect(affectedTemplates(keep)).toEqual(['review.parked']);
   });
 });

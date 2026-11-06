@@ -133,6 +133,7 @@ function ProjectPage() {
   return (
     <div className={cn('mx-auto space-y-5', view === 'board' ? 'max-w-none' : 'max-w-4xl')}>
       <ProjectHeader project={project} today={today} />
+      {project.status === 'parked' && <ParkedBanner project={project} />}
       <NextAction project={project} />
       <Countdowns items={page.countdowns} today={today} />
 
@@ -186,6 +187,38 @@ function ProjectPage() {
           <Details key={project.id} project={project} today={today} />
         </div>
       )}
+    </div>
+  );
+}
+
+/** A parked project: decide what to do with it (D43). Keeping it parked is a fine answer. */
+function ParkedBanner({ project }: { project: Project }) {
+  const changeStatus = useProjectStatus();
+  const actions = useStructureActions();
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-dashed px-4 py-3">
+      <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+        <CirclePause className="mr-1.5 inline size-4 align-text-bottom" />
+        This project is parked. Still worth it? Keep it parked, bring it back, or close it.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" onClick={() => void actions.keepParked(project)}>
+          <CirclePause />
+          Keep parked
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => void changeStatus(project, 'active')}>
+          <CirclePlay />
+          Make active
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => void changeStatus(project, 'completed')}>
+          <CheckCircle2 />
+          Complete
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => void changeStatus(project, 'archived')}>
+          <Archive />
+          Archive
+        </Button>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { addDays } from '@strekatron/shared/time';
 import { and, eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../src/db/client';
-import { activity, focusSessions, quests, users, userSettings } from '../src/db/schema';
+import { activity, focusSessions, projects, quests, users, userSettings } from '../src/db/schema';
 import { client, request, resetDb, setUpOwner, type Client } from './helpers';
 
 let as: Client;
@@ -556,5 +556,50 @@ describe('work on every active project (D42)', () => {
       (x: { id: string }) => x.id === q.id,
     );
     expect(end).toMatchObject({ progress: 2, status: 'completed' });
+  });
+});
+
+describe('revisit a parked project (D43)', () => {
+  it('asks to revisit a project parked over a week ago; keeping it parked completes it', async () => {
+    const p = await newProject('Old idea');
+    expect((await as.post(`/api/projects/${p.id}/status`, { status: 'parked' })).status).toBe(200);
+    await db.delete(quests).where(eq(quests.userId, userId));
+
+    // Parked just now: too soon.
+    const soon = (await as.get('/api/quests')).body.quests as { templateKey: string }[];
+    expect(soon.some((q) => q.templateKey === 'review.parked')).toBe(false);
+
+    // Parked ten days ago.
+    await db
+      .update(projects)
+      .set({ statusChangedAt: new Date(Date.now() - 10 * 86_400_000) })
+      .where(eq(projects.id, p.id));
+    await db.delete(quests).where(eq(quests.userId, userId));
+    const board = (await as.get('/api/quests')).body.quests as {
+      id: string;
+      templateKey: string;
+      targetEntityId: string;
+    }[];
+    const q = board.find((x) => x.templateKey === 'review.parked')!;
+    expect(q.targetEntityId).toBe(p.id);
+
+    const kept = await as.post(`/api/projects/${p.id}/keep-parked`);
+    expect(kept.status).toBe(200);
+    expect(kept.body).toMatchObject({ id: p.id, status: 'parked' });
+    expect(kept.body.game.questsDone.map((d: { id: string }) => d.id)).toEqual([q.id]);
+    expect(
+      (await db.select().from(activity).where(eq(activity.type, 'project_revisited'))).map(
+        (a) => a.payload,
+      ),
+    ).toEqual([{ decision: 'keep' }]);
+  });
+
+  it('logs a decision when a parked project moves on, and refuses to keep an active one', async () => {
+    const p = await newProject('Side thing');
+    expect((await as.post(`/api/projects/${p.id}/keep-parked`)).status).toBe(409);
+    await as.post(`/api/projects/${p.id}/status`, { status: 'parked' });
+    await as.post(`/api/projects/${p.id}/status`, { status: 'archived' });
+    const rows = await db.select().from(activity).where(eq(activity.type, 'project_revisited'));
+    expect(rows.map((a) => [a.entityId, a.payload])).toEqual([[p.id, { decision: 'archived' }]]);
   });
 });

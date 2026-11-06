@@ -71,6 +71,13 @@
       "when": 1793882410571,
       "tag": "0009_weekly_review",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793925771967,
+      "tag": "0010_project_revisited",
+      "breakpoints": true
     }
   ]
 }

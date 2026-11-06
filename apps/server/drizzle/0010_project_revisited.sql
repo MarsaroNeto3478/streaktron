@@ -1,0 +1,2 @@
+ALTER TABLE "activity" DROP CONSTRAINT "activity_type";--> statement-breakpoint
+ALTER TABLE "activity" ADD CONSTRAINT "activity_type" CHECK ("activity"."type" in ('task_completed', 'task_reopened', 'task_triaged', 'item_created', 'next_action_set', 'focus_completed', 'quest_completed', 'quest_bonus', 'habit_checked', 'review_completed', 'project_revisited'));

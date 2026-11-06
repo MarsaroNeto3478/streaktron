@@ -7,6 +7,7 @@ import type {
   ProjectPatch,
   ProjectStatusInput,
 } from '@strekatron/shared/schemas';
+import type { RevisitDecision } from '@strekatron/shared/game';
 import { newId } from '@strekatron/shared/ids';
 import {
   canTransition,
@@ -378,8 +379,32 @@ export async function setProjectStatus(userId: string, id: string, input: Projec
       }
       if (input.status === 'active') await assertRoomForActive(tx, userId, id);
       await setStatus(tx, id, input.status);
+      // Moving a parked project on is a decision about it (D43).
+      if (project.status === 'parked') {
+        await recordActivity(tx, userId, {
+          type: 'project_revisited',
+          entityId: id,
+          payload: { decision: input.status as RevisitDecision },
+        });
+      }
     }
     return projectViews(tx, userId, changed);
+  });
+}
+
+/** "Keep it parked": a parked project looked at and left as it is, which also counts (D43). */
+export async function keepParked(userId: string, id: string) {
+  return db.transaction(async (tx) => {
+    const project = await ownedProject(tx, userId, id, true);
+    if (project.status !== 'parked') {
+      throw conflict('not_parked', `“${project.title}” isn’t parked.`);
+    }
+    await recordActivity(tx, userId, {
+      type: 'project_revisited',
+      entityId: id,
+      payload: { decision: 'keep' },
+    });
+    return (await projectViews(tx, userId, [id]))[0]!;
   });
 }
 

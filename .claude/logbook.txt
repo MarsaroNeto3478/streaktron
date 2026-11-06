@@ -654,3 +654,51 @@ RESULTADO: 286 testes passando (3 novos).
   (continuação) "concordo com sua decisão, pode commitar merge e push": o autor concordou com
   a D42 (criar tarefa ou fixar próxima ação não conta). Commit no branch "phase-4-weekly", merge
   na main e push para MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — O que é PWA
+-------------------------------------------------------------------------------------------------
+PEDIDO: "oq é pwa mesmo?"
+O QUE FOI FEITO: Explicação: PWA (Progressive Web App) é um site que pode ser instalado como
+  aplicativo (ícone na tela inicial, janela própria, sem barra do navegador) e receber
+  notificações push, sem loja de apps. No Strekatron: instalar no celular pelo endereço HTTPS do
+  Tailscale e receber lembretes (hábitos do dia, fim do foco, streak em risco). Precisa de um
+  manifest (nome, ícone, cores), um service worker e HTTPS. Pelo plano, sem dados offline.
+RESULTADO: Só pergunta, nada mudou no código.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Revisitar um projeto estacionado
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos fazer a próxima parte".
+  Pergunta ao autor: qual parte (revisitar estacionado, quest de projeto ou PWA)? Resposta:
+  "Revisitar estacionado".
+O QUE FOI FEITO:
+  - Nova quest semanal "Revisit “X”": escolhe o projeto estacionado há mais tempo sem decisão
+    (pelo menos 7 dias) e pede para olhar de novo e decidir. Vale 50 XP e uma caixa grande.
+  - Qualquer decisão conta: manter estacionado, reativar, concluir ou arquivar. A ideia é
+    decidir, não forçar a voltar (o que poderia passar do limite de projetos ativos).
+  - A página de um projeto estacionado mostra uma faixa com os botões Keep parked, Make active,
+    Complete e Archive. Na revisão semanal, os estacionados também ganharam "Keep parked".
+  - Por trás: uma nova atividade no log ("projeto revisitado", com a decisão), que não dá XP nem
+    conta como dia ativo, e uma migração no banco.
+DECISÕES: D43.
+RESULTADO: 290 testes passando (4 novos). Migração aplicada no banco.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Onde fica a criação de conta no plano
+-------------------------------------------------------------------------------------------------
+PEDIDO: "perdao mas a criação de conta é que parte do nosso plano, nao lembro"
+O QUE FOI FEITO: Explicação a partir do plan.md: hoje só existe o cadastro do
+  primeiro usuário (Fase 0), na tela "Set up"; depois disso o cadastro fica fechado. Abrir o cadastro
+  (com convites) e as configurações de conta (trocar e-mail e senha, apagar a conta) estão na
+  Fase 8, a fase social, junto com os convites de amigos. Limite de tentativas, termos e
+  política de privacidade estão na Fase 10 (lançamento como produto).
+RESULTADO: Só pergunta, nada mudou no código.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Commit da revisita e próximo passo
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode commitar, merge push e depois siga em frente com o proximo passo"
+O QUE FOI FEITO: Commit no branch "phase-4-parked" (quest "Revisit a parked project", D43),
+  merge na main e push para MarsaroNeto3478/streaktron. Em seguida, o próximo item da Fase 4: a
+  quest de projeto gerada a partir das metas e prazos (entrada abaixo).

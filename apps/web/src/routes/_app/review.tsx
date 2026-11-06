@@ -321,6 +321,7 @@ function NextActionRow({ project: p }: { project: Project }) {
 function ActiveProjects({ stalled }: { stalled: ReadonlySet<string> }) {
   const { data: projects = [] } = useQuery(projectsQuery);
   const change = useProjectStatus();
+  const actions = useStructureActions();
   const active = projects.filter((p) => p.status === 'active');
   const parked = projects.filter((p) => p.status === 'parked');
   const row = (p: Project, action: ReactNode) => (
@@ -335,7 +336,7 @@ function ActiveProjects({ stalled }: { stalled: ReadonlySet<string> }) {
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Keep active what you’ll really work on next week. Parking a project quiets it on Today and
-        in quests until you bring it back.
+        in quests until you bring it back. For a parked one, “Keep parked” is a decision too.
       </p>
       <div className="space-y-1">
         <h3 className="text-sm font-medium text-muted-foreground">Active</h3>
@@ -358,9 +359,14 @@ function ActiveProjects({ stalled }: { stalled: ReadonlySet<string> }) {
             {parked.map((p) =>
               row(
                 p,
-                <Button variant="ghost" size="sm" onClick={() => void change(p, 'active')}>
-                  <CirclePlay /> Make active
-                </Button>,
+                <span className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => void actions.keepParked(p)}>
+                    <CirclePause /> Keep parked
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => void change(p, 'active')}>
+                    <CirclePlay /> Make active
+                  </Button>
+                </span>,
               ),
             )}
           </ul>

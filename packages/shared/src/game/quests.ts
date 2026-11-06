@@ -143,6 +143,10 @@ export interface BoardContext {
   hasReviewQuest: boolean;
   /** This week's "Work on every active project" quest exists already (D42). */
   hasProjectsQuest: boolean;
+  /** Parked projects, with the last day they were decided on: parked or revisited (D43). */
+  parkedProjects: readonly { id: string; title: string; since: DateString }[];
+  /** This week's "Revisit a parked project" quest exists already. */
+  hasParkedQuest: boolean;
 }
 
 interface Candidate {
@@ -372,6 +376,25 @@ function weeklyProjectsSpec(ctx: BoardContext): QuestSpec | null {
   };
 }
 
+/**
+ * "Revisit a parked project" (D43): once a week, the parked project decided on longest ago, if it's
+ * been at least a week. Keeping it parked counts too: the point is to decide, not to reactivate.
+ */
+function revisitParkedSpec(ctx: BoardContext): QuestSpec | null {
+  const due = ctx.parkedProjects
+    .filter((p) => p.since <= addDays(ctx.today, -GAME.review.parkedAfterDays))
+    .sort((a, b) => a.since.localeCompare(b.since) || a.title.localeCompare(b.title));
+  const p = due[0];
+  if (!p) return null;
+  return {
+    ...dayQuest(ctx, 'review', 'review.parked', `Revisit “${p.title}”`, GAME.review.parkedXp, {
+      targetEntityId: p.id,
+      params: { projectId: p.id },
+    }),
+    ...weekBounds(ctx),
+  };
+}
+
 function makeCandidates(ctx: BoardContext): Candidate[] {
   const { cap, breakdownSubtasks } = GAME.quests.make;
   const out: Candidate[] = [];
@@ -528,6 +551,10 @@ export function planBoard(ctx: BoardContext, rng: Rng): QuestSpec[] {
     if (projects) out.push(projects);
   }
   if (!ctx.hasReviewQuest && !idle && !resting(ctx, 'review')) out.push(reviewSpec(ctx));
+  if (!ctx.hasParkedQuest && !idle && !resting(ctx, 'review')) {
+    const revisit = revisitParkedSpec(ctx);
+    if (revisit) out.push(revisit);
+  }
   return out;
 }
 
@@ -732,6 +759,10 @@ export function questProgress(
       return inPeriod.filter(
         (a) => a.type === 'review_completed' && a.payload.weekStart === q.periodStart,
       ).length;
+    case 'review.parked':
+      return inPeriod.filter(
+        (a) => a.type === 'project_revisited' && a.entityId === q.targetEntityId,
+      ).length;
     case 'tutorial.area':
       return inPeriod.filter((a) => a.type === 'item_created' && a.payload.kind === 'area').length;
     case 'tutorial.project':
@@ -825,6 +856,8 @@ export function affectedTemplates(a: Activity): readonly string[] {
       return ['quick.habit', 'daily.all_habits', 'weekly.target'];
     case 'review_completed':
       return ['review.weekly', 'weekly.target'];
+    case 'project_revisited':
+      return ['review.parked'];
     default:
       return [];
   }
