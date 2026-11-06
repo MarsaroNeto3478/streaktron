@@ -526,3 +526,35 @@ describe('stats and admin', () => {
     }
   });
 });
+
+describe('work on every active project (D42)', () => {
+  it('counts a finished task in each project, and lets off one parked during the week', async () => {
+    await onlyQuests('weekly');
+    const a = await newProject('Thesis');
+    const b = await newProject('Game');
+    const ta = await newTask('Outline', { projectId: a.id });
+    await db.delete(quests).where(eq(quests.userId, userId));
+
+    const board = (await as.get('/api/quests')).body.quests as {
+      id: string;
+      templateKey: string;
+      target: number;
+      progress: number;
+      status: string;
+    }[];
+    const q = board.find((x) => x.templateKey === 'weekly.projects')!;
+    expect(q).toMatchObject({ target: 2, progress: 0 });
+
+    await as.post(`/api/tasks/${ta.id}/complete`);
+    const mid = (await as.get('/api/quests')).body.quests.find(
+      (x: { id: string }) => x.id === q.id,
+    );
+    expect(mid).toMatchObject({ progress: 1, status: 'offered' });
+
+    expect((await as.post(`/api/projects/${b.id}/status`, { status: 'parked' })).status).toBe(200);
+    const end = (await as.get('/api/quests')).body.quests.find(
+      (x: { id: string }) => x.id === q.id,
+    );
+    expect(end).toMatchObject({ progress: 2, status: 'completed' });
+  });
+});

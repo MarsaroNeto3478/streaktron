@@ -328,7 +328,7 @@ const QUEST_HELP: Record<Restable, string> = {
   daily: 'Three a day from your projects and tasks',
   time: 'Focus time, sized from your own recent days',
   make: 'Add a task or goal, then fill in its details',
-  weekly: 'Your weekly target, and focus for the week',
+  weekly: 'Your weekly target, and working on every active project',
   review: 'Do the weekly review, at the end of the week',
 };
 

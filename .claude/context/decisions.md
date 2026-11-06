@@ -215,6 +215,11 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Decision:** This repo's app is now **Strekatron** everywhere: the UI, the packages (`@strekatron/shared`, `/server`, `/web`), the Docker Compose project (`name: strekatron`, so its volume `strekatron_pgdata` no longer depends on the folder's name), the database, its role and the test database (`strekatron`, `strekatron_test`), the backup files (`strekatron-YYYY-MM-DD.dump`) and the docs. The live data moved over intact: the role and databases were renamed in place, the old volume `streaktron_pgdata` was copied to the new one and kept as a fallback, and a dump taken just before is in `data/backups/pre-rename/`. Not renamed: the GitHub repository (the user renames it on GitHub; the remote follows), the partner's `JVGdev/streaktron`, the local folder, and the past entries of the logbook and progress log (they're a record).
 - **Why:** The user's choice of name for their version of the two parallel apps.
 
+### D42 · "Work on every active project" weekly quest — accepted (2026-11-05, Claude, following plan §5)
+- **Decision:** Weekly quests are now the plan's fixed set: "Be active on N days this week" (already there) and **"Work on all N active projects this week"** (`weekly.projects`). It lists the projects active when it's offered; each needs a **finished task** (subtasks too) or a **focus session of 10 minutes or more** on it during the week. A project **parked, completed or deleted** during the week is let off (parking is the review's good decision, not a failure). Offered once a week, only with **two or more** active projects (one project is the weekly target's job); 60 XP + 10 per project, at most 100; large box. It has its own check, so a week whose board was made before it still gets one. Resting "weekly" in Settings turns both off.
+- **Why:** It fights the failure mode "projects stall unnoticed" (§1) next to the weekly review, and rewards spreading effort without asking for much in each project.
+- **Alternatives:** Counting any activity (a created task, a next action) as touching a project (too little effort, like D37's call on quests); requiring the parked project anyway.
+
 ---
 
 ## Rejected ideas (don't propose again)

@@ -213,6 +213,7 @@ async function boardContext(
   let hasDayBoard = false;
   let hasWeekBoard = false;
   let hasReviewQuest = false;
+  let hasProjectsQuest = false;
   let pendingFollowUps = 0;
   for (const q of history) {
     const key = questKey(q);
@@ -229,6 +230,9 @@ async function boardContext(
     }
     if (q.type === 'follow_up' && q.status === 'offered') pendingFollowUps++;
     if (q.templateKey === 'review.weekly' && q.periodStart === weekStart) hasReviewQuest = true;
+    if (q.templateKey === 'weekly.projects' && q.periodStart === weekStart) {
+      hasProjectsQuest = true;
+    }
   }
 
   return {
@@ -256,6 +260,7 @@ async function boardContext(
     hasWeekBoard,
     challenge: s.challenge ?? null,
     hasReviewQuest,
+    hasProjectsQuest,
   };
 }
 
@@ -283,6 +288,15 @@ async function ensureBoard(
   }
   const ctx = await boardContext(tx, userId, s, today, acts);
   for (const spec of planBoard(ctx, rng)) await insertQuest(tx, userId, spec);
+}
+
+/** The ids of the user's active projects ("Work on every active project", D42). */
+async function activeProjectIds(tx: Tx, userId: string): Promise<Set<string>> {
+  const rows = await tx
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.userId, userId), eq(projects.status, 'active')));
+  return new Set(rows.map((r) => r.id));
 }
 
 const closeQuest = (tx: Tx, id: string, status: QuestRow['status']) =>
@@ -396,6 +410,8 @@ async function evaluateQuests(
         continue;
       }
       progress = filledCount((q.params.missing as DetailPart[]) ?? [], item.filled);
+    } else if (q.templateKey === 'weekly.projects') {
+      progress = questProgress(q, acts, { activeProjects: await activeProjectIds(tx, userId) });
     } else {
       progress = questProgress(q, acts);
     }

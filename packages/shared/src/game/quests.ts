@@ -141,6 +141,8 @@ export interface BoardContext {
   challenge: Challenge | null;
   /** This week's "Do the weekly review" quest exists already. */
   hasReviewQuest: boolean;
+  /** This week's "Work on every active project" quest exists already (D42). */
+  hasProjectsQuest: boolean;
 }
 
 interface Candidate {
@@ -350,6 +352,26 @@ function weeklyTargetSpec(ctx: BoardContext): QuestSpec {
   };
 }
 
+/**
+ * "Work on every active project this week" (D42): one finished task or a 10-minute focus session in
+ * each project active when the week began. Only with two or more active projects.
+ */
+function weeklyProjectsSpec(ctx: BoardContext): QuestSpec | null {
+  const n = ctx.projects.length;
+  if (n < 2) return null;
+  return {
+    ...dayQuest(
+      ctx,
+      'weekly',
+      'weekly.projects',
+      `Work on all ${n} active projects this week`,
+      Math.min(100, 60 + 10 * n),
+      { target: n, params: { projectIds: ctx.projects.map((p) => p.id) } },
+    ),
+    ...weekBounds(ctx),
+  };
+}
+
 function makeCandidates(ctx: BoardContext): Candidate[] {
   const { cap, breakdownSubtasks } = GAME.quests.make;
   const out: Candidate[] = [];
@@ -500,6 +522,11 @@ export function planBoard(ctx: BoardContext, rng: Rng): QuestSpec[] {
     if (!resting(ctx, 'weekly')) out.push(weeklyTargetSpec(ctx));
     if (!resting(ctx, 'time')) out.push(timeWeekSpec(ctx, rng));
   }
+  // Its own check, so a week whose board came before it still gets one.
+  if (!ctx.hasProjectsQuest && !idle && !resting(ctx, 'weekly')) {
+    const projects = weeklyProjectsSpec(ctx);
+    if (projects) out.push(projects);
+  }
   if (!ctx.hasReviewQuest && !idle && !resting(ctx, 'review')) out.push(reviewSpec(ctx));
   return out;
 }
@@ -603,6 +630,11 @@ export function tutorialSpec(step: TutorialStep, today: DateString, replay: bool
 export interface ProgressExtra {
   /** Follow-ups: how many of the asked parts are filled now. */
   filledParts?: number;
+  /**
+   * "Work on every active project": the projects still active. One parked, completed or deleted
+   * during the week no longer needs work (parking is a good decision, not a failure).
+   */
+  activeProjects?: ReadonlySet<string>;
 }
 
 /**
@@ -656,6 +688,23 @@ export function questProgress(
       return n;
     case 'weekly.target':
       return new Set(inPeriod.filter(qualifies).map((a) => a.localDate)).size;
+    case 'weekly.projects': {
+      const ids = (q.params.projectIds as string[] | undefined) ?? [];
+      const touched = new Set<string>();
+      for (const a of inPeriod) {
+        if (a.type === 'task_completed' && a.payload.projectId) touched.add(a.payload.projectId);
+        if (
+          a.type === 'focus_completed' &&
+          a.payload.projectId &&
+          a.payload.minutes >= GAME.xp.focusMinMinutes
+        ) {
+          touched.add(a.payload.projectId);
+        }
+      }
+      const active = extra.activeProjects;
+      return ids.filter((id) => touched.has(id) || (active !== undefined && !active.has(id)))
+        .length;
+    }
     case 'comeback.focus':
       return inPeriod.filter(
         (a) => a.type === 'focus_completed' && a.payload.minutes >= GAME.xp.focusMinMinutes,
@@ -746,6 +795,7 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'daily.project_task',
         'daily.two_tasks',
         'weekly.target',
+        'weekly.projects',
         'tutorial.complete',
       ];
     case 'task_triaged':
@@ -758,6 +808,7 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'time.day',
         'time.week',
         'weekly.target',
+        'weekly.projects',
         'comeback.focus',
         'tutorial.focus',
       ];

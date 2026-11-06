@@ -427,6 +427,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     hasWeekBoard: false,
     challenge: null,
     hasReviewQuest: true,
+    hasProjectsQuest: true,
     ...over,
   };
 }
@@ -1020,5 +1021,49 @@ describe('weekly review (D38)', () => {
     const lastWeeks = act('review_completed', '2026-11-02', { weekStart: '2026-10-26' });
     expect(questProgress(q, [lastWeeks])).toBe(0);
     expect(questProgress(q, [lastWeeks, mine])).toBe(1);
+  });
+});
+
+describe('work on every active project (D42)', () => {
+  const weekly = (over: Partial<BoardContext> = {}) =>
+    planBoard(
+      ctx({ hasDayBoard: true, hasWeekBoard: true, hasProjectsQuest: false, ...over }),
+      seededRng(1),
+    ).find((q) => q.templateKey === 'weekly.projects');
+
+  it('is offered once a week, with two or more active projects, even after the week board', () => {
+    const q = weekly()!;
+    expect(q).toMatchObject({
+      type: 'weekly',
+      target: 2,
+      xp: 80,
+      boxTier: 'large',
+      periodStart: '2026-11-02',
+      periodEnd: '2026-11-08',
+      params: { projectIds: ['prj_a', 'prj_b'] },
+    });
+    expect(weekly({ hasProjectsQuest: true })).toBeUndefined();
+    expect(weekly({ projects: ctx().projects.slice(0, 1) })).toBeUndefined();
+    expect(weekly({ restingTypes: ['weekly'] })).toBeUndefined();
+  });
+
+  it('counts a finished task or 10 minutes of focus in each project; a parked one is let off', () => {
+    const q = stored(weekly()!, new Date('2026-11-02T00:00:00Z'));
+    const shortFocus = act('focus_completed', TODAY, {
+      minutes: 5,
+      projectId: 'prj_b',
+      taskId: null,
+    });
+    const acts = [done(TODAY, 'S', undefined, { projectId: 'prj_a' }), shortFocus];
+    expect(questProgress(q, acts)).toBe(1);
+    const longFocus = act('focus_completed', TODAY, {
+      minutes: 10,
+      projectId: 'prj_b',
+      taskId: null,
+    });
+    expect(questProgress(q, [...acts, longFocus])).toBe(2);
+    // prj_b was parked during the week.
+    expect(questProgress(q, acts, { activeProjects: new Set(['prj_a']) })).toBe(2);
+    expect(affectedTemplates(longFocus)).toContain('weekly.projects');
   });
 });

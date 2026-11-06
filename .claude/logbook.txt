@@ -633,3 +633,24 @@ RESULTADO: Tudo no ar.
   (continuação) "faz o commit, merge e push": commit no branch "phase-4-goals" (progresso das
   metas de compromisso e a troca de nome para Strekatron), merge na main e push para
   MarsaroNeto3478/streaktron.
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Quests semanais completas
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos para a proxima" (próximo item da Fase 4: quests semanais completas).
+O QUE FOI FEITO:
+  - Já existia a quest semanal "Be active on N days this week". Faltava a outra do plano:
+    "Work on all N active projects this week".
+  - Ela conta, em cada projeto ativo, uma tarefa concluída ou uma sessão de foco de 10 minutos ou
+    mais durante a semana. Se o autor estacionar ou concluir um projeto no meio da semana (por
+    exemplo, na revisão semanal), esse projeto deixa de ser cobrado: estacionar é uma boa
+    decisão, não uma falha.
+  - Só aparece com dois ou mais projetos ativos. Vale 60 XP + 10 por projeto (no máximo 100) e uma
+    caixa grande. Como tem verificação própria, já aparece nesta semana.
+  - O detalhe da quest explica o que conta e tem um botão para a página de projetos.
+DECISÕES: D42. Criar uma tarefa ou fixar a próxima ação não conta como "trabalhar" no projeto
+  (pouco esforço, como na decisão dos hábitos, D37).
+RESULTADO: 286 testes passando (3 novos).
+  (continuação) "concordo com sua decisão, pode commitar merge e push": o autor concordou com
+  a D42 (criar tarefa ou fixar próxima ação não conta). Commit no branch "phase-4-weekly", merge
+  na main e push para MarsaroNeto3478/streaktron.
