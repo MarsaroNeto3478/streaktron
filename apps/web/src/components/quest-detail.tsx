@@ -136,6 +136,13 @@ function useExplain(q: Quest): Explained {
         what: `Be active on ${q.target} days this week.`,
         counts: activeDay,
       };
+    case 'weekly.projects':
+      return {
+        what: `Move each of your ${q.target} active projects forward this week, even a little.`,
+        counts:
+          'In each project, a finished task or a focus session of 10 minutes or more. A project you park or complete during the week no longer needs it.',
+        go: { label: 'Go to Projects', run: () => void navigate({ to: '/projects' }) },
+      };
     case 'comeback.focus':
       return {
         what: 'Welcome back. One short session is enough to restart: 10 minutes of focus.',

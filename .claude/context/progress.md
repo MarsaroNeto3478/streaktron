@@ -166,3 +166,8 @@
 - Every tracked file: Streaktron → Strekatron, `@streaktron/*` → `@strekatron/*` (lockfile reinstalled). Repository URLs, the partner's repo and the folder path kept.
 - Database: role `streaktron` → `strekatron` (password `strekatron`), databases `strekatron` and `strekatron_test`, renamed in place; Compose project `name: strekatron`, container `strekatron-db`, data copied to the `strekatron_pgdata` volume (the old `streaktron_pgdata` kept). Local `.env` updated; backups renamed; a pre-rename dump in `data/backups/pre-rename/`.
 - 283 tests passing; the API and web restarted on the renamed database.
+
+### 2026-11-05 — Phase 4: weekly quests fully wired (branch `phase-4-weekly`, D42)
+- **Shared:** `weekly.projects` ("Work on all N active projects this week"): offered once a week with 2+ active projects (`BoardContext.hasProjectsQuest`), `params.projectIds`, 60 + 10/project XP (max 100), large box; progress = projects with a finished task or 10+ min of focus, plus those no longer active (`ProgressExtra.activeProjects`). 2 unit tests.
+- **Server:** the board context knows `hasProjectsQuest`; evaluation passes the active project ids. 1 API test (286 in all).
+- **Web:** the quest detail explains it (with "Go to Projects"); Settings' weekly help mentions it.
