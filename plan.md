@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D43 | "Revisit a parked project" quest: any decision counts, "Keep parked" included; `project_revisited` activity |
 | D42 | Weekly quest "Work on all N active projects": a task or 10 min of focus in each, parked ones let off, 60 + 10/project XP |
 | D40 | Commitment goals: focus on the project this week or month, a bar with the even pace, minutes a day to go, a streak of periods met; no extra XP |
 | D39 | Countdowns are automatic: Today shows countdown events and active projects' due dates; a project page adds its next three task deadlines |
@@ -535,7 +536,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Weekly review flow (summary, stalled projects, inbox triage, next actions, active/parked swap, reflection) (D38)
 - [x] Commitment goal progress from focus minutes, with pace (D40: all focus on the project this week or month, on track / behind / met, minutes a day to go, a streak of periods met)
 - [x] Weekly quests fully wired (touch all active projects, weekly target) (D42: a finished task or 10 minutes of focus in each active project; parked ones are let off)
-- [ ] **Review** quest type (weekly review, revisit a parked project) — *the weekly review quest is done (D38); "revisit a parked project" is still to do*
+- [x] **Review** quest type (weekly review, revisit a parked project) (D38, D43: "Revisit X" once a week for the parked project decided on longest ago; keeping it parked counts)
 - [ ] **Project** quest type generated from goals and deadlines
 - [ ] PWA: manifest, service worker (no offline data), install on phone over Tailscale HTTPS
 - [ ] Web Push reminders: habits due, focus ended, opt-in "streak at risk" nudge (max one per day)

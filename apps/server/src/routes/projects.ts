@@ -22,6 +22,7 @@ import {
   moveProject,
   projectView,
   projectViews,
+  keepParked,
   setProjectStatus,
   updateProject,
 } from '../services/projects';
@@ -59,6 +60,10 @@ export const projectRoutes = new Hono<AuthedEnv>()
     }),
   )
   /** Lifecycle; 409 `active_limit` (with the active projects) when over the limit (D5). */
+  /** A parked project revisited and kept parked (D43). */
+  .post('/:id/keep-parked', param, async (c) =>
+    c.json(await keepParked(c.get('user').id, c.req.valid('param').id)),
+  )
   .post('/:id/status', param, validate('json', projectStatusSchema), async (c) =>
     c.json({
       projects: await setProjectStatus(

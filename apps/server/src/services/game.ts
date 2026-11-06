@@ -151,10 +151,17 @@ async function boardContext(
   const weekStart = startOfWeek(today, s.weekStart);
   const activeDays = new Set<DateString>();
   const lastWorked = new Map<string, DateString>();
+  /** The last day each project was revisited while parked (D43). */
+  const lastRevisited = new Map<string, DateString>();
   const focusByDay = new Map<DateString, number>();
   const historyFrom = addDays(today, -28);
   for (const a of acts) {
     if (qualifies(a)) activeDays.add(a.localDate);
+    if (a.type === 'project_revisited' && a.entityId) {
+      if ((lastRevisited.get(a.entityId) ?? '') < a.localDate) {
+        lastRevisited.set(a.entityId, a.localDate);
+      }
+    }
     if (a.type === 'task_completed' || a.type === 'focus_completed') {
       const p = a.payload.projectId;
       if (p && (lastWorked.get(p) ?? '') < a.localDate) lastWorked.set(p, a.localDate);
@@ -175,6 +182,16 @@ async function boardContext(
     .from(projects)
     .where(and(eq(projects.userId, userId), eq(projects.status, 'active')))
     .orderBy(asc(projects.sortOrder));
+
+  const parked = await tx
+    .select({ id: projects.id, title: projects.title, changedAt: projects.statusChangedAt })
+    .from(projects)
+    .where(and(eq(projects.userId, userId), eq(projects.status, 'parked')));
+  const parkedProjects = parked.map((p) => {
+    const parkedOn = dayOf(s, p.changedAt);
+    const revisited = lastRevisited.get(p.id) ?? '';
+    return { id: p.id, title: p.title, since: revisited > parkedOn ? revisited : parkedOn };
+  });
 
   const [counts] = await tx
     .select({
@@ -214,6 +231,7 @@ async function boardContext(
   let hasWeekBoard = false;
   let hasReviewQuest = false;
   let hasProjectsQuest = false;
+  let hasParkedQuest = false;
   let pendingFollowUps = 0;
   for (const q of history) {
     const key = questKey(q);
@@ -233,6 +251,7 @@ async function boardContext(
     if (q.templateKey === 'weekly.projects' && q.periodStart === weekStart) {
       hasProjectsQuest = true;
     }
+    if (q.templateKey === 'review.parked' && q.periodStart === weekStart) hasParkedQuest = true;
   }
 
   return {
@@ -261,6 +280,8 @@ async function boardContext(
     challenge: s.challenge ?? null,
     hasReviewQuest,
     hasProjectsQuest,
+    parkedProjects,
+    hasParkedQuest,
   };
 }
 

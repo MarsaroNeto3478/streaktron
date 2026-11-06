@@ -21,6 +21,8 @@ export const ACTIVITY_TYPES = [
   'habit_checked',
   /** The weekly review done, for the week starting `payload.weekStart` (D38). */
   'review_completed',
+  /** A parked project revisited: kept parked, or made active, completed or archived (D43). */
+  'project_revisited',
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -43,7 +45,11 @@ export interface ActivityPayloads {
    */
   habit_checked: { date: DateString; projectId: string | null; habitCreatedOn?: DateString };
   review_completed: { weekStart: DateString };
+  project_revisited: { decision: RevisitDecision };
 }
+
+/** What a revisit of a parked project decided: keep it parked, or move it on (D43). */
+export type RevisitDecision = 'keep' | 'active' | 'completed' | 'archived';
 
 /** An activity row as the rules read it. */
 export type Activity = {

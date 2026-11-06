@@ -26,6 +26,9 @@ export const GAME = {
     windowDays: 2,
     /** The "Do the weekly review" quest. */
     questXp: 50,
+    /** "Revisit a parked project" (D43): its XP, and how long a project stays parked before it. */
+    parkedXp: 50,
+    parkedAfterDays: 7,
   },
   levels: {
     /** Cumulative XP to reach level n is `step · n · (n − 1)`: L2 = 100, L3 = 300, L10 = 4500. */

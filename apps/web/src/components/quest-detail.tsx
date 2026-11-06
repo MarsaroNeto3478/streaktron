@@ -156,6 +156,13 @@ function useExplain(q: Quest): Explained {
           'Finishing the weekly review. Today reminds you at the end of the week; a review on the first day of the next week still counts for this one.',
         go: { label: 'Start the review', run: () => void navigate({ to: '/review' }) },
       };
+    case 'review.parked':
+      return {
+        what: 'This project has been parked for a while. Look at it again and decide: keep it parked, make it active, complete it or archive it.',
+        counts:
+          'Any decision on this project this week, “Keep parked” included. The point is to decide, not to take it back on.',
+        go: toProject('Open the project'),
+      };
     case 'make.task':
       return {
         what: 'Add a new task to this project.',

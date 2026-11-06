@@ -171,3 +171,8 @@
 - **Shared:** `weekly.projects` ("Work on all N active projects this week"): offered once a week with 2+ active projects (`BoardContext.hasProjectsQuest`), `params.projectIds`, 60 + 10/project XP (max 100), large box; progress = projects with a finished task or 10+ min of focus, plus those no longer active (`ProgressExtra.activeProjects`). 2 unit tests.
 - **Server:** the board context knows `hasProjectsQuest`; evaluation passes the active project ids. 1 API test (286 in all).
 - **Web:** the quest detail explains it (with "Go to Projects"); Settings' weekly help mentions it.
+
+### 2026-11-05 — Phase 4: revisit a parked project (branch `phase-4-parked`, D43)
+- **Shared:** activity `project_revisited { decision: keep|active|completed|archived }` (no XP, not an active day); `review.parked` quest ("Revisit “X”", weekly, 50 XP, large box) for the parked project with the oldest decision once 7 days old (`GAME.review.parkedXp`, `parkedAfterDays`); `BoardContext.parkedProjects`, `hasParkedQuest`. 2 unit tests.
+- **Server:** migration `0010_project_revisited` (activity type check); `setProjectStatus` logs a revisit when a parked project moves on; `keepParked` + `POST /api/projects/:id/keep-parked` (409 `not_parked`). 2 API tests (290 in all).
+- **Web:** a parked project's page shows a banner (Keep parked / Make active / Complete / Archive); the weekly review's parked list has "Keep parked"; the quest detail explains `review.parked`; Settings' review help mentions it.
