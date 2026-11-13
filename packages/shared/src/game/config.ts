@@ -77,6 +77,15 @@ export const GAME = {
     },
     /** "Check in all habits due today" needs at least this many due. */
     allHabitsMin: 2,
+    /** Project quests (D44), from goals and deadlines: one a week. */
+    project: {
+      /** At most this many tasks asked for. */
+      maxTasks: 3,
+      /** A project or goal deadline this close makes its quest likelier. */
+      deadlineDays: 14,
+      /** The smallest focus a commitment quest asks for. */
+      minMinutes: 15,
+    },
     /** Tutorial quests (D31): XP per step and for the last one, which also gives a large box. */
     tutorial: { stepXp: 20, lastXp: 50, days: 365 },
   },

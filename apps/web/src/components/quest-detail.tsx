@@ -156,6 +156,26 @@ function useExplain(q: Quest): Explained {
           'Finishing the weekly review. Today reminds you at the end of the week; a review on the first day of the next week still counts for this one.',
         go: { label: 'Start the review', run: () => void navigate({ to: '/review' }) },
       };
+    case 'project.goal_tasks':
+      return {
+        what: `Finish ${q.target} task${q.target === 1 ? '' : 's'} that belong to this goal, before the quest ends.`,
+        counts:
+          'Completing top-level tasks linked to this goal (a task’s goal is set in its details). A goal with a deadline this week ends the quest on that day.',
+        go: target ? { label: 'Open the goal', run: () => openSheet('goal', target) } : undefined,
+      };
+    case 'project.commitment':
+      return {
+        what: `Put in this week’s share of the goal’s focus time: ${formatMinutes(q.target)}, in as many sessions as you like.`,
+        counts:
+          'The minutes of every focus session on this project this week, from when the quest appeared.',
+        go: focus(),
+      };
+    case 'project.deadline':
+      return {
+        what: `This project is due soon. Finish ${q.target} of its task${q.target === 1 ? '' : 's'} before the quest ends.`,
+        counts: 'Completing top-level tasks of this project. The quest ends on its due date.',
+        go: toProject('Open the project'),
+      };
     case 'review.parked':
       return {
         what: 'This project has been parked for a while. Look at it again and decide: keep it parked, make it active, complete it or archive it.',

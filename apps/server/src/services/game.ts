@@ -38,6 +38,7 @@ import { and, asc, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import { db } from '../db/client';
 import { activity, goals, projects, quests, tasks, userSettings } from '../db/schema';
 import { dayOf, recordActivity, type GameScope } from './activity';
+import { goalViews } from './goals';
 import { habitsDueToday } from './habits';
 import { conflict, notFound, type Conn, type Tx } from './common';
 import { focusList } from './today';
@@ -175,6 +176,7 @@ async function boardContext(
     .select({
       id: projects.id,
       title: projects.title,
+      dueDate: projects.dueDate,
       pinned: sql<boolean>`${projects.nextActionTaskId} is not null`,
       openTasks: sql<number>`(select count(*)::int from tasks t where t.project_id = ${outer('projects', 'id')} and t.parent_task_id is null and t.completed_at is null and t.deleted_at is null)`,
       openGoals: sql<number>`(select count(*)::int from goals g where g.project_id = ${outer('projects', 'id')} and g.status = 'open' and g.deleted_at is null)`,
@@ -182,6 +184,52 @@ async function boardContext(
     .from(projects)
     .where(and(eq(projects.userId, userId), eq(projects.status, 'active')))
     .orderBy(asc(projects.sortOrder));
+
+  // Open goals of active projects, commitments with their progress (project quests, D44).
+  const goalRows = activeProjects.length
+    ? await tx
+        .select()
+        .from(goals)
+        .where(
+          and(
+            eq(goals.userId, userId),
+            inArray(
+              goals.projectId,
+              activeProjects.map((p) => p.id),
+            ),
+            eq(goals.status, 'open'),
+            isNull(goals.deletedAt),
+          ),
+        )
+    : [];
+  const goalTasks = goalRows.length
+    ? await tx
+        .select({ goalId: tasks.goalId, n: sql<number>`count(*)::int` })
+        .from(tasks)
+        .where(
+          and(
+            inArray(
+              tasks.goalId,
+              goalRows.map((g) => g.id),
+            ),
+            isNull(tasks.parentTaskId),
+            isNull(tasks.completedAt),
+            isNull(tasks.deletedAt),
+          ),
+        )
+        .groupBy(tasks.goalId)
+    : [];
+  const openByGoal = new Map(goalTasks.map((r) => [r.goalId, r.n]));
+  const openGoals = (await goalViews(tx, userId, goalRows)).map((g) => ({
+    id: g.id,
+    title: g.title,
+    projectId: g.projectId,
+    kind: g.kind,
+    dueDate: g.dueDate,
+    openTasks: openByGoal.get(g.id) ?? 0,
+    remaining: g.progress ? Math.max(0, g.progress.target - g.progress.minutes) : null,
+    daysLeft: g.progress?.daysLeft ?? null,
+  }));
 
   const parked = await tx
     .select({ id: projects.id, title: projects.title, changedAt: projects.statusChangedAt })
@@ -232,6 +280,7 @@ async function boardContext(
   let hasReviewQuest = false;
   let hasProjectsQuest = false;
   let hasParkedQuest = false;
+  let hasProjectQuest = false;
   let pendingFollowUps = 0;
   for (const q of history) {
     const key = questKey(q);
@@ -252,6 +301,7 @@ async function boardContext(
       hasProjectsQuest = true;
     }
     if (q.templateKey === 'review.parked' && q.periodStart === weekStart) hasParkedQuest = true;
+    if (q.type === 'project' && q.periodStart === weekStart) hasProjectQuest = true;
   }
 
   return {
@@ -282,6 +332,8 @@ async function boardContext(
     hasProjectsQuest,
     parkedProjects,
     hasParkedQuest,
+    goals: openGoals,
+    hasProjectQuest,
   };
 }
 

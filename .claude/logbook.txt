@@ -702,3 +702,51 @@ PEDIDO: "pode commitar, merge push e depois siga em frente com o proximo passo"
 O QUE FOI FEITO: Commit no branch "phase-4-parked" (quest "Revisit a parked project", D43),
   merge na main e push para MarsaroNeto3478/streaktron. Em seguida, o próximo item da Fase 4: a
   quest de projeto gerada a partir das metas e prazos (entrada abaixo).
+
+-------------------------------------------------------------------------------------------------
+2026-11-05 — Quests de projeto (a partir das metas e prazos)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "siga em frente com o proximo passo" (próximo item da Fase 4: a quest de projeto).
+O QUE FOI FEITO:
+  - Novo tipo de quest "Project", uma por semana, escolhida entre:
+    - "Finish N tasks of «meta»": até 3 tarefas abertas de uma meta de resultado. Se a meta
+      vence nesta semana, a quest termina no dia do prazo.
+    - "Focus X for «meta»": a parte desta semana do que falta numa meta de compromisso (usa o
+      progresso feito antes, D40).
+    - "Finish N tasks in «projeto» before it's due": quando o projeto vence em até 14 dias.
+  - Prazos próximos deixam a quest mais provável. Vale de 55 a 100 XP e uma caixa grande; dá
+    para trocar (reroll) e desligar em Settings.
+  - Para saber de qual meta era a tarefa concluída, o registro de "tarefa concluída" agora
+    guarda a meta. Uma migração no banco aceita o novo tipo de quest.
+  - O detalhe da quest explica o que conta e tem botão para a meta, o foco ou o projeto.
+DECISÕES: D44.
+RESULTADO: 295 testes passando (5 novos). Migração aplicada no banco. Da Fase 4 falta só PWA e
+  notificações push.
+OBSERVAÇÕES: Para a quest "Finish N tasks of «meta»" aparecer, as tarefas precisam estar ligadas
+  à meta (campo Goal nos detalhes da tarefa).
+
+-------------------------------------------------------------------------------------------------
+2026-11-06 — Ligar o ambiente
+-------------------------------------------------------------------------------------------------
+PEDIDO: "claude vamos ativar"
+O QUE FOI FEITO: O Docker Desktop estava desligado. Foi aberto, o banco strekatron-db subiu (7
+  projetos), e a API (porta 3001) e o site (porta 5173) voltaram a rodar. O trabalho das quests
+  de projeto continua no branch "phase-4-project-quests", sem commit.
+RESULTADO: Tudo no ar.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Ligar o ambiente
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos ativar"
+O QUE FOI FEITO: O Docker Desktop estava desligado. Foi aberto, o banco strekatron-db subiu (7
+  projetos), e a API (porta 3001) e o site (porta 5173) voltaram a rodar. As quests de projeto
+  (D44) continuam no branch "phase-4-project-quests", sem commit.
+RESULTADO: Tudo no ar.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Commit das quests de projeto e início do PWA
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push e ja pode começar o proximo passo"
+O QUE FOI FEITO: Commit no branch "phase-4-project-quests" (D44), merge na main e push para
+  MarsaroNeto3478/streaktron. Em seguida, o último item da Fase 4: PWA e notificações push
+  (entrada abaixo).
