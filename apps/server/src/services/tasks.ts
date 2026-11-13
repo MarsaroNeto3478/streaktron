@@ -33,7 +33,7 @@ type ColumnRow = typeof boardColumns.$inferSelect;
 
 // --- Activity (D8) ---------------------------------------------------------------------------
 
-type DonenessRow = Pick<TaskRow, 'id' | 'effort' | 'projectId' | 'parentTaskId'>;
+type DonenessRow = Pick<TaskRow, 'id' | 'effort' | 'projectId' | 'parentTaskId' | 'goalId'>;
 
 /** The activity a task's completion or reopening writes. */
 function donenessActivity(task: DonenessRow, done: boolean): ActivityInput {
@@ -41,7 +41,12 @@ function donenessActivity(task: DonenessRow, done: boolean): ActivityInput {
     ? {
         type: 'task_completed',
         entityId: task.id,
-        payload: { effort: task.effort, projectId: task.projectId, subtask: !!task.parentTaskId },
+        payload: {
+          effort: task.effort,
+          projectId: task.projectId,
+          subtask: !!task.parentTaskId,
+          goalId: task.goalId,
+        },
       }
     : { type: 'task_reopened', entityId: task.id, payload: { projectId: task.projectId } };
 }
@@ -219,6 +224,7 @@ export async function createTask(userId: string, input: TaskCreate) {
       effort: input.effort ?? null,
       projectId,
       parentTaskId: input.parentTaskId ?? null,
+      goalId: input.goalId ?? null,
     };
     await recordActivity(tx, userId, [
       {
@@ -468,6 +474,7 @@ export async function setDoneness(tx: Tx, userId: string, ids: string[], done: b
       effort: tasks.effort,
       projectId: tasks.projectId,
       parentTaskId: tasks.parentTaskId,
+      goalId: tasks.goalId,
     })
     .from(tasks)
     .where(

@@ -28,8 +28,10 @@ export const QUEST_TYPES = [
   'comeback',
   /** The tutorial's steps (D31): one at a time, each spawning the next. */
   'tutorial',
-  /** The weekly review (D38). */
+  /** The weekly review (D38) and revisiting a parked project (D43). */
   'review',
+  /** From goals and deadlines (D44). */
+  'project',
 ] as const;
 export type QuestType = (typeof QUEST_TYPES)[number];
 
@@ -41,6 +43,7 @@ export const RESTABLE_TYPES = [
   'make',
   'weekly',
   'review',
+  'project',
 ] as const satisfies readonly QuestType[];
 
 export const QUEST_TYPE_LABELS: Record<QuestType, string> = {
@@ -53,6 +56,7 @@ export const QUEST_TYPE_LABELS: Record<QuestType, string> = {
   comeback: 'Comeback',
   tutorial: 'Tutorial',
   review: 'Review',
+  project: 'Project',
 };
 
 export const BOX_TIERS = ['small', 'standard', 'large', 'special'] as const;
@@ -117,7 +121,23 @@ export interface BoardContext {
     pinned: boolean;
     /** Last day something counted in it (null: never). */
     lastWorked: DateString | null;
+    dueDate: DateString | null;
   }[];
+  /** Open goals of active projects (project quests, D44). */
+  goals: readonly {
+    id: string;
+    title: string;
+    projectId: string;
+    kind: 'outcome' | 'commitment';
+    dueDate: DateString | null;
+    /** Open top-level tasks under the goal. */
+    openTasks: number;
+    /** Commitments: focus still needed this period (0 when met), and its days left with today. */
+    remaining: number | null;
+    daysLeft: number | null;
+  }[];
+  /** This week's project quest exists already. */
+  hasProjectQuest: boolean;
   inboxOpen: number;
   openSubtasks: number;
   /** Habits due today and not checked in yet. */
@@ -170,6 +190,7 @@ const BOX: Record<QuestType, BoxTier> = {
   weekly: 'large',
   tutorial: 'small',
   review: 'large',
+  project: 'large',
 };
 
 const fmtMinutes = (m: number) => {
@@ -395,6 +416,92 @@ function revisitParkedSpec(ctx: BoardContext): QuestSpec | null {
   };
 }
 
+/**
+ * Project quests (D44), from goals and deadlines, for this week: finish some tasks of an outcome
+ * goal, put in this week's share of a commitment goal, or finish some tasks of a project due soon.
+ * A deadline inside the week ends the quest on that day.
+ */
+function projectCandidates(ctx: BoardContext): Candidate[] {
+  const { maxTasks, deadlineDays, minMinutes } = GAME.quests.project;
+  const week = weekBounds(ctx);
+  const soon = (d: DateString | null) =>
+    d !== null && d >= ctx.today && daysBetween(ctx.today, d) <= deadlineDays;
+  const until = (d: DateString | null) =>
+    d !== null && d >= ctx.today && d < week.periodEnd ? d : week.periodEnd;
+  const tasksXp = (n: number) => 40 + 15 * n;
+  const active = new Set(ctx.projects.map((p) => p.id));
+  const out: Candidate[] = [];
+
+  for (const g of ctx.goals) {
+    if (!active.has(g.projectId)) continue;
+    if (g.kind === 'outcome' && g.openTasks > 0) {
+      const n = Math.min(g.openTasks, maxTasks);
+      out.push({
+        spec: {
+          ...dayQuest(
+            ctx,
+            'project',
+            'project.goal_tasks',
+            `Finish ${n} task${n === 1 ? '' : 's'} of “${g.title}”`,
+            tasksXp(n),
+            { target: n, targetEntityId: g.id, params: { projectId: g.projectId, goalId: g.id } },
+          ),
+          periodStart: week.periodStart,
+          periodEnd: until(g.dueDate),
+        },
+        need: soon(g.dueDate) ? 3 : 1,
+        projectId: g.projectId,
+      });
+    }
+    if (g.kind === 'commitment' && g.remaining && g.daysLeft) {
+      // This week's share of what's left: all of it when the period ends with the week.
+      const weekLeft = daysBetween(ctx.today, week.periodEnd) + 1;
+      const share = (g.remaining * Math.min(1, weekLeft / g.daysLeft)) / 5;
+      const minutes = Math.max(minMinutes, Math.ceil(share) * 5);
+      out.push({
+        spec: {
+          ...dayQuest(
+            ctx,
+            'project',
+            'project.commitment',
+            `Focus ${fmtMinutes(minutes)} for “${g.title}”`,
+            Math.min(100, 50 + Math.floor(minutes / 6)),
+            {
+              target: minutes,
+              targetEntityId: g.id,
+              params: { projectId: g.projectId, goalId: g.id },
+            },
+          ),
+          ...week,
+        },
+        need: 2,
+        projectId: g.projectId,
+      });
+    }
+  }
+  for (const p of ctx.projects) {
+    if (!soon(p.dueDate) || p.openTasks === 0) continue;
+    const n = Math.min(p.openTasks, maxTasks);
+    out.push({
+      spec: {
+        ...dayQuest(
+          ctx,
+          'project',
+          'project.deadline',
+          `Finish ${n} task${n === 1 ? '' : 's'} in “${p.title}” before it’s due`,
+          tasksXp(n),
+          { target: n, targetEntityId: p.id, params: { projectId: p.id } },
+        ),
+        periodStart: week.periodStart,
+        periodEnd: until(p.dueDate),
+      },
+      need: daysBetween(ctx.today, p.dueDate!) <= 7 ? 4 : 2,
+      projectId: p.id,
+    });
+  }
+  return out;
+}
+
 function makeCandidates(ctx: BoardContext): Candidate[] {
   const { cap, breakdownSubtasks } = GAME.quests.make;
   const out: Candidate[] = [];
@@ -551,6 +658,10 @@ export function planBoard(ctx: BoardContext, rng: Rng): QuestSpec[] {
     if (projects) out.push(projects);
   }
   if (!ctx.hasReviewQuest && !idle && !resting(ctx, 'review')) out.push(reviewSpec(ctx));
+  if (!ctx.hasProjectQuest && !idle && !resting(ctx, 'project')) {
+    const [pick] = pickWeighted(projectCandidates(ctx), weightOf(ctx), 1, rng);
+    if (pick) out.push(pick.spec);
+  }
   if (!ctx.hasParkedQuest && !idle && !resting(ctx, 'review')) {
     const revisit = revisitParkedSpec(ctx);
     if (revisit) out.push(revisit);
@@ -570,6 +681,8 @@ export function rerollSpec(ctx: BoardContext, quest: QuestSpec, rng: Rng): Quest
       return pick(dailyCandidates(ctx));
     case 'make':
       return pick(makeCandidates(ctx));
+    case 'project':
+      return pick(projectCandidates(ctx));
     case 'time': {
       // A new size; keep trying for one that differs.
       for (let i = 0; i < 5; i++) {
@@ -759,6 +872,25 @@ export function questProgress(
       return inPeriod.filter(
         (a) => a.type === 'review_completed' && a.payload.weekStart === q.periodStart,
       ).length;
+    case 'project.goal_tasks':
+      return inPeriod.filter(
+        (a) =>
+          a.type === 'task_completed' &&
+          !a.payload.subtask &&
+          a.payload.goalId === q.targetEntityId,
+      ).length;
+    case 'project.deadline':
+      return inPeriod.filter(
+        (a) =>
+          a.type === 'task_completed' && !a.payload.subtask && a.payload.projectId === projectId,
+      ).length;
+    case 'project.commitment':
+      for (const a of inPeriod) {
+        if (a.type === 'focus_completed' && a.payload.projectId === projectId) {
+          n += a.payload.minutes;
+        }
+      }
+      return n;
     case 'review.parked':
       return inPeriod.filter(
         (a) => a.type === 'project_revisited' && a.entityId === q.targetEntityId,
@@ -827,6 +959,8 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'daily.two_tasks',
         'weekly.target',
         'weekly.projects',
+        'project.goal_tasks',
+        'project.deadline',
         'tutorial.complete',
       ];
     case 'task_triaged':
@@ -840,6 +974,7 @@ export function affectedTemplates(a: Activity): readonly string[] {
         'time.week',
         'weekly.target',
         'weekly.projects',
+        'project.commitment',
         'comeback.focus',
         'tutorial.focus',
       ];

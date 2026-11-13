@@ -225,6 +225,16 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** Plan §5's review type ("Revisit one parked project and decide keep/drop"). Parked projects otherwise sit forgotten; the quest asks for a decision, not for taking the project back on, so it never pushes past the active limit (D5).
 - **Alternatives:** Only counting reactivation or closing (would nudge people over their active limit); a decision on any parked project instead of a named one.
 
+### D44 · Project quests from goals and deadlines — accepted (2026-11-05, the user said "siga em frente"; Claude's design, following plan §5)
+- **Decision:** A new quest type `project` (migration `0011_project_quests`), **one a week**, picked by weight from active projects' goals and deadlines:
+  - **`project.goal_tasks`** — an open outcome goal with open tasks: "Finish N tasks of “goal”", N = its open top-level tasks, at most 3; 40 + 15·N XP. A deadline inside the week ends the quest that day, and a deadline within 14 days makes it likelier.
+  - **`project.commitment`** — a commitment goal not met yet: "Focus X for “goal”", X = this week's share of what's left of its period (all of it for a weekly goal; for a monthly one, the part for the days of this week), at least 15 min, rounded to 5; 50 + X/6 XP (at most 100). Counts focus on the goal's project.
+  - **`project.deadline`** — an active project due within 14 days with open tasks: "Finish N tasks in “project” before it's due" (N ≤ 3), ending on its due date; likelier within 7 days.
+  - Large box; rerollable; restable in Settings ("project"). Like every quest, it counts only what happens after it's offered.
+- To know a finished task's goal, **`task_completed` now carries `goalId`** (optional: older rows don't have it).
+- **Why:** Plan §5's project type ("Finish 3 tasks of goal X before Friday · Reach 50% of commitment goal Y this week"); it ties quests to what the user is actually aiming for, and D40's progress gives the commitment share.
+- **Alternatives:** Several project quests a week (more noise than help); counting tasks completed before the quest appeared (would make the quest free).
+
 ---
 
 ## Rejected ideas (don't propose again)

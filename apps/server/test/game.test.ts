@@ -603,3 +603,45 @@ describe('revisit a parked project (D43)', () => {
     expect(rows.map((a) => [a.entityId, a.payload])).toEqual([[p.id, { decision: 'archived' }]]);
   });
 });
+
+describe('project quests (D44)', () => {
+  it('a goal’s quest is done by finishing the goal’s tasks, and the log knows the goal', async () => {
+    await onlyQuests();
+    await db
+      .update(userSettings)
+      .set({
+        questSettings: {
+          restingTypes: ['quick', 'daily', 'time', 'make', 'weekly', 'review'],
+          timeQuestMinMinutes: 15,
+          timeQuestMaxMinutes: 180,
+        },
+      })
+      .where(eq(userSettings.userId, userId));
+    const p = await newProject('Thesis');
+    const g = await as.post('/api/goals', { projectId: p.id, title: 'Chapter 1', kind: 'outcome' });
+    const t1 = await newTask('Outline', { projectId: p.id, goalId: g.body.id });
+    const t2 = await newTask('Draft', { projectId: p.id, goalId: g.body.id });
+    await newTask('Elsewhere', { projectId: p.id });
+    await db.delete(quests).where(eq(quests.userId, userId));
+
+    const board = (await as.get('/api/quests')).body.quests as {
+      id: string;
+      type: string;
+      templateKey: string;
+      target: number;
+      targetEntityId: string;
+    }[];
+    const q = board.find((x) => x.type === 'project')!;
+    expect(q).toMatchObject({ templateKey: 'project.goal_tasks', target: 2 });
+    expect(q.targetEntityId).toBe(g.body.id);
+
+    await as.post(`/api/tasks/${t1.id}/complete`);
+    const last = await as.post(`/api/tasks/${t2.id}/complete`);
+    expect(last.body.game.questsDone.map((d: { id: string }) => d.id)).toEqual([q.id]);
+    const logged = await activities('task_completed');
+    expect(logged.map((a) => (a.payload as { goalId?: string }).goalId)).toEqual([
+      g.body.id,
+      g.body.id,
+    ]);
+  });
+});

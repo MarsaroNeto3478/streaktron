@@ -30,7 +30,13 @@ export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 export type CreatedKind = 'task' | 'subtask' | 'goal' | 'area' | 'project';
 
 export interface ActivityPayloads {
-  task_completed: { effort: Effort | null; projectId: string | null; subtask: boolean };
+  /** `goalId`: the task's goal (project quests, D44); missing on completions logged before. */
+  task_completed: {
+    effort: Effort | null;
+    projectId: string | null;
+    subtask: boolean;
+    goalId?: string | null;
+  };
   task_reopened: { projectId: string | null };
   task_triaged: { projectId: string };
   item_created: { kind: CreatedKind; projectId: string | null; parentTaskId: string | null };

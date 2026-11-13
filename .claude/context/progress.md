@@ -176,3 +176,9 @@
 - **Shared:** activity `project_revisited { decision: keep|active|completed|archived }` (no XP, not an active day); `review.parked` quest ("Revisit “X”", weekly, 50 XP, large box) for the parked project with the oldest decision once 7 days old (`GAME.review.parkedXp`, `parkedAfterDays`); `BoardContext.parkedProjects`, `hasParkedQuest`. 2 unit tests.
 - **Server:** migration `0010_project_revisited` (activity type check); `setProjectStatus` logs a revisit when a parked project moves on; `keepParked` + `POST /api/projects/:id/keep-parked` (409 `not_parked`). 2 API tests (290 in all).
 - **Web:** a parked project's page shows a banner (Keep parked / Make active / Complete / Archive); the weekly review's parked list has "Keep parked"; the quest detail explains `review.parked`; Settings' review help mentions it.
+
+### 2026-11-05 — Phase 4: project quests (branch `phase-4-project-quests`, D44)
+- **Shared:** quest type `project` (restable, large box) with `project.goal_tasks`, `project.commitment`, `project.deadline` (`projectCandidates`, one weekly pick; `GAME.quests.project`); `BoardContext.goals`, `projects[].dueDate`, `hasProjectQuest`; `task_completed.goalId`. 4 unit tests.
+- **Server:** migration `0011_project_quests` (quest type check); the board context gathers open goals of active projects with open task counts and commitment progress (`goalViews`, exported from `services/goals.ts`); task completions log the goal. 1 API test (295 in all).
+- **Web:** the quest detail explains the three templates (open the goal, start focus on the project, open the project); Settings can rest project quests.
+- Phase 4 left: PWA and Web Push.

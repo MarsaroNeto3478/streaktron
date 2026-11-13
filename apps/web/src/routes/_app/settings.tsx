@@ -330,6 +330,7 @@ const QUEST_HELP: Record<Restable, string> = {
   make: 'Add a task or goal, then fill in its details',
   weekly: 'Your weekly target, and working on every active project',
   review: 'Do the weekly review, and revisit a parked project',
+  project: 'One a week from your goals and deadlines',
 };
 
 function QuestSettings() {

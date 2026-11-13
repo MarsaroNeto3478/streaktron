@@ -403,6 +403,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
         openGoals: 1,
         pinned: false,
         lastWorked: '2026-11-03',
+        dueDate: null,
       },
       {
         id: 'prj_b',
@@ -411,6 +412,7 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
         openGoals: 0,
         pinned: true,
         lastWorked: '2026-10-20',
+        dueDate: null,
       },
     ],
     inboxOpen: 2,
@@ -430,6 +432,8 @@ function ctx(over: Partial<BoardContext> = {}): BoardContext {
     hasProjectsQuest: true,
     parkedProjects: [],
     hasParkedQuest: true,
+    goals: [],
+    hasProjectQuest: true,
     ...over,
   };
 }
@@ -529,6 +533,7 @@ describe('board', () => {
               openGoals: 2,
               pinned: true,
               lastWorked: '2026-11-03',
+              dueDate: null,
             },
           ],
         });
@@ -1110,5 +1115,104 @@ describe('revisit a parked project (D43)', () => {
     expect(questProgress(q, [other])).toBe(0);
     expect(questProgress(q, [other, keep])).toBe(1);
     expect(affectedTemplates(keep)).toEqual(['review.parked']);
+  });
+});
+
+describe('project quests (D44)', () => {
+  type Goal = BoardContext['goals'][number];
+  const goal = (over: Partial<Goal>): Goal => ({
+    id: 'gol_x',
+    title: 'Pass the exam',
+    projectId: 'prj_a',
+    kind: 'outcome',
+    dueDate: null,
+    openTasks: 5,
+    remaining: null,
+    daysLeft: null,
+    ...over,
+  });
+  const board = (over: Partial<BoardContext>) =>
+    planBoard(
+      ctx({ hasDayBoard: true, hasWeekBoard: true, hasProjectQuest: false, ...over }),
+      seededRng(3),
+    ).filter((q) => q.type === 'project');
+
+  it('asks for up to three tasks of an outcome goal, ending early on its deadline', () => {
+    const [q] = board({ goals: [goal({ dueDate: '2026-11-06' })] });
+    expect(q).toMatchObject({
+      templateKey: 'project.goal_tasks',
+      title: 'Finish 3 tasks of “Pass the exam”',
+      target: 3,
+      xp: 85,
+      boxTier: 'large',
+      targetEntityId: 'gol_x',
+      periodStart: '2026-11-02',
+      periodEnd: '2026-11-06',
+    });
+    expect(board({ goals: [goal({ openTasks: 1 })] })[0]).toMatchObject({ target: 1, xp: 55 });
+    // No open tasks under it, or a parked project's goal: nothing to ask.
+    expect(board({ goals: [goal({ openTasks: 0 })] })).toEqual([]);
+    expect(board({ goals: [goal({ projectId: 'prj_parked' })] })).toEqual([]);
+  });
+
+  it('asks for this week’s share of a commitment goal', () => {
+    // Weekly goal, 150 min left, the week ends with its period: all of it.
+    const [week] = board({
+      goals: [goal({ kind: 'commitment', openTasks: 0, remaining: 150, daysLeft: 5 })],
+    });
+    expect(week).toMatchObject({
+      templateKey: 'project.commitment',
+      title: 'Focus 2 h 30 min for “Pass the exam”',
+      target: 150,
+      xp: 75,
+      periodEnd: '2026-11-08',
+    });
+    // Monthly goal, 600 min left over 27 days: 5 of them this week.
+    const [month] = board({
+      goals: [goal({ kind: 'commitment', openTasks: 0, remaining: 600, daysLeft: 27 })],
+    });
+    expect(month!.target).toBe(115);
+    // Met already: nothing.
+    expect(
+      board({ goals: [goal({ kind: 'commitment', openTasks: 0, remaining: 0, daysLeft: 5 })] }),
+    ).toEqual([]);
+  });
+
+  it('asks to finish tasks of a project due within two weeks', () => {
+    const projects = ctx().projects.map((p, i) => ({
+      ...p,
+      dueDate: i === 0 ? '2026-11-15' : null,
+    }));
+    const [q] = board({ projects });
+    expect(q).toMatchObject({
+      templateKey: 'project.deadline',
+      title: 'Finish 3 tasks in “Thesis” before it’s due',
+      targetEntityId: 'prj_a',
+      periodEnd: '2026-11-08',
+    });
+    const far = projects.map((p) => ({ ...p, dueDate: p.dueDate && '2026-12-31' }));
+    expect(board({ projects: far })).toEqual([]);
+    expect(board({ projects, hasProjectQuest: true })).toEqual([]);
+    expect(board({ projects, restingTypes: ['project'] })).toEqual([]);
+  });
+
+  it('counts the goal’s tasks, the project’s tasks or its focus minutes', () => {
+    const at = new Date('2026-11-02T00:00:00Z');
+    const [g] = board({ goals: [goal({})] });
+    const q = stored(g!, at);
+    const ofGoal = done(TODAY, 'S', undefined, { projectId: 'prj_a', goalId: 'gol_x' });
+    const noGoal = done(TODAY, 'S', undefined, { projectId: 'prj_a', goalId: null });
+    expect(questProgress(q, [ofGoal, noGoal, ofGoal])).toBe(2);
+
+    const [c] = board({
+      goals: [goal({ kind: 'commitment', openTasks: 0, remaining: 60, daysLeft: 5 })],
+    });
+    const focusA = act('focus_completed', TODAY, { minutes: 25, projectId: 'prj_a', taskId: null });
+    const focusB = act('focus_completed', TODAY, { minutes: 50, projectId: 'prj_b', taskId: null });
+    expect(questProgress(stored(c!, at), [focusA, focusB, focusA])).toBe(50);
+    expect(affectedTemplates(focusA)).toContain('project.commitment');
+    expect(affectedTemplates(ofGoal)).toEqual(
+      expect.arrayContaining(['project.goal_tasks', 'project.deadline']),
+    );
   });
 });
