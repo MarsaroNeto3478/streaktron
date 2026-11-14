@@ -170,3 +170,27 @@ export const inventoryItems = pgTable(
   },
   (t) => [index().on(t.userId, t.itemKey), uniqueIndex('inventory_items_box').on(t.lootBoxId)],
 );
+
+export const ACHIEVEMENT_KINDS = ['medal', 'prize'] as const;
+
+/**
+ * Medals and prizes earned (D49): stored the first time, with the user's day it was reached, and
+ * never taken back. Milestones are keys in `@strekatron/shared/game` (`tasks.10`…); a finished
+ * project's prize is `project.<id>`, with its title kept in `params`.
+ */
+export const achievements = pgTable(
+  'achievements',
+  {
+    id: text().primaryKey(),
+    userId: userId(),
+    key: text().notNull(),
+    kind: text({ enum: ACHIEVEMENT_KINDS }).notNull(),
+    earnedOn: day().notNull(),
+    params: jsonb().$type<Record<string, unknown>>().notNull().default({}),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex('achievements_user_key').on(t.userId, t.key),
+    check('achievements_kind', oneOf(t.kind, ACHIEVEMENT_KINDS)),
+  ],
+);

@@ -29,3 +29,6 @@ test-results/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# TanStack Router generator scratch files
+.tanstack/

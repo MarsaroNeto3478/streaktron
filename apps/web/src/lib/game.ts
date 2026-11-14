@@ -92,6 +92,18 @@ export function celebrate(qc: QueryClient, e: GameEvents) {
   if (e.freezeEarned)
     toast('Streak freeze earned', { description: 'A missed day won’t break it.' });
   if (e.weekMet) toast.success('Weekly target met', { description: 'The weekly streak grows.' });
+  // Medals and prizes (D49): one toast each, or one for many (the first visit after they existed).
+  if (e.achievements.length > 2) {
+    toast.success(`${e.achievements.length} medals and prizes earned`, {
+      description: 'See them in Medals.',
+    });
+  } else {
+    for (const a of e.achievements) {
+      toast.success(`${a.kind === 'prize' ? 'Prize' : 'Medal'}: ${a.title}`, {
+        description: 'See it in Medals.',
+      });
+    }
+  }
   if (e.boxesEarned > 0) {
     toast(e.boxesEarned === 1 ? 'Loot box earned' : `${e.boxesEarned} loot boxes earned`, {
       description: 'Open it in Collection.',

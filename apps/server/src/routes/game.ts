@@ -20,7 +20,14 @@ import {
   resumeFocus,
   startFocus,
 } from '../services/focus';
-import { getGameState, heatmap, questBoard, rerollQuest } from '../services/game';
+import {
+  achievementsPage,
+  getGameState,
+  heatmap,
+  questBoard,
+  rerollQuest,
+  statsPage,
+} from '../services/game';
 import { todayCountdowns } from '../services/countdowns';
 import { occurrencesIn } from '../services/events';
 import { todayHabits } from '../services/habits';
@@ -29,7 +36,9 @@ import { focusList } from '../services/today';
 export const gameRoutes = new Hono<AuthedEnv>()
   .use(requireUser)
   /** XP, level, daily and weekly streaks, freezes. */
-  .get('/state', async (c) => c.json(await getGameState(c.get('user').id)));
+  .get('/state', async (c) => c.json(await getGameState(c.get('user').id)))
+  /** Medals and prizes with their progress (D49). */
+  .get('/achievements', async (c) => c.json(await achievementsPage(c.get('user').id)));
 
 export const questRoutes = new Hono<AuthedEnv>()
   .use(requireUser)
@@ -81,4 +90,10 @@ export const statsRoutes = new Hono<AuthedEnv>()
   .get('/heatmap', validate('query', dayRangeSchema), async (c) => {
     const { from, to } = c.req.valid('query');
     return c.json({ days: await heatmap(c.get('user').id, from, to) });
-  });
+  })
+  /** Weekly totals, focus per project and area, quest outcomes, streak history (D50). */
+  .get(
+    '/overview',
+    validate('query', z.object({ weeks: z.enum(['4', '12', '26', '52']).default('12') })),
+    async (c) => c.json(await statsPage(c.get('user').id, Number(c.req.valid('query').weeks))),
+  );

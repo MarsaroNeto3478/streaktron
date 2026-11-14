@@ -207,3 +207,17 @@
 - On the dev database the user's account got 14 retroactive boxes (the 8 completed quests without one are tour replays). None opened by me. Not checked visually: the pane is at sign-in.
 - 322 tests; typecheck and lint clean. Web rebuilt for the phone link.
 - Same day: catalogue grown to 83 items (17 bedroom variations from the kit: benches, stools, tables, bedside pieces, sofas, a ceiling lamp, a TV with antenna). Kitchen/bathroom left out at the user's choice; structure pieces wait for Phase 7. Web rebuilt.
+
+### 2026-11-14 — Phase 6 starts: medals and prizes (D49, uncommitted, on `main`'s working tree)
+- Order for Phase 6 (told the user): medals and prizes, stats page, export/import, project templates, UX polish, Playwright; the usage review waits for 2–3 weeks of use (~from 2026-11-18); GitHub and Google Calendar last (they need the user's accounts).
+- `achievementStatus` in shared `game/achievements.ts` (31 milestones in 10 groups), 5 tests; `achievements` table (migration 0014); `services/achievements.ts` (`grantAchievements`, `achievementsView`), `achievementsPage` in game.ts, `GET /api/game/achievements`; `achievements` in the `game` block. 3 API tests.
+- Web: `/medals` page (prizes, finished projects, medals by group with the next step's progress), nav entry, toasts.
+- The user's account, read-only preview: First step, Getting things done, Looking back, Quest taker will arrive with their real days on the first visit.
+- 330 tests; typecheck and lint clean; web rebuilt.
+
+### 2026-11-14 — Phase 6: the stats page (D50, same branch, uncommitted)
+- `statsOverview` and `streakRuns` in shared `game/stats.ts` (2 tests); `dailyStreak` takes an optional per-day callback.
+- `statsPage` in game.ts + `GET /api/stats/overview?weeks=` (1 API test): names for focus by project/area, quest outcomes by type.
+- Web: the Stats page rewritten (range picker, 4 totals with change vs. the weeks before, weekly column chart with a measure picker and tooltip, focus by project/area, quests, streak history, heatmap kept).
+- Found while checking against the real account (read-only): tasks were counted per completion (15) while medals count each task once (12); stats now count a task once too.
+- 333 tests; typecheck and lint clean; web rebuilt. Not checked visually (the pane is at sign-in).

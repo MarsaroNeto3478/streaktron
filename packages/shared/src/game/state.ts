@@ -66,13 +66,26 @@ export interface GameEvents {
   questsAdded: { id: string; title: string }[];
   /** Loot boxes granted (D48): for quests just done, or a make quest whose follow-up closed. */
   boxesEarned: number;
+  /** Medals and prizes earned (D49). */
+  achievements: EarnedAchievement[];
   state: GameState;
+}
+
+export interface EarnedAchievement {
+  key: string;
+  kind: 'medal' | 'prize';
+  title: string;
 }
 
 export function gameEvents(
   before: GameState,
   after: GameState,
-  quests: { done: QuestDone[]; added: { id: string; title: string }[]; boxes?: number },
+  quests: {
+    done: QuestDone[];
+    added: { id: string; title: string }[];
+    boxes?: number;
+    achievements?: EarnedAchievement[];
+  },
 ): GameEvents {
   return {
     xp: Math.max(0, after.xp - before.xp),
@@ -89,6 +102,7 @@ export function gameEvents(
     questsDone: quests.done,
     questsAdded: quests.added,
     boxesEarned: quests.boxes ?? 0,
+    achievements: quests.achievements ?? [],
     state: after,
   };
 }
@@ -102,4 +116,5 @@ export const eventful = (e: GameEvents) =>
   e.weekMet ||
   e.questsDone.length > 0 ||
   e.questsAdded.length > 0 ||
-  e.boxesEarned > 0;
+  e.boxesEarned > 0 ||
+  e.achievements.length > 0;
