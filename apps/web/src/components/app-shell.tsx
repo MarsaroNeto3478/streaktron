@@ -7,7 +7,7 @@ import { CommandPalette } from '@/components/command-palette';
 import { Celebration } from '@/components/celebration';
 import { EntityIcon } from '@/components/entity-icon';
 import { FocusBar, FocusStartDialog } from '@/components/focus';
-import { GameChip } from '@/components/game-header';
+import { GameChip, LootChip } from '@/components/game-header';
 import { Logo } from '@/components/logo';
 import { NAV } from '@/components/nav';
 import { ProjectStatusProvider } from '@/components/project-status';
@@ -31,6 +31,7 @@ import { isMac } from '@/hooks/use-hotkeys';
 import { authClient } from '@/lib/auth-client';
 import {
   areasQuery,
+  lootQuery,
   projectsQuery,
   tasksQuery,
   type Area,
@@ -53,6 +54,8 @@ export function AppShell({
 }) {
   const { data: inbox } = useQuery(tasksQuery({ project: 'inbox', status: 'open' }));
   const inboxCount = inbox?.length ?? 0;
+  const { data: loot } = useQuery(lootQuery);
+  const unopened = loot?.length ?? 0;
 
   return (
     <ProjectStatusProvider>
@@ -85,6 +88,14 @@ export function AppShell({
                 {to === '/inbox' && inboxCount > 0 && (
                   <span className="text-xs text-muted-foreground tabular-nums">{inboxCount}</span>
                 )}
+                {to === '/collection' && unopened > 0 && (
+                  <span
+                    className="rounded-full bg-primary px-1.5 text-[11px] leading-5 font-semibold text-primary-foreground tabular-nums"
+                    aria-label={`${unopened} unopened loot boxes`}
+                  >
+                    {unopened}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
@@ -95,6 +106,7 @@ export function AppShell({
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b bg-background/85 px-4 backdrop-blur md:px-8">
             <Logo className="md:invisible" />
             <div className="flex items-center gap-1">
+              <LootChip />
               <GameChip />
               <Button
                 variant="ghost"

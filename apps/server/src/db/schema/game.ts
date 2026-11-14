@@ -3,6 +3,7 @@
 
 import type { ActivityPayloads, ActivityType } from '@strekatron/shared/game';
 import { ACTIVITY_TYPES, BOX_TIERS, QUEST_STATUSES, QUEST_TYPES } from '@strekatron/shared/game';
+import { RARITIES } from '@strekatron/shared/collectibles';
 import { sql } from 'drizzle-orm';
 import {
   check,
@@ -123,4 +124,49 @@ export const quests = pgTable(
     check('quests_status', oneOf(t.status, QUEST_STATUSES)),
     check('quests_type', oneOf(t.type, QUEST_TYPES)),
   ],
+);
+
+/**
+ * One box per quest that earned one (D11, D48). The rarity and item are rolled when it's opened and
+ * kept; the pity rules read the opened boxes in order.
+ */
+export const lootBoxes = pgTable(
+  'loot_boxes',
+  {
+    id: text().primaryKey(),
+    userId: userId(),
+    /** The quest that earned it; unique, so a quest never gives two boxes. */
+    questId: text().references((): AnyPgColumn => quests.id, { onDelete: 'set null' }),
+    tier: text({ enum: BOX_TIERS }).notNull(),
+    earnedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    openedAt: timestamp({ withTimezone: true }),
+    itemKey: text(),
+    rarity: text({ enum: RARITIES }),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex('loot_boxes_quest').on(t.questId),
+    index().on(t.userId, t.openedAt),
+    check('loot_boxes_tier', oneOf(t.tier, BOX_TIERS)),
+    check('loot_boxes_rarity', sql`${t.rarity} is null or ${oneOf(t.rarity, RARITIES)}`),
+    check(
+      'loot_boxes_opened',
+      sql`(${t.openedAt} is null) = (${t.itemKey} is null) and (${t.itemKey} is null) = (${t.rarity} is null)`,
+    ),
+  ],
+);
+
+/** One row per owned copy of a collectible (duplicates are kept, plan.md §4.9). */
+export const inventoryItems = pgTable(
+  'inventory_items',
+  {
+    id: text().primaryKey(),
+    userId: userId(),
+    /** A key in the catalogue (`@strekatron/shared/collectibles`). */
+    itemKey: text().notNull(),
+    acquiredAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    lootBoxId: text().references(() => lootBoxes.id, { onDelete: 'set null' }),
+    ...timestamps,
+  },
+  (t) => [index().on(t.userId, t.itemKey), uniqueIndex('inventory_items_box').on(t.lootBoxId)],
 );

@@ -134,6 +134,24 @@ export const questsQuery = queryOptions({
   queryFn: async () => (await fetchQuests()).quests,
 });
 
+const fetchLoot = () => call(api.loot.$get());
+export type LootBox = Awaited<ReturnType<typeof fetchLoot>>['unopened'][number];
+
+/** Unopened loot boxes, oldest first (D48); fetching grants any earned and not granted yet. */
+export const lootQuery = queryOptions({
+  queryKey: ['game', 'loot'],
+  queryFn: async () => (await fetchLoot()).unopened,
+});
+
+const fetchCollection = () => call(api.collection.$get());
+export type CollectionView = Awaited<ReturnType<typeof fetchCollection>>;
+
+/** The collectibles the user owns (the catalogue itself is in `@strekatron/shared/collectibles`). */
+export const collectionQuery = queryOptions({
+  queryKey: ['game', 'collection'],
+  queryFn: fetchCollection,
+});
+
 const fetchTutorial = () => call(api.tutorial.$get());
 export type Tutorial = Awaited<ReturnType<typeof fetchTutorial>>;
 

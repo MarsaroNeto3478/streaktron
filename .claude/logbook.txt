@@ -997,3 +997,90 @@ O QUE FOI FEITO:
 DECISÕES: D47 (troca de quest uma vez por dia), registrada a seguir.
 RESULTADO: Ambiente no ar; dicas publicadas.
 OBSERVAÇÕES: —
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Troca de quest uma vez por dia (ideia do observations.txt)
+-------------------------------------------------------------------------------------------------
+PEDIDO: Resposta à pergunta sobre a ideia do observations.txt: "Uma troca por dia por quest".
+O QUE FOI FEITO:
+  - Antes, cada quest podia ser trocada uma vez, e a quest que entrou no lugar nunca mais podia ser
+    trocada. Agora a substituta pode ser trocada de novo a partir do dia seguinte. Para quests de um
+    dia nada muda; para as da semana inteira (tempo da semana, quests de projeto), é uma troca por
+    dia em vez de uma por semana.
+  - Achei um erro no caminho: as quests de projeto (D44) deveriam poder ser trocadas, mas o código
+    as deixava de fora. Corrigido.
+  - Os botões de troca agora dizem "once a day".
+DECISÕES: D47.
+RESULTADO: 309 testes passando (1 novo). No branch phase-5-reroll-daily, sem commit.
+OBSERVAÇÕES: A ideia já foi incorporada; o observations.txt pode ser limpo.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Escolha do pacote de arte CC0 para a Fase 5
+-------------------------------------------------------------------------------------------------
+PEDIDO: (continuação: arte provisória do catálogo vem de um pacote CC0)
+O QUE FOI FEITO: Procurei um pacote e encontrei o "Furniture Kit" do Kenney (kenney.nl): cerca de
+  140 arquivos de móveis em estilo isométrico (cama, mesas, cadeiras, estantes, plantas,
+  luminárias, tapetes, eletrodomésticos), licença CC0 (domínio público, uso comercial permitido,
+  sem exigir crédito). Combina com o quarto isométrico da Fase 7. Mostrei a imagem de exemplo e
+  pedi autorização antes de baixar.
+DECISÕES: pendente (o autor aprova o download).
+RESULTADO: aguardando resposta.
+OBSERVAÇÕES: O site do Kenney pede doação opcional antes do download; o pacote é gratuito.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 5: caixas de recompensa e coleção
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode" (autorização para baixar o pacote de arte e seguir com a Fase 5).
+O QUE FOI FEITO:
+  - Baixei o Furniture Kit do Kenney (CC0, 5 MB, licença conferida no arquivo). Escolhi 66 móveis
+    isométricos (cada um em 4 direções) para o catálogo inicial.
+  - Catálogo: 9 categorias (camas, assentos, mesas, armazenamento, luz, plantas, eletrônicos,
+    decoração, tapetes) e 5 raridades (24 comuns, 21 incomuns, 13 raros, 5 épicos, 3 lendários).
+  - Regras das caixas: chances por tamanho de caixa (pequena, normal, grande, especial) e a
+    "garantia" (pity): a cada 10 caixas vem pelo menos um Raro, a cada 30 pelo menos um Épico.
+    Testado com 5000 aberturas simuladas.
+  - Toda quest concluída dá uma caixa, inclusive as concluídas antes desta fase (retroativas), e
+    nunca duas vezes. A caixa de uma quest de "criar" só chega quando a quest de detalhes termina.
+  - Tela "Collection": caixas para abrir (uma por vez ou todas), animação de abertura com a cor da
+    raridade, e o álbum com os itens que faltam em silhueta e a porcentagem por categoria. Ícone de
+    presente com o número de caixas no topo da tela.
+DECISÕES: D48.
+RESULTADO: 322 testes passando. A conta já recebeu 14 caixas pelas quests concluídas (as outras 8
+  eram repetições do tour, que não valem nada). Não abri nenhuma. Sem commit.
+OBSERVAÇÕES: O site do Kenney só libera o download pelo navegador; baixei pelo navegador do app.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Pergunta: dá para ter mais itens na coleção?
+-------------------------------------------------------------------------------------------------
+PEDIDO: "aqui, tem como aumentar a quantidade de itens?"
+O QUE FOI FEITO: Expliquei que sim. O pacote do Kenney tem 140 móveis e usei 66. Sobram cerca de
+  54 objetos (cozinha, banheiro, lavanderia, variações de mesas, cadeiras e sofás) e cerca de 20
+  peças de estrutura (paredes, pisos, portas, escadas), que fazem mais sentido no quarto da Fase 7.
+  Perguntei quais grupos entram.
+DECISÕES: pendente (o autor escolhe).
+RESULTADO: aguardando resposta.
+OBSERVAÇÕES: Mais itens deixam o álbum mais longo de completar; as chances por raridade não mudam.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Mais itens na coleção (sem cozinha e banheiro)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "concordo, deixa de fora a cozinha e o banheiro"
+O QUE FOI FEITO: Acrescentei 17 móveis de quarto do mesmo pacote: bancos, banquinho, mesas (com
+  toalha, de cavalete, de centro quadradas), criado-mudo e mesa de cabeceira, estante com portas,
+  rack de TV com portas, cadeira moderna, luminária de teto, sofá longo (Épico), TV de antena
+  (Épico) e sofá em L (Lendário). A coleção passou de 66 para 83 itens.
+DECISÕES: D48 atualizada (cozinha, banheiro e lavanderia ficam de fora; paredes, pisos, portas e
+  escadas esperam a Fase 7).
+RESULTADO: Testes do catálogo passando; app recompilado para o celular. Sem commit.
+OBSERVAÇÕES: Os itens novos não mudam as caixas já abertas; só entram no sorteio das próximas.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit, merge e push da Fase 5
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO: Rodei os testes (322 passando), o lint e a checagem de tipos. Fiz um commit no
+  branch phase-5-reroll-daily com a troca de quest uma vez por dia (D47) e a Fase 5 (D48), juntei
+  na main e enviei para o GitHub (só o repositório do autor).
+DECISÕES: nenhuma nova.
+RESULTADO: Fase 5 na main.
+OBSERVAÇÕES: O .claude/launch.json continua fora do commit (é só da máquina local).

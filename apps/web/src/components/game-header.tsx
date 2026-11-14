@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { CalendarCheck, Flame, Snowflake } from 'lucide-react';
-import { gameStateQuery, meQuery, type GameStateView } from '@/lib/queries';
+import { CalendarCheck, Flame, Gift, Snowflake } from 'lucide-react';
+import { gameStateQuery, lootQuery, meQuery, type GameStateView } from '@/lib/queries';
 import { STREAK_RULE } from '@/lib/game';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +26,24 @@ export function GameChip() {
         <Flame className="size-3.5" />
         {g.daily.current}
       </span>
+    </Link>
+  );
+}
+
+/** Unopened loot boxes (D48): a chip in the top bar, only while there are some. */
+export function LootChip() {
+  const { data: loot } = useQuery(lootQuery);
+  const n = loot?.length ?? 0;
+  if (!n) return null;
+  return (
+    <Link
+      to="/collection"
+      className="mr-1 flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground tabular-nums hover:bg-primary/90"
+      aria-label={n === 1 ? '1 unopened loot box' : `${n} unopened loot boxes`}
+      title="Open your loot boxes"
+    >
+      <Gift className="size-3.5" />
+      {n}
     </Link>
   );
 }

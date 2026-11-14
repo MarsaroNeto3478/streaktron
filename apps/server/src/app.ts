@@ -15,6 +15,7 @@ import { columnRoutes } from './routes/columns';
 import { calendarRoutes, eventRoutes } from './routes/events';
 import { goalRoutes } from './routes/goals';
 import { habitRoutes } from './routes/habits';
+import { collectionRoutes, lootRoutes } from './routes/loot';
 import { healthRoutes } from './routes/health';
 import { meRoutes } from './routes/me';
 import { focusRoutes, gameRoutes, questRoutes, statsRoutes, todayRoutes } from './routes/game';
@@ -55,7 +56,9 @@ const api = new Hono()
   .route('/stats', statsRoutes)
   .route('/tutorial', tutorialRoutes)
   .route('/reviews', reviewRoutes)
-  .route('/push', pushRoutes);
+  .route('/push', pushRoutes)
+  .route('/loot', lootRoutes)
+  .route('/collection', collectionRoutes);
 
 export const app = new Hono();
 

@@ -17,7 +17,7 @@ import {
   questKey,
   questProgress,
   qualifies,
-  rerollable,
+  canRerollNow,
   rerollSpec,
   tutorialSpec,
   type Activity,
@@ -39,6 +39,7 @@ import { db } from '../db/client';
 import { activity, goals, projects, quests, tasks, userSettings } from '../db/schema';
 import { dayOf, recordActivity, type GameScope } from './activity';
 import { goalViews } from './goals';
+import { grantBoxes } from './loot';
 import { habitsDueToday } from './habits';
 import { conflict, notFound, type Conn, type Tx } from './common';
 import { focusList } from './today';
@@ -442,6 +443,8 @@ interface Evaluation {
   added: { id: string; title: string }[];
   /** Activities the evaluation itself wrote (quest completions, bonuses). */
   recorded: Activity[];
+  /** Loot boxes granted (D48). */
+  boxes: number;
 }
 
 /**
@@ -455,7 +458,7 @@ async function evaluateQuests(
   acts: Activity[],
   only?: { activities: readonly Activity[]; touched: ReadonlySet<string> },
 ): Promise<Evaluation> {
-  const out: Evaluation = { done: [], added: [], recorded: [] };
+  const out: Evaluation = { done: [], added: [], recorded: [], boxes: 0 };
   const open = await tx
     .select()
     .from(quests)
@@ -534,6 +537,9 @@ async function evaluateQuests(
   if (out.done.some((d) => d.type === 'daily')) {
     out.recorded.push(...(await boardBonus(tx, userId, today, acts)));
   }
+  // Boxes for what was just done, for make quests whose follow-up closed, and, the first time,
+  // for every quest completed before loot existed (retroactive, D48).
+  out.boxes = await grantBoxes(tx, userId);
   return out;
 }
 
@@ -651,6 +657,7 @@ export async function questBoard(userId: string) {
       ),
     )
     .orderBy(asc(quests.offeredAt), asc(quests.id));
+  const [s] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
   const views = await Promise.all(
     rows.map(async (r) => {
       // Follow-ups also say which of the asked parts are filled in already.
@@ -661,13 +668,17 @@ export async function questBoard(userId: string) {
       const filled = item
         ? ((r.params.missing as DetailPart[] | undefined) ?? []).filter((p) => item.filled[p])
         : null;
-      return { ...questView(r, today), filled };
+      return { ...questView(r, today, s), filled };
     }),
   );
   return { today, quests: views, game: events };
 }
 
-function questView(r: QuestRow, today: DateString) {
+/** The day a quest replaced another one (D47), or null when it wasn't a reroll. */
+const rerolledOn = (r: QuestRow, s: SettingsRow | undefined) =>
+  r.rerollOf === null ? null : dayOf(s, r.offeredAt);
+
+function questView(r: QuestRow, today: DateString, s: SettingsRow | undefined) {
   return {
     id: r.id,
     type: r.type,
@@ -688,14 +699,13 @@ function questView(r: QuestRow, today: DateString) {
     targetEntityId: r.targetEntityId,
     params: r.params,
     status: r.status,
-    canReroll:
-      r.status === 'offered' && rerollable(r) && r.rerollOf === null && r.periodEnd >= today,
+    canReroll: canRerollNow({ ...r, rerolledOn: rerolledOn(r, s) }, today),
     completedAt: r.status === 'completed' ? r.closedAt : null,
   };
 }
 export type QuestView = ReturnType<typeof questView>;
 
-/** Swap a quest for another of its type, once (D10: one reroll per quest per day). */
+/** Swap a quest for another of its type (D10, D47: one reroll per quest per day). */
 export async function rerollQuest(userId: string, id: string) {
   return db.transaction(async (tx) => {
     const s = await lockUser(tx, userId);
@@ -708,8 +718,8 @@ export async function rerollQuest(userId: string, id: string) {
     if (row.status !== 'offered' || row.periodEnd < today) {
       throw conflict('quest_closed', 'That quest is already over.');
     }
-    if (!rerollable(row) || row.rerollOf !== null) {
-      throw conflict('no_reroll', 'This quest can’t be rerolled.');
+    if (!canRerollNow({ ...row, rerolledOn: rerolledOn(row, s) }, today)) {
+      throw conflict('no_reroll', 'This quest can’t be rerolled again today.');
     }
     const acts = await loadActivities(tx, userId);
     const ctx = await boardContext(tx, userId, s, today, acts);
@@ -720,7 +730,7 @@ export async function rerollQuest(userId: string, id: string) {
     await closeQuest(tx, row.id, 'rerolled');
     const newId_ = await insertQuest(tx, userId, replacement, { rerollOf: row.id });
     const [fresh] = await tx.select().from(quests).where(eq(quests.id, newId_));
-    return questView(fresh!, today);
+    return questView(fresh!, today, s);
   });
 }
 

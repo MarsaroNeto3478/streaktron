@@ -77,6 +77,8 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D48 | Loot boxes: Kenney CC0 art, 83-item catalogue, odds per tier, pity, boxes granted by reconciling with the quests table (retroactive; make quests after their follow-up) |
+| D47 | One reroll per quest per day: a replacement can be rerolled again on a later day; project quests are rerollable |
 | D46 | Streaky's tips: one at a time on Today (streak needs today, project without a next action, no active project, big inbox, a general tip for the challenge); put away per browser |
 | D45 | PWA (manifest, icons, a service worker without offline data) and Web Push: focus ended, habits left, opt-in streak at risk; once a day each |
 | D44 | Project quests, one a week, from goals and deadlines; `task_completed` carries `goalId` |
@@ -296,7 +298,7 @@ Quests come from an **extensible type registry**. Each type defines: cadence, ge
 
 - **Weighted picks with waiting time:** a candidate's weight is `need × (1 + daysWaiting / 7)²`, where `daysWaiting` counts days since it was last offered or worked on. Neglected projects and tasks surface sooner or later; nothing is left out forever.
 - **Sized from your own days:** time quests target the median of your recent active days (last 28 days, at least 3 of them) × 0.8–1.2, rounded to 5 minutes, clamped to configurable min/max. With too little history, a default range is used.
-- **One reroll per quest per day.** Rerolls are logged: a type that keeps getting rerolled is a misfit signal.
+- **One reroll per quest per day** (D47: a replacement can be swapped again on a later day). Rerolls are logged: a type that keeps getting rerolled is a misfit signal.
 - **Board bonus:** finishing every daily quest grants bonus XP.
 - **Resting types:** each quest type (except comeback) can be turned off in settings.
 - **Nothing for idle things:** parked/completed projects never get quests; after 7+ days with no activity at all, only the comeback quest appears (no full board waiting as noise).
@@ -550,12 +552,12 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 **Acceptance:** Exams/deadlines appear on the calendar with countdowns; a recurring lecture block shows every week; completing the weekly review is guided and takes ~5 minutes; a habit reminder reaches the phone.
 
 ### Phase 5 — Rewards: loot boxes & collection
-- [ ] Collectible catalogue format + initial catalogue (~40–60 items across categories and all rarities) with placeholder art (CC0 pack, license checked for commercial use)
-- [ ] `loot_boxes` + `inventory_items` tables; box granted on quest completion with tier by type
-- [ ] Loot rolling server-side: tiered odds, pity timer — unit-tested with seeded RNG (distribution + pity guarantees); crypto RNG in production
-- [ ] Retroactive grant: one box per previously completed quest
-- [ ] Opening UI: reveal animation by rarity, skip, open-all; unopened badge in the app shell
-- [ ] Collection/album view: owned vs. silhouettes, completion % by category/set
+- [x] Collectible catalogue format + initial catalogue (~40–60 items across categories and all rarities) with placeholder art (CC0 pack, license checked for commercial use) — 83 items, Kenney Furniture Kit (D48)
+- [x] `loot_boxes` + `inventory_items` tables; box granted on quest completion with tier by type
+- [x] Loot rolling server-side: tiered odds, pity timer — unit-tested with seeded RNG (distribution + pity guarantees); crypto RNG in production
+- [x] Retroactive grant: one box per previously completed quest
+- [x] Opening UI: reveal animation by rarity, skip, open-all; unopened badge in the app shell
+- [x] Collection/album view: owned vs. silhouettes, completion % by category/set
 
 **Acceptance:** Completing a quest yields a box; opening it adds an item to the collection; over 100 simulated openings, rarity distribution and pity rules hold; all pre-existing quest completions produced boxes exactly once.
 

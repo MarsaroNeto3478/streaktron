@@ -81,3 +81,7 @@ The server makes its Web Push keys once and keeps them in `data/vapid.json` (or 
 A pg-boss job checks every hour and writes one `pg_dump` per day (named by the owner's local day) to `data/backups/strekatron-YYYY-MM-DD.dump`, keeping the newest 14. Because the check is hourly, a laptop that was off at night still gets its backup. To trigger one now, send `POST /api/admin/backup` while signed in.
 
 Restore a backup with `pg_restore --clean --if-exists -d <database-url> data/backups/strekatron-YYYY-MM-DD.dump`. Without a host `pg_dump`, `pnpm dev` uses the one in the database container (`PG_DUMP` in `.env`); the app image ships its own.
+
+## Art
+
+Collectibles use [Kenney](https://kenney.nl)'s *Furniture Kit* (CC0, placeholder art); the licence is in `apps/web/public/assets/collectibles/LICENSE-kenney.txt`.

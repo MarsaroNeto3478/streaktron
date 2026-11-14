@@ -228,3 +228,67 @@
     animation: none;
   }
 }
+
+/* Loot boxes (D48): the box shakes, then opens into the item with a glow in its rarity's color. */
+@keyframes loot-shake {
+  0%,
+  100% {
+    transform: rotate(0) scale(1);
+  }
+  20% {
+    transform: rotate(-8deg) scale(1.04);
+  }
+  40% {
+    transform: rotate(8deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(-10deg) scale(1.12);
+  }
+  80% {
+    transform: rotate(10deg) scale(1.16);
+  }
+}
+@keyframes loot-reveal {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes loot-glow {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+}
+@layer utilities {
+  .animate-loot-shake {
+    animation: loot-shake 900ms ease-in-out;
+  }
+  .animate-loot-reveal {
+    animation: loot-reveal 500ms cubic-bezier(0.2, 0.7, 0.3, 1.2) both;
+  }
+  .animate-loot-glow {
+    animation: loot-glow 700ms ease-out both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-loot-shake,
+  .animate-loot-reveal,
+  .animate-loot-glow {
+    animation: none;
+  }
+}
