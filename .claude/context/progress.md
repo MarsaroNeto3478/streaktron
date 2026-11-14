@@ -193,3 +193,17 @@
 ### 2026-11-14 — Next: Streaky's tips (branch `phase-4-streaky-tips`, nothing written yet)
 - Phase 4 PWA committed and pushed (`6abaa3f`, merge `35fd04e`). Started the last Phase 4 item, Streaky as a helper with tips (D31); stopped before writing code because the user went to sleep and asked to shut the PC down. Idea to propose: one dismissible Streaky tip card on Today, picked by simple rules from data the page already has.
 - **Streaky's tips (D46), uncommitted on `phase-4-streaky-tips`:** `@strekatron/shared/tips` (`tipsFor`, `pickTip`, `hiddenUntil`; 5 tests, 308 in all) and `components/tip-card.tsx` on Today (after the tour; put away per browser in `localStorage`). Typecheck and lint clean; the web build in `apps/web/dist` was refreshed for the phone. Not checked visually: the browser pane was at sign-in. With this, every Phase 4 item is done; next is Phase 5 (loot boxes and collection).
+
+### 2026-11-14 — Tips shipped; one reroll per quest per day (branch `phase-5-reroll-daily`, D47)
+- Committed Streaky's tips (`8a456f4`, merge `c4c55e1`, pushed).
+- Folded `observations.txt` ("one-time-a-day reroll for each") into D47: `canRerollNow` in shared `quests.ts` (a replacement offered today waits until tomorrow); `questView`/`rerollQuest` use it; project quests are rerollable (they had candidates but `rerollable` left them out). Button titles say "once a day". 1 new API test (309 in all). Uncommitted.
+- Phase 5 answers from the user: placeholder art from a CC0 pack (show it before downloading).
+
+### 2026-11-14 — Phase 5: loot boxes and the collection (D48, same branch, uncommitted)
+- Downloaded Kenney's Furniture Kit (CC0, 5 MB) with the user's OK; 66 items' sprites (4 directions, 728 KB) in `apps/web/public/assets/collectibles`, with the licence.
+- `@strekatron/shared/collectibles`: catalogue, odds per tier, pity floor, `openBox`; 7 tests (5000 seeded openings per seed keep the odds and the pity rules).
+- Server: `loot_boxes`, `inventory_items` (migration 0013); `services/loot.ts` (`grantBoxes` reconciles from quests, `openBoxes`, `lootView`, `collectionView`); `GET /api/loot`, `POST /api/loot/:id/open`, `POST /api/loot/open-all`, `GET /api/collection`; `boxesEarned` in the `game` block. 6 API tests.
+- Web: `/collection` (boxes to open + album with silhouettes and % per category), reveal dialog (shake, glow by rarity, skip, open next / open all), gift chip in the top bar, count in the sidebar, toast.
+- On the dev database the user's account got 14 retroactive boxes (the 8 completed quests without one are tour replays). None opened by me. Not checked visually: the pane is at sign-in.
+- 322 tests; typecheck and lint clean. Web rebuilt for the phone link.
+- Same day: catalogue grown to 83 items (17 bedroom variations from the kit: benches, stools, tables, bedside pieces, sofas, a ceiling lamp, a TV with antenna). Kitchen/bathroom left out at the user's choice; structure pieces wait for Phase 7. Web rebuilt.

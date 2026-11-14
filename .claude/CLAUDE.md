@@ -4,7 +4,7 @@ Strekatron is a web app that helps people stay consistent with studies and perso
 
 ## Current status
 
-- **Phase:** Phases 0–3 done (Phase 3 = MVP, 2026-11-04, being dogfooded). **Phase 4** done 2026-11-13 (habits, calendar, countdowns, weekly review, commitment goals, weekly/review/project quests, Streaky's tour, PWA and Web Push); Streaky's tips done 2026-11-14 (D46). Next: Phase 5 (loot boxes and collection).
+- **Phase:** Phases 0–3 done (Phase 3 = MVP, 2026-11-04, being dogfooded). **Phase 4** done 2026-11-13 (habits, calendar, countdowns, weekly review, commitment goals, weekly/review/project quests, Streaky's tour, PWA and Web Push); Streaky's tips done 2026-11-14 (D46). **Phase 5** (loot boxes and collection, D48) built 2026-11-14 on branch `phase-5-reroll-daily`, not committed yet. Next: Phase 6.
 - **Run it:** `pnpm db:up && pnpm dev` (README has setup, scripts, Tailscale and backups). On the Windows machine pnpm isn't installed globally: use `npx pnpm@11.24.0 …`.
 - **Repository:** https://github.com/MarsaroNeto3478/streaktron (this user's copy), branch `main`.
 - **Two parallel versions:** the user (this repo, renamed Strekatron on 2026-11-05, D41) and a partner (`JVGdev/streaktron`) built a shared base, then each continues their own version; at the end they'll compare both and merge the best into a bigger project. Keep this repo's choices well documented (decisions.md) so the comparison is easy; never push to the partner's repo.

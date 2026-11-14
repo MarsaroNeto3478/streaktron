@@ -337,6 +337,24 @@ describe('quests', () => {
     expect(after.body.quests.map((x: { id: string }) => x.id)).not.toContain(q.id);
   });
 
+  it('lets a weekly quest that came from a reroll be swapped again on a later day (D47)', async () => {
+    await onlyQuests('time');
+    const { body } = await as.get('/api/quests');
+    const week = body.quests.find((x: { templateKey: string }) => x.templateKey === 'time.week');
+    expect(week?.canReroll).toBe(true);
+    const swapped = await as.post(`/api/quests/${week.id}/reroll`);
+    expect(swapped.status, JSON.stringify(swapped.body)).toBe(200);
+    expect(swapped.body.canReroll).toBe(false);
+    // The replacement was offered yesterday: today it can be swapped once more.
+    await db
+      .update(quests)
+      .set({ offeredAt: new Date(Date.now() - 86_400_000) })
+      .where(eq(quests.id, swapped.body.id));
+    const later = await as.get('/api/quests');
+    const again = later.body.quests.find((x: { id: string }) => x.id === swapped.body.id);
+    expect(again.canReroll).toBe(true);
+  });
+
   it('expires yesterday’s quests and makes a new board', async () => {
     await as.get('/api/quests');
     await db

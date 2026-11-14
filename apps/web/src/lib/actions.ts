@@ -559,6 +559,18 @@ export function gameActions(qc: QueryClient) {
         return next;
       }),
 
+    /** Open one loot box, or every unopened one (D48); resolves to what came out. */
+    openBoxes: (which: { id: string } | 'all') =>
+      attempt(async () => {
+        const res =
+          which === 'all'
+            ? await call(api.loot['open-all'].$post())
+            : await call(api.loot[':id'].open.$post({ param: { id: which.id } }));
+        void qc.invalidateQueries({ queryKey: ['game', 'loot'] });
+        void qc.invalidateQueries({ queryKey: ['game', 'collection'] });
+        return res.opened;
+      }),
+
     /** Throws (the settings form shows the message, e.g. the weekly time-zone lock). */
     saveSettings: async (patch: SettingsPatch) => {
       const settings = await call(api.settings.$patch({ json: patch }));

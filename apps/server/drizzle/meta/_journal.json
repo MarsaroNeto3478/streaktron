@@ -92,6 +92,13 @@
       "when": 1794584504578,
       "tag": "0012_push",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794686492129,
+      "tag": "0013_loot",
+      "breakpoints": true
     }
   ]
 }

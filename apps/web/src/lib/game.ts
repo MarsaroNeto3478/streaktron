@@ -92,6 +92,11 @@ export function celebrate(qc: QueryClient, e: GameEvents) {
   if (e.freezeEarned)
     toast('Streak freeze earned', { description: 'A missed day won’t break it.' });
   if (e.weekMet) toast.success('Weekly target met', { description: 'The weekly streak grows.' });
+  if (e.boxesEarned > 0) {
+    toast(e.boxesEarned === 1 ? 'Loot box earned' : `${e.boxesEarned} loot boxes earned`, {
+      description: 'Open it in Collection.',
+    });
+  }
   // XP alone: a small, quick note.
   if (e.xp > 0 && !e.levelUp && !e.questsDone.length && !e.streak) {
     toast(`+${e.xp} XP`, { duration: 1500 });

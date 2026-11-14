@@ -1,5 +1,5 @@
 // The quest board on Today: today's quests, this week's, and follow-ups. Each shows its progress;
-// most can be rerolled once. Clicking one opens what it asks and a button to go do it.
+// most can be rerolled once a day (D47). Clicking one opens what it asks and a button to go do it.
 
 import { PART_LABELS, QUEST_TYPE_LABELS, type QuestType } from '@strekatron/shared/game';
 import { useQuery } from '@tanstack/react-query';
@@ -158,7 +158,7 @@ function QuestRow({ quest: q }: { quest: Quest }) {
             size="icon"
             className="size-8 text-muted-foreground"
             aria-label={`Reroll “${q.title}”`}
-            title="Swap for another (once)"
+            title="Swap for another (once a day)"
             disabled={busy}
             onClick={async (e) => {
               e.stopPropagation();

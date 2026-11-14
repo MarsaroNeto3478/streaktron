@@ -324,7 +324,7 @@ function Body({ quest: q, close }: { quest: Quest; close: () => void }) {
           <Button
             variant="ghost"
             disabled={busy}
-            title="Swap for another quest of the same kind (once)"
+            title="Swap for another quest of the same kind (once a day)"
             onClick={async () => {
               setBusy(true);
               await actions.reroll(q.id);

@@ -697,9 +697,34 @@ export function rerollSpec(ctx: BoardContext, quest: QuestSpec, rng: Rng): Quest
   }
 }
 
-/** Whether a quest can be rerolled at all (once per quest per day; not follow-ups or comeback). */
+/** Whether a quest's type can be rerolled at all (not follow-ups, comeback, tutorial…). */
 export const rerollable = (q: Pick<QuestSpec, 'type'>) =>
-  q.type === 'quick' || q.type === 'daily' || q.type === 'make' || q.type === 'time';
+  q.type === 'quick' ||
+  q.type === 'daily' ||
+  q.type === 'make' ||
+  q.type === 'time' ||
+  q.type === 'project';
+
+/**
+ * Whether a quest can be rerolled now (D47): one reroll per quest per day. A quest that came from
+ * a reroll today waits until tomorrow; a weekly quest can be swapped again on a later day.
+ */
+export function canRerollNow(
+  q: Pick<QuestSpec, 'type'> & {
+    status: string;
+    periodEnd: DateString;
+    /** The day this quest replaced another one, or null when it wasn't a reroll. */
+    rerolledOn: DateString | null;
+  },
+  today: DateString,
+): boolean {
+  return (
+    q.status === 'offered' &&
+    rerollable(q) &&
+    q.periodEnd >= today &&
+    (q.rerolledOn === null || q.rerolledOn < today)
+  );
+}
 
 // --- Follow-ups (D16) ------------------------------------------------------------------------
 
