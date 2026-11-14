@@ -26,6 +26,14 @@ const schema = z.object({
   /** Command that runs pg_dump (`docker exec -i strekatron-db pg_dump` when it isn't installed). */
   PG_DUMP: z.string().default('pg_dump'),
   BACKUP_KEEP: z.coerce.number().int().min(1).default(14),
+  /** Web Push keys (D45); without them the server makes a pair once and keeps it in DATA_DIR. */
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  /** Who runs this server, for the push services (a mailto: or https: URL). */
+  VAPID_SUBJECT: z
+    .string()
+    .regex(/^(mailto:|https:)/, 'VAPID_SUBJECT must start with mailto: or https:')
+    .default('https://github.com/MarsaroNeto3478/streaktron'),
   JOBS_ENABLED: z
     .enum(['true', 'false'])
     .default('true')

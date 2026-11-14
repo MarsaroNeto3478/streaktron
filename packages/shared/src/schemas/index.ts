@@ -17,6 +17,7 @@ import {
 } from '../structure';
 import { isDateString, isValidTimeZone } from '../time';
 import { RESTABLE_TYPES } from '../game/quests';
+import { DEFAULT_REMINDERS, remindersSchema } from '../push';
 import { CHALLENGES } from '../game/challenge';
 import { FREQS, TIME_RE } from '../calendar';
 
@@ -75,6 +76,8 @@ export const userSettingsSchema = z.object({
   questSettings: questSettingsSchema,
   /** The answer to Streaky's question (D32, D36); null: not answered or skipped. */
   challenge: z.enum(CHALLENGES).nullable(),
+  /** Push reminders (D45). */
+  reminders: remindersSchema,
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 
@@ -90,6 +93,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   ],
   questSettings: { restingTypes: [], timeQuestMinMinutes: 15, timeQuestMaxMinutes: 180 },
   challenge: null,
+  reminders: DEFAULT_REMINDERS,
 };
 
 /** The weekly review's two questions (D38): plain text, like habit and event notes. */
