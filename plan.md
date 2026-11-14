@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D52 | Project templates: Course, Exam prep, Paper or thesis, Personal project (columns, goals, first tasks, dated countdown, weekly classes) |
 | D51 | Export (one JSON file) and import (a restore: replaces the account's data, a copy kept first) |
 | D50 | Stats page: totals vs. the weeks before, weekly trend, focus by project/area, quest outcomes, streak history |
 | D49 | Medals (effort) and prizes (streak milestones, finished projects), derived from the log with their real day, stored once |
@@ -570,7 +571,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Achievements → **medals** (first 7-day streak, 100 focus hours, 10 weekly reviews…) and **prizes** (completed projects, streak milestones), stored with earned dates (D49; Medals page)
 - [ ] GitHub integration: link repo to project, poll commits, commits → activity (count toward active days)
 - [ ] Google Calendar integration: quests, deadlines, countdowns in an app-created calendar
-- [ ] Project templates (e.g. "Course": default columns, goals, recurring events)
+- [x] Project templates (e.g. "Course": default columns, goals, recurring events) — D52: Course, Exam prep, Paper or thesis, Personal project
 - [x] Data export (JSON) and import (D51: import is a restore that replaces the account's data)
 - [ ] UX polish pass: empty states, loading states, keyboard shortcut cheat sheet, dark mode
 - [ ] Playwright tests for key flows (capture → board → complete → XP → quest → box)
@@ -673,6 +674,7 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 - Timeline / Gantt view
 - Graph view of links
 - Markdown import/export of descriptions
+- Save a project as a template (own templates, after the built-in ones from D52 have been used)
 - Notes as a first-class entity (linkable documents not tied to a task)
 - Time-of-day focus analytics ("you focus best at…")
 - Offline mode (see §6 note)

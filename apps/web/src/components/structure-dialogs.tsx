@@ -27,6 +27,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RichEditor } from '@/components/rich-editor';
+import { TemplatePicker } from '@/components/template-picker';
+import { NO_TEMPLATE, templateInput, templateProblem, type TemplateChoice } from '@/lib/templates';
+import { projectTemplate } from '@strekatron/shared/structure';
 import { useStructureActions } from '@/lib/actions';
 import { areasQuery, meQuery, projectsQuery, type Area, type Project } from '@/lib/queries';
 import { setUi, useUi } from '@/lib/ui-store';
@@ -176,11 +179,24 @@ function ProjectForm({
   const [dueDate, setDueDate] = useState(project?.dueDate ?? '');
   // New projects only; an existing one's description is edited on its page.
   const [description, setDescription] = useState<RichDoc | null>(null);
+  // New projects only: a template (D52) and the dates it asks for.
+  const [template, setTemplate] = useState<TemplateChoice>(NO_TEMPLATE);
+  const problem = templateProblem(template);
   const [busy, setBusy] = useState(false);
+
+  function pickTemplate(c: TemplateChoice) {
+    // A template brings its look; the user can still change it below.
+    if (c.key && c.key !== template.key) {
+      const t = projectTemplate(c.key);
+      setColor(t.color);
+      setIcon(t.icon);
+    }
+    setTemplate(c);
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || problem) return;
     setBusy(true);
     const fields = {
       title,
@@ -196,7 +212,12 @@ function ProjectForm({
       if (ok) onDone();
       return;
     }
-    const created = await actions.createProject({ ...fields, description, status });
+    const created = await actions.createProject({
+      ...fields,
+      description,
+      status,
+      template: templateInput(template),
+    });
     setBusy(false);
     if (created) {
       onDone();
@@ -228,6 +249,16 @@ function ProjectForm({
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
+        {!project && (
+          <Field label="Start from">
+            <TemplatePicker
+              value={template}
+              onChange={pickTemplate}
+              weekStart={me?.settings.weekStart ?? 1}
+            />
+          </Field>
+        )}
+        {problem && <p className="-mt-2 text-xs text-destructive">{problem}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Area">
             <Select value={area} onValueChange={setArea}>
@@ -305,7 +336,7 @@ function ProjectForm({
           <Button type="button" variant="ghost" onClick={onDone}>
             Cancel
           </Button>
-          <Button type="submit" disabled={busy || !title.trim()}>
+          <Button type="submit" disabled={busy || !title.trim() || !!problem}>
             {project ? 'Save' : 'Create project'}
           </Button>
         </DialogFooter>

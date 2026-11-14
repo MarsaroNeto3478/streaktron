@@ -12,13 +12,24 @@ import { newId } from '@strekatron/shared/ids';
 import {
   canTransition,
   DEFAULT_COLUMNS,
+  projectTemplate,
+  type ProjectTemplate,
   pickNextAction,
   placeAt,
   type ProjectStatus,
 } from '@strekatron/shared/structure';
 import { and, asc, count, eq, inArray, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
 import { db } from '../db/client';
-import { areas, boardColumns, projects, tasks, userSettings } from '../db/schema';
+import {
+  areas,
+  boardColumns,
+  calendarEvents,
+  goals,
+  projects,
+  tasks,
+  userSettings,
+} from '../db/schema';
+import { toRRule } from '@strekatron/shared/calendar';
 import {
   conflict,
   defined,
@@ -30,7 +41,7 @@ import {
   type Conn,
   type Tx,
 } from './common';
-import { recordActivity } from './activity';
+import { recordActivity, userToday } from './activity';
 import { writeLinks } from './links';
 import { snapshotProjects } from './snapshots';
 
@@ -207,6 +218,7 @@ export async function createProject(userId: string, input: ProjectCreate) {
     if (status === 'active') await assertRoomForActive(tx, userId);
 
     const id = newId('project');
+    const tpl = input.template ? projectTemplate(input.template.key) : null;
     const sortOrder = await edgeOrder(
       tx,
       projects,
@@ -222,24 +234,26 @@ export async function createProject(userId: string, input: ProjectCreate) {
       title: input.title,
       areaId: input.areaId ?? null,
       status,
-      color: input.color,
-      icon: input.icon,
+      color: input.color ?? tpl?.color,
+      icon: input.icon ?? tpl?.icon,
       startDate: input.startDate ?? null,
-      dueDate: input.dueDate ?? null,
+      dueDate: input.dueDate ?? (tpl?.date ? (input.template?.date ?? null) : null),
       sortOrder,
       ...richColumns(input.description),
     });
     await writeLinks(tx, userId, id, input.description);
-    await tx.insert(boardColumns).values(
-      DEFAULT_COLUMNS.map((c, i) => ({
-        id: newId('boardColumn'),
-        userId,
-        projectId: id,
-        title: c.title,
-        category: c.category,
-        sortOrder: i,
-      })),
-    );
+    const columns = (tpl?.columns ?? DEFAULT_COLUMNS).map((c, i) => ({
+      id: newId('boardColumn'),
+      userId,
+      projectId: id,
+      title: c.title,
+      category: c.category,
+      sortOrder: i,
+    }));
+    await tx.insert(boardColumns).values(columns);
+    if (tpl && input.template) {
+      await buildFromTemplate(tx, userId, id, input.title, tpl, input.template, columns);
+    }
     await recordActivity(tx, userId, {
       type: 'item_created',
       entityId: id,
@@ -438,3 +452,77 @@ export async function unpinClosed(conn: Conn, projectIds: (string | null)[]) {
 }
 
 export type { ProjectRow };
+
+/**
+ * A template's goals, first tasks and events (D52), in the project's creating transaction. They
+ * aren't logged as things the user made: a template is a starting point, not work done.
+ */
+async function buildFromTemplate(
+  tx: Tx,
+  userId: string,
+  projectId: string,
+  title: string,
+  tpl: ProjectTemplate,
+  given: NonNullable<ProjectCreate['template']>,
+  columns: { id: string; category: string }[],
+) {
+  const goalIds = tpl.goals.map(() => newId('goal'));
+  if (tpl.goals.length) {
+    await tx.insert(goals).values(
+      tpl.goals.map((g, i) => ({
+        id: goalIds[i]!,
+        userId,
+        projectId,
+        title: g.title,
+        kind: g.kind,
+        targetMinutes: g.kind === 'commitment' ? g.targetMinutes : null,
+        period: g.kind === 'commitment' ? g.period : null,
+        dueDate: g.kind === 'outcome' && g.dated ? (given.date ?? null) : null,
+        sortOrder: i,
+      })),
+    );
+  }
+  const column = columns[tpl.tasksIn ?? columns.findIndex((c) => c.category === 'todo')]!;
+  if (tpl.tasks.length) {
+    await tx.insert(tasks).values(
+      tpl.tasks.map((t, i) => ({
+        id: newId('task'),
+        userId,
+        projectId,
+        columnId: column.id,
+        goalId: t.goal === undefined ? null : goalIds[t.goal]!,
+        title: t.title,
+        sortOrder: i,
+      })),
+    );
+  }
+  if (tpl.date && given.date) {
+    await tx.insert(calendarEvents).values({
+      id: newId('event'),
+      userId,
+      projectId,
+      title: `${tpl.date.event}: ${title}`,
+      startDate: given.date,
+      countdown: true,
+    });
+  }
+  if (tpl.weekly && given.weekly) {
+    const today = await userToday(tx, userId);
+    await tx.insert(calendarEvents).values({
+      id: newId('event'),
+      userId,
+      projectId,
+      title: `${tpl.weekly.event}: ${title}`,
+      startDate: today,
+      startTime: given.weekly.startTime,
+      endTime: given.weekly.endTime,
+      // Classes run until the exam, when there's one.
+      recurrence: toRRule({
+        freq: 'weekly',
+        interval: 1,
+        byDay: given.weekly.days,
+        ...(given.date && given.date > today ? { until: given.date } : {}),
+      }),
+    });
+  }
+}
