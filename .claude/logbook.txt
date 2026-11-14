@@ -1150,3 +1150,32 @@ DECISÕES: nenhuma nova.
 RESULTADO: Medalhas e estatísticas na main.
 OBSERVAÇÕES: Desliguei o servidor de desenvolvimento durante o merge (ele regenera o arquivo de
   rotas ao trocar de branch) e liguei de novo depois.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 6: exportar e importar dados
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode seguir para exportar e importar dados"
+O QUE FOI FEITO:
+  - Configurações → "Your data": "Export my data" baixa um arquivo JSON com tudo da conta (áreas,
+    projetos, tarefas, hábitos, eventos, o registro de atividades, quests, caixas, itens e
+    medalhas). Senha e sessões não vão no arquivo.
+  - "Import a file…" lê um arquivo exportado, mostra o que ele tem e pede confirmação. A importação
+    substitui tudo o que a conta tem pelo conteúdo do arquivo (é uma restauração, não uma mistura).
+    Antes de começar, o servidor guarda uma cópia dos dados atuais. Se o arquivo estiver com
+    problema, nada muda.
+DECISÕES: D51 (importar = restaurar; misturar dois históricos quebraria a regra de ganhar XP uma
+  vez só).
+RESULTADO: 335 testes passando. A exportação da sua conta tem 134 KB. Sem commit.
+OBSERVAÇÕES: Um teste pegou um erro meu no caminho: eu tinha colocado as rotas novas na raiz da
+  API, e isso fazia endereços inexistentes pedirem login em vez de responder "não encontrado".
+  Movi para /api/data.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit, merge e push: exportar e importar
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO: Commit no branch phase-6-export (D51), merge na main e push para o GitHub (só o
+  repositório do autor).
+DECISÕES: nenhuma nova.
+RESULTADO: Exportar e importar na main.
+OBSERVAÇÕES: Servidor de desenvolvimento desligado durante o merge e ligado de novo depois.

@@ -221,3 +221,9 @@
 - Web: the Stats page rewritten (range picker, 4 totals with change vs. the weeks before, weekly column chart with a measure picker and tooltip, focus by project/area, quests, streak history, heatmap kept).
 - Found while checking against the real account (read-only): tasks were counted per completion (15) while medals count each task once (12); stats now count a task once too.
 - 333 tests; typecheck and lint clean; web rebuilt. Not checked visually (the pane is at sign-in).
+
+### 2026-11-14 — Phase 6: export and import (D51, branch `phase-6-export`, uncommitted)
+- `services/transfer.ts` (`exportAccount`, `importAccount`, table order with second-pass columns), `routes/transfer.ts` under `/api/data` (mounting it at `/` put sign-in on unknown endpoints: caught by the API 404 test). 2 API tests: a round trip gives back the same export; a broken file changes nothing.
+- Web: Settings → Your data (`components/your-data.tsx`), `dataActions` in actions.ts; the import dialog says what the file holds and that the current data is saved first.
+- The real account's export (read-only check): 134 KB, 102 activity rows, 70 quests, 12 tasks.
+- 335 tests; typecheck and lint clean; web rebuilt.

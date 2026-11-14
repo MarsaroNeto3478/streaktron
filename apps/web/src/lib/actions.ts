@@ -771,3 +771,39 @@ export function useEventActions() {
   const qc = useQueryClient();
   return useMemo(() => eventActions(qc), [qc]);
 }
+
+// --- Your data (D51) -------------------------------------------------------------------------
+
+export type ExportFile = Awaited<ReturnType<typeof fetchExport>>;
+const fetchExport = () => call(api.data.export.$get());
+
+export function dataActions(qc: QueryClient) {
+  return {
+    /** Everything the account has, saved as a JSON file. */
+    exportData: () =>
+      attempt(async () => {
+        const file = await fetchExport();
+        const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `strekatron-export-${file.exportedAt.slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return file;
+      }),
+
+    /** Replace the account's data with an export's; every view reloads. */
+    importData: (file: ExportFile) =>
+      attempt(async () => {
+        const res = await call(api.data.import.$post({ json: file }));
+        await qc.invalidateQueries();
+        return res;
+      }),
+  };
+}
+
+export function useDataActions() {
+  const qc = useQueryClient();
+  return useMemo(() => dataActions(qc), [qc]);
+}

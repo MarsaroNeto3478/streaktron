@@ -24,6 +24,7 @@ import { projectRoutes } from './routes/projects';
 import { pushRoutes } from './routes/push';
 import { setupRoutes } from './routes/setup';
 import { taskRoutes } from './routes/tasks';
+import { transferRoutes } from './routes/transfer';
 import { reviewRoutes } from './routes/reviews';
 import { tutorialRoutes } from './routes/tutorial';
 
@@ -58,7 +59,8 @@ const api = new Hono()
   .route('/reviews', reviewRoutes)
   .route('/push', pushRoutes)
   .route('/loot', lootRoutes)
-  .route('/collection', collectionRoutes);
+  .route('/collection', collectionRoutes)
+  .route('/data', transferRoutes);
 
 export const app = new Hono();
 
