@@ -19,6 +19,7 @@ import {
   qualifies,
   canRerollNow,
   rerollSpec,
+  statsOverview,
   tutorialSpec,
   type Activity,
   type BoardContext,
@@ -36,10 +37,11 @@ import { newId } from '@strekatron/shared/ids';
 import { addDays, startOfWeek, type DateString } from '@strekatron/shared/time';
 import { and, asc, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import { db } from '../db/client';
-import { activity, goals, projects, quests, tasks, userSettings } from '../db/schema';
+import { activity, areas, goals, projects, quests, tasks, userSettings } from '../db/schema';
 import { dayOf, recordActivity, type GameScope } from './activity';
 import { goalViews } from './goals';
 import { grantBoxes } from './loot';
+import { achievementsView, grantAchievements, type Earned } from './achievements';
 import { habitsDueToday } from './habits';
 import { conflict, notFound, type Conn, type Tx } from './common';
 import { focusList } from './today';
@@ -445,6 +447,8 @@ interface Evaluation {
   recorded: Activity[];
   /** Loot boxes granted (D48). */
   boxes: number;
+  /** Medals and prizes earned (D49). */
+  achievements?: Earned[];
 }
 
 /**
@@ -624,6 +628,7 @@ export async function evaluateAfterWrite(scope: GameScope): Promise<GameEvents |
       activities: scope.activities,
       touched: scope.touched,
     });
+    ev.achievements = await grantAchievements(tx, userId, acts, s, today);
     return gameEvents(before, stateOf(acts, s, today), ev);
   });
 }
@@ -637,8 +642,20 @@ export async function evaluateAll(userId: string) {
     const before = stateOf(acts, s, today);
     await ensureBoard(tx, userId, s, today, acts, cryptoRng);
     const ev = await evaluateQuests(tx, userId, today, acts);
+    ev.achievements = await grantAchievements(tx, userId, acts, s, today);
     const events = gameEvents(before, stateOf(acts, s, today), ev);
     return { today, events: eventful(events) ? events : null, state: events.state };
+  });
+}
+
+/** Medals and prizes with their progress (D49); viewing stores any reached and not stored yet. */
+export async function achievementsPage(userId: string) {
+  return db.transaction(async (tx) => {
+    const s = await lockUser(tx, userId);
+    const today = dayOf(s);
+    const acts = await loadActivities(tx, userId);
+    const earned = await grantAchievements(tx, userId, acts, s, today);
+    return { ...(await achievementsView(tx, userId, acts, s, today)), earned };
   });
 }
 
@@ -759,4 +776,86 @@ export async function heatmap(userId: string, from: DateString, to: DateString) 
     days.set(a.localDate, d);
   }
   return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * The stats page (D50): weekly totals for the last `weeks` weeks against the weeks before, focus
+ * per project and area, quest outcomes by type, and the daily streak's history.
+ */
+export async function statsPage(userId: string, weeks: number) {
+  const [s] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
+  if (!s) throw notFound('user');
+  const today = dayOf(s);
+  const o = statsOverview(await loadActivities(db, userId), {
+    today,
+    weekStart: s.weekStart,
+    weeks,
+  });
+
+  const [projectRows, areaRows, questRows] = await Promise.all([
+    db
+      .select({
+        id: projects.id,
+        title: projects.title,
+        color: projects.color,
+        areaId: projects.areaId,
+      })
+      .from(projects)
+      .where(eq(projects.userId, userId)),
+    db
+      .select({ id: areas.id, title: areas.title, color: areas.color })
+      .from(areas)
+      .where(eq(areas.userId, userId)),
+    db
+      .select({ type: quests.type, status: quests.status, n: sql<number>`count(*)::int` })
+      .from(quests)
+      .where(
+        and(
+          eq(quests.userId, userId),
+          gte(quests.periodEnd, o.from),
+          lt(quests.periodEnd, today),
+          inArray(quests.status, ['completed', 'expired']),
+        ),
+      )
+      .groupBy(quests.type, quests.status),
+  ]);
+  const projectById = new Map(projectRows.map((p) => [p.id, p]));
+  const areaById = new Map(areaRows.map((a) => [a.id, a]));
+
+  const focusByProject = o.focusByProject.map((f) => {
+    const p = f.projectId ? projectById.get(f.projectId) : undefined;
+    return {
+      projectId: p ? p.id : null,
+      title: p ? p.title : f.projectId ? 'Deleted project' : 'No project',
+      color: p?.color ?? null,
+      areaId: p?.areaId ?? null,
+      minutes: f.minutes,
+    };
+  });
+  const byArea = new Map<string | null, number>();
+  for (const f of focusByProject) byArea.set(f.areaId, (byArea.get(f.areaId) ?? 0) + f.minutes);
+  const focusByArea = [...byArea]
+    .map(([areaId, minutes]) => {
+      const a = areaId ? areaById.get(areaId) : undefined;
+      return { areaId, title: a?.title ?? 'No area', color: a?.color ?? null, minutes };
+    })
+    .sort((a, b) => b.minutes - a.minutes);
+
+  // Quests whose time is over (today's may still be done): completed vs. expired, by type.
+  const byType = new Map<string, { type: string; completed: number; expired: number }>();
+  for (const r of questRows) {
+    if (r.type === 'tutorial') continue;
+    const t = byType.get(r.type) ?? { type: r.type, completed: 0, expired: 0 };
+    t[r.status as 'completed' | 'expired'] += r.n;
+    byType.set(r.type, t);
+  }
+
+  return {
+    ...o,
+    focusByProject,
+    focusByArea,
+    quests: [...byType.values()].sort(
+      (a, b) => b.completed + b.expired - (a.completed + a.expired),
+    ),
+  };
 }

@@ -77,6 +77,8 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D50 | Stats page: totals vs. the weeks before, weekly trend, focus by project/area, quest outcomes, streak history |
+| D49 | Medals (effort) and prizes (streak milestones, finished projects), derived from the log with their real day, stored once |
 | D48 | Loot boxes: Kenney CC0 art, 83-item catalogue, odds per tier, pity, boxes granted by reconciling with the quests table (retroactive; make quests after their follow-up) |
 | D47 | One reroll per quest per day: a replacement can be rerolled again on a later day; project quests are rerollable |
 | D46 | Streaky's tips: one at a time on Today (streak needs today, project without a next action, no active project, big inbox, a general tip for the challenge); put away per browser |
@@ -563,8 +565,8 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 
 ### Phase 6 — Stats, achievements, polish & integrations
 - [ ] **Usage review** after 2–3 weeks of dogfooding (like Quire's `review/fit.md`): quest fit stats, what's used vs. ignored; tune §5 values
-- [ ] Stats page: focus per project/area, trends, streak history, quest completion rate, XP over time
-- [ ] Achievements → **medals** (first 7-day streak, 100 focus hours, 10 weekly reviews…) and **prizes** (completed projects, streak milestones), stored with earned dates
+- [x] Stats page: focus per project/area, trends, streak history, quest completion rate, XP over time (D50)
+- [x] Achievements → **medals** (first 7-day streak, 100 focus hours, 10 weekly reviews…) and **prizes** (completed projects, streak milestones), stored with earned dates (D49; Medals page)
 - [ ] GitHub integration: link repo to project, poll commits, commits → activity (count toward active days)
 - [ ] Google Calendar integration: quests, deadlines, countdowns in an app-created calendar
 - [ ] Project templates (e.g. "Course": default columns, goals, recurring events)
@@ -690,5 +692,5 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 - **Q2 — Ordering of friend streaks.** Currently Phase 8 (after rewards, stats/polish, bedroom). Since it's a main motivation factor, it could move right after Phase 5.
 - **Q3 — Bedroom art.** Style (pixel art vs. clean vector isometric) and source (CC0 packs, self-made, commissioned, AI-assisted — check commercial licensing for a product). Placeholders unblock development either way.
 - **Q4 — Business model** (for the product): free, freemium (e.g. integrations, extra rooms), or subscription. Fixed constraint: loot is never sold.
-- **Q5 — Medals vs. prizes in the wardrobe.** Working definition: medals = achievements, prizes = milestone trophies (projects completed, streak milestones, events). Confirm when designing Phase 6–7.
+- **Q5 — Medals vs. prizes in the wardrobe.** Settled by D49: medals = steady effort (tasks, focus, reviews, quests…), prizes = milestones (streaks, finished projects, later events).
 - Revisit gamification numbers (§5) and loot odds (§4.9) after ~2 weeks of dogfooding.

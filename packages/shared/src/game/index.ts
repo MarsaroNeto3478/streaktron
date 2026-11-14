@@ -10,3 +10,5 @@ export * from './select';
 export * from './quests';
 export * from './challenge';
 export * from './review';
+export * from './achievements';
+export * from './stats';

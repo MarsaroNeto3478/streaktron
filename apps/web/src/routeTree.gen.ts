@@ -16,6 +16,7 @@ import { Route as AppCalendarRouteImport } from './routes/_app/calendar'
 import { Route as AppCollectionRouteImport } from './routes/_app/collection'
 import { Route as AppHabitsRouteImport } from './routes/_app/habits'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
+import { Route as AppMedalsRouteImport } from './routes/_app/medals'
 import { Route as AppReviewRouteImport } from './routes/_app/review'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppStatsRouteImport } from './routes/_app/stats'
@@ -57,6 +58,11 @@ const AppHabitsRoute = AppHabitsRouteImport.update({
 const AppInboxRoute = AppInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMedalsRoute = AppMedalsRouteImport.update({
+  id: '/medals',
+  path: '/medals',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReviewRoute = AppReviewRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/collection': typeof AppCollectionRoute
   '/habits': typeof AppHabitsRoute
   '/inbox': typeof AppInboxRoute
+  '/medals': typeof AppMedalsRoute
   '/review': typeof AppReviewRoute
   '/settings': typeof AppSettingsRoute
   '/stats': typeof AppStatsRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/collection': typeof AppCollectionRoute
   '/habits': typeof AppHabitsRoute
   '/inbox': typeof AppInboxRoute
+  '/medals': typeof AppMedalsRoute
   '/review': typeof AppReviewRoute
   '/settings': typeof AppSettingsRoute
   '/stats': typeof AppStatsRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/_app/collection': typeof AppCollectionRoute
   '/_app/habits': typeof AppHabitsRoute
   '/_app/inbox': typeof AppInboxRoute
+  '/_app/medals': typeof AppMedalsRoute
   '/_app/review': typeof AppReviewRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/stats': typeof AppStatsRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/habits'
     | '/inbox'
+    | '/medals'
     | '/review'
     | '/settings'
     | '/stats'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/habits'
     | '/inbox'
+    | '/medals'
     | '/review'
     | '/settings'
     | '/stats'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/_app/collection'
     | '/_app/habits'
     | '/_app/inbox'
+    | '/_app/medals'
     | '/_app/review'
     | '/_app/settings'
     | '/_app/stats'
@@ -259,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInboxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/medals': {
+      id: '/_app/medals'
+      path: '/medals'
+      fullPath: '/medals'
+      preLoaderRoute: typeof AppMedalsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/review': {
       id: '/_app/review'
       path: '/review'
@@ -323,6 +342,7 @@ interface AppRouteChildren {
   AppCollectionRoute: typeof AppCollectionRoute
   AppHabitsRoute: typeof AppHabitsRoute
   AppInboxRoute: typeof AppInboxRoute
+  AppMedalsRoute: typeof AppMedalsRoute
   AppReviewRoute: typeof AppReviewRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppStatsRoute: typeof AppStatsRoute
@@ -338,6 +358,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCollectionRoute: AppCollectionRoute,
   AppHabitsRoute: AppHabitsRoute,
   AppInboxRoute: AppInboxRoute,
+  AppMedalsRoute: AppMedalsRoute,
   AppReviewRoute: AppReviewRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppStatsRoute: AppStatsRoute,

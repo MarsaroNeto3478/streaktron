@@ -3,6 +3,7 @@ import {
   CalendarDays,
   FolderKanban,
   Gem,
+  Medal,
   Inbox,
   ClipboardCheck,
   ListTodo,
@@ -21,7 +22,8 @@ export interface NavItem {
     | '/calendar'
     | '/review'
     | '/stats'
-    | '/collection';
+    | '/collection'
+    | '/medals';
   label: string;
   icon: LucideIcon;
   /** In the phone's bottom bar (five fit). */
@@ -38,4 +40,5 @@ export const NAV: NavItem[] = [
   { to: '/review', label: 'Weekly review', icon: ClipboardCheck, phone: false },
   { to: '/stats', label: 'Stats', icon: BarChart3, phone: false },
   { to: '/collection', label: 'Collection', icon: Gem, phone: false },
+  { to: '/medals', label: 'Medals', icon: Medal, phone: false },
 ];

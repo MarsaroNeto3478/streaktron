@@ -43,7 +43,12 @@ export interface DailyStreak {
  * The daily streak as of `today`. Days before today are settled: active, covered by a freeze, or
  * the end of the run. Today only adds; until it ends it can't break anything.
  */
-export function dailyStreak(active: ReadonlySet<DateString>, today: DateString): DailyStreak {
+export function dailyStreak(
+  active: ReadonlySet<DateString>,
+  today: DateString,
+  /** Called for each day walked, with the run's length after it (streak history, stats). */
+  onDay?: (day: DateString, kind: 'active' | 'frozen' | 'missed', current: number) => void,
+): DailyStreak {
   const { freezeEvery, maxFreezes } = GAME.streaks;
   let current = 0;
   let longest = 0;
@@ -58,14 +63,17 @@ export function dailyStreak(active: ReadonlySet<DateString>, today: DateString):
         current++;
         run++;
         if (run % freezeEvery === 0 && freezes < maxFreezes) freezes++;
+        onDay?.(day, 'active', current);
       } else if (current > 0 && freezes > 0) {
         freezes--;
         run = 0;
         frozenDays.push(day);
+        onDay?.(day, 'frozen', current);
       } else {
         current = 0;
         run = 0;
         frozenDays = [];
+        onDay?.(day, 'missed', 0);
       }
       longest = Math.max(longest, current);
     }
@@ -77,6 +85,7 @@ export function dailyStreak(active: ReadonlySet<DateString>, today: DateString):
     run++;
     if (run % freezeEvery === 0 && freezes < maxFreezes) freezes++;
     longest = Math.max(longest, current);
+    onDay?.(today, 'active', current);
   }
   return {
     current,

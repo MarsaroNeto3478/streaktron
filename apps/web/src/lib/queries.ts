@@ -134,6 +134,15 @@ export const questsQuery = queryOptions({
   queryFn: async () => (await fetchQuests()).quests,
 });
 
+const fetchAchievements = () => call(api.game.achievements.$get());
+export type Achievement = Awaited<ReturnType<typeof fetchAchievements>>['achievements'][number];
+
+/** Medals and prizes with their progress (D49); fetching stores any reached and not stored yet. */
+export const achievementsQuery = queryOptions({
+  queryKey: ['game', 'achievements'],
+  queryFn: fetchAchievements,
+});
+
 const fetchLoot = () => call(api.loot.$get());
 export type LootBox = Awaited<ReturnType<typeof fetchLoot>>['unopened'][number];
 
@@ -198,6 +207,14 @@ export const heatmapQuery = (from: string, to: string) =>
     queryKey: ['game', 'heatmap', from, to],
     queryFn: async () => (await fetchHeatmap(from, to)).days,
   });
+
+const fetchStats = (weeks: StatsWeeks) => call(api.stats.overview.$get({ query: { weeks } }));
+export type StatsWeeks = '4' | '12' | '26' | '52';
+export type StatsOverview = Awaited<ReturnType<typeof fetchStats>>;
+
+/** The stats page (D50): the last `weeks` weeks against the weeks before. */
+export const statsQuery = (weeks: StatsWeeks) =>
+  queryOptions({ queryKey: ['game', 'stats', weeks], queryFn: () => fetchStats(weeks) });
 
 const fetchHabits = (archived: boolean) =>
   call(api.habits.$get({ query: { archived: archived ? 'true' : 'false' } }));

@@ -1084,3 +1084,69 @@ O QUE FOI FEITO: Rodei os testes (322 passando), o lint e a checagem de tipos. F
 DECISÕES: nenhuma nova.
 RESULTADO: Fase 5 na main.
 OBSERVAÇÕES: O .claude/launch.json continua fora do commit (é só da máquina local).
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — 5 caixas de teste
+-------------------------------------------------------------------------------------------------
+PEDIDO: "consegue me dar 5 caixas para testar?"
+O QUE FOI FEITO: Coloquei 5 caixas direto no banco, na conta do autor: 1 pequena, 2 normais, 1
+  grande e 1 especial, para ver as cores e as chances de cada tamanho. Elas não vêm de nenhuma
+  quest (aparecem sem o nome de quest).
+DECISÕES: nenhuma (exceção para teste, a pedido do autor; as caixas normais só vêm de quests, D11).
+RESULTADO: 5 caixas esperando na tela Collection.
+OBSERVAÇÕES: Abrir essas caixas conta para a garantia de raridade (pity), como qualquer outra.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 6 começa: medalhas e prêmios
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode começar a fase 6"
+O QUE FOI FEITO:
+  - Ordem da Fase 6: medalhas e prêmios primeiro, depois a página de estatísticas, exportar e
+    importar dados, modelos de projeto, acabamento visual e testes de ponta a ponta. A revisão de
+    uso espera 2 a 3 semanas de uso (o app está em uso desde 04/11). GitHub e Google Agenda ficam
+    para o fim, porque precisam das suas contas.
+  - Medalhas (esforço contínuo): tarefas, horas de foco, revisões semanais, quests, dias com todas
+    as quests diárias, check-ins de hábitos, volta depois de dias parados, níveis. Cada grupo tem
+    degraus (bronze, prata, ouro, platina, diamante).
+  - Prêmios (marcos): sequência de 7, 30, 100 e 365 dias; meta semanal 4, 12, 26 e 52 semanas
+    seguidas; um prêmio para cada projeto concluído, que fica mesmo se o projeto for reaberto.
+  - Tudo sai do registro de atividades, então o que você já tinha alcançado aparece com o dia em
+    que realmente aconteceu. Nova tela "Medals" e aviso quando ganha uma medalha.
+DECISÕES: D49 (resolve a pergunta Q5 do plano: medalhas = esforço, prêmios = marcos).
+RESULTADO: 330 testes passando. Na sua conta vão aparecer 4 medalhas: First step (03/11), Getting
+  things done (05/11), Looking back (05/11) e Quest taker (03/11). Sem commit.
+OBSERVAÇÕES: Não incluí medalhas por caixas abertas ou álbum completo, para as medalhas premiarem
+  o trabalho, não a sorte.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 6: página de estatísticas
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode seguir para a página de estatísticas"
+O QUE FOI FEITO:
+  - A página "Stats" foi refeita. Escolhe o período (4 semanas, 12 semanas, 6 meses, 1 ano) e
+    mostra:
+    - totais do período (foco, tarefas, XP, dias ativos) comparados com o período anterior;
+    - gráfico semana a semana, uma medida por vez, com o valor ao passar o mouse;
+    - foco por projeto ou por área;
+    - quanto das quests foi feito e quanto expirou, por tipo;
+    - histórico das sequências (todas as de 2 dias ou mais, a maior primeiro);
+    - o mapa de calor que já existia.
+  - Conferi os números com os seus dados (só leitura) e achei uma diferença: as estatísticas
+    contavam uma tarefa reaberta e concluída de novo duas vezes (15), e as medalhas uma vez (12).
+    Agora as duas contam uma vez, como o XP.
+DECISÕES: D50.
+RESULTADO: 333 testes passando. No último mês: 39 min de foco, 12 tarefas, 695 XP, 5 dias ativos;
+  o foco foi mais para "Thesis"; as quests de tempo expiraram todas (0 de 4), sinal para a revisão
+  de uso ajustar o tamanho delas. Sem commit.
+OBSERVAÇÕES: Não vi a página na tela (o navegador do app está no login).
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit, merge e push: medalhas e estatísticas
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO: Commit no branch phase-6-medals com as medalhas e prêmios (D49) e a página de
+  estatísticas (D50), merge na main e push para o GitHub (só o repositório do autor).
+DECISÕES: nenhuma nova.
+RESULTADO: Medalhas e estatísticas na main.
+OBSERVAÇÕES: Desliguei o servidor de desenvolvimento durante o merge (ele regenera o arquivo de
+  rotas ao trocar de branch) e liguei de novo depois.

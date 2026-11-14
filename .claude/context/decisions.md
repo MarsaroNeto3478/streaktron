@@ -235,6 +235,25 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** Plan §5's project type ("Finish 3 tasks of goal X before Friday · Reach 50% of commitment goal Y this week"); it ties quests to what the user is actually aiming for, and D40's progress gives the commitment share.
 - **Alternatives:** Several project quests a week (more noise than help); counting tasks completed before the quest appeared (would make the quest free).
 
+### D50 · The stats page — accepted (2026-11-14, Phase 6)
+- **Decision:** One endpoint, `GET /api/stats/overview?weeks=4|12|26|52` (default 12), from a pure `statsOverview` in `@strekatron/shared/game`; the server adds project and area names and quest outcomes. The page shows:
+  - **Totals** for the range (focus, tasks done, XP, active days), each against the same number of weeks just before (percent change; nothing when the weeks before had none).
+  - **Week by week**: one column chart, one measure at a time (focus, tasks, XP, active days), with a hover/focus tooltip and a screen-reader table.
+  - **Focus by project or by area** (top 8, then "Everything else"), **quest outcomes by type** (done vs. let expire, for quests whose time is over; rerolled and tutorial quests left out), and the **streak history** (every run of 2+ days, longest first, freezes bridging a missed day as in the streak itself; `dailyStreak` got an optional per-day callback for this).
+  - The heatmap stays at the bottom; the level/streak header left this page (it's on Today).
+  - A task counts once, on its first completion (reopened and done again is still one), like XP; the repeat still makes its day active.
+- **Why:** The phase's acceptance is "a truthful story of where time went": totals with a comparison, a trend, where the focus went, and whether quests fit. One hue everywhere: each chart shows one measure, so color carries no identity (the project's own color is only a small dot by its name).
+- **Alternatives:** A chart library (Recharts): not needed for columns and bars, and it would add weight to the bundle.
+
+### D49 · Medals and prizes — accepted (2026-11-14, Phase 6; settles Q5)
+- **Decision:** Medals mark steady effort; prizes mark milestones (Q5's working definition, kept).
+  - **Medals** (tiered, bronze to diamond in the UI): tasks done 1/10/100/500/1000 (each task once, subtasks don't count); focus hours 1/10/50/100/500; weekly reviews 1/10/26/52; quests 1/50/200 (replays don't count); clean sweeps (every daily quest in a day) 1/10; habit check-ins 30/100/365; a comeback quest done; levels 5/10/20/30.
+  - **Prizes:** daily streak 7/30/100/365 days; weekly target 4/12/26/52 weeks in a row; one per finished project (`project.<id>`, its title kept).
+  - Derived from the activity log by a pure function (`achievementStatus` in `@strekatron/shared/game`), with the day each target was first reached (streaks by binary search over days, since the longest run only grows). The server stores each one the first time (`achievements`, unique per user and key) and never takes it back, so medals reached before this existed arrive with their real day, and a reopened project keeps its prize.
+  - Granted after every quest evaluation (writes, board views) and when the Medals page is read; the `game` block lists new ones (`achievements`), shown as toasts (one toast when there are more than two).
+- **Why:** Same pattern as XP and boxes (derived, earn once, retroactive). Streak milestones as prizes because they're trophies of a period, not of an amount of work.
+- **Alternatives:** Medals for loot (boxes opened, album %): left out so medals reward the work, not luck.
+
 ### D48 · Loot boxes and the collection (Phase 5) — accepted (2026-11-14)
 - **Decision:**
   - **Art:** Kenney's *Furniture Kit* (CC0: commercial use, no credit required), the isometric sprites in four directions, as placeholder art that already fits the isometric bedroom (Phase 7). The user chose "a CC0 pack from the internet".
