@@ -8,6 +8,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { ArrowDownRight, ArrowUpRight, Flame } from 'lucide-react';
 import { useState } from 'react';
 import { PageHeader } from '@/components/page-header';
+import { PageSkeleton } from '@/components/page-states';
 import { formatDayShort, formatMinutes } from '@/lib/days';
 import { COLOR } from '@/lib/look';
 import {
@@ -68,7 +69,7 @@ function StatsPage() {
   const { data: me } = useQuery(meQuery);
   const [weeks, setWeeks] = useState<StatsWeeks>('12');
   const { data, isPending } = useQuery(statsQuery(weeks));
-  if (!me) return null;
+  if (!me) return <PageSkeleton className="max-w-4xl" />;
   const range = RANGES.find((r) => r.value === weeks)!;
   return (
     <div className="mx-auto max-w-4xl space-y-6">

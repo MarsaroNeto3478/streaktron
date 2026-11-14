@@ -233,3 +233,10 @@
 - Web: "Start from" in the new-project dialog (`components/template-picker.tsx`, `lib/templates.ts`): picking a template sets its icon and color, shows what it brings, and asks for its dates.
 - 338 tests; typecheck and lint clean; web rebuilt. Not checked visually (the pane is at sign-in).
 - Plan §12 backlog candidate: save a project as a template.
+
+### 2026-11-14 — Phase 6: UX polish pass (D53, branch `phase-6-polish`, uncommitted)
+- Theme choice (System/Light/Dark) per device: `lib/theme.ts` (`startTheme`, `setTheme`, `useTheme`), a pre-paint script in `index.html`, Settings → Appearance, palette commands; the toaster follows it.
+- `components/page-states.tsx`: `PageSkeleton`, `NavProgress`, `EmptyState`, `NotFound`, `RouteError` (stale-build reload, 404/400 → not found). Router defaults (`defaultPendingComponent`, `defaultErrorComponent`, `defaultNotFoundComponent`); the project page's own error component removed.
+- Pages that rendered nothing while loading show the skeleton; Today, Collection and Medals got loaders; empty states on Today, Habits, Projects and task lists use `EmptyState`.
+- Shortcuts G O (Collection) and G M (Medals); palette: Calendar, Collection, Medals, theme.
+- Checked in the browser pane on a throwaway database (port 3101, deleted afterwards): dark and light, empty Projects and Today, not-found pages, and the Course template from the dialog (board, tasks, countdown, weekly class). 338 tests; typecheck and lint clean; web rebuilt.

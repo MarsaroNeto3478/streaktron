@@ -235,6 +235,15 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** Plan §5's project type ("Finish 3 tasks of goal X before Friday · Reach 50% of commitment goal Y this week"); it ties quests to what the user is actually aiming for, and D40's progress gives the commitment share.
 - **Alternatives:** Several project quests a week (more noise than help); counting tasks completed before the quest appeared (would make the quest free).
 
+### D53 · UX polish: theme choice and shared page states — accepted (2026-11-14, Phase 6)
+- **Decision:** The polish pass found the shortcut cheat sheet ("?") and dark mode (following the system) already built; it adds what was missing:
+  - **Theme choice:** System / Light / Dark under Settings → Appearance and in the command palette. It is saved **on the device** (`localStorage`), not the account, so a phone and a computer can differ; `index.html` applies it before the first paint (no white flash), and the browser bar color follows it.
+  - **Shared page states** (`components/page-states.tsx`): a page skeleton instead of a blank page while data loads; a thin bar at the top while the router waits for the next page; one error page with "Try again" (and, after a rebuild, "There's a new version — Reload" when the phone asks for old files); one "Nothing here" page for unknown addresses and deleted or malformed ids (404/400); one `EmptyState` look (icon, title, text, one action) used by Today, Habits, Projects and task lists.
+  - Today, Collection and Medals load their data in the route loader like the other pages, so a failed load shows the error page instead of a skeleton forever.
+  - Shortcuts: G then O (Collection) and G then M (Medals); the palette gains Calendar, Collection and Medals.
+- **Why:** A blank page or an endless skeleton looks like a broken app, and the app runs on a computer that may be asleep; the theme belongs to the screen the user is holding.
+- **Alternatives:** Theme saved in the account settings (one choice for every device; rejected for the reason above).
+
 ### D52 · Project templates — accepted (2026-11-14, Phase 6)
 - **Decision:** Four built-in templates, picked under "Start from" in the new-project dialog (Blank stays the default): **Course** (To study / Studying / To review / Done; 3 h a week of study; "Pass the exam"; asks for the exam date and the weekly class days and times), **Exam prep** (5 h a week of review; "Ready for the exam"; asks for the exam date), **Paper or thesis** (4 h a week of writing; research, first draft and final version as goals; asks for the deadline), **Personal project** (Ideas / To do / Doing / Done; 2 h a week; "First version working"). Each brings its columns, goals, 2–3 first tasks, an icon and a color.
   - A date given becomes an event with a countdown (`Exam: <title>`, `Deadline: <title>`), the dated goal's due date and the project's due date (when none was typed). Class days and times become one weekly event (`Class: <title>`) from today, until the exam when there is one. Everything the template asks for is optional.

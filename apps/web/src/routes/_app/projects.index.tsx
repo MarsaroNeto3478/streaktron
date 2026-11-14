@@ -31,6 +31,7 @@ import {
   Archive,
   ArchiveRestore,
   ChevronRight,
+  FolderKanban,
   GripVertical,
   MoreHorizontal,
   Pencil,
@@ -41,6 +42,7 @@ import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { EntityIcon } from '@/components/entity-icon';
 import { ProjectCard } from '@/components/project-card';
 import { PageHeader } from '@/components/page-header';
+import { EmptyState } from '@/components/page-states';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -247,19 +249,25 @@ function ProjectsPage() {
       />
 
       {areas.length === 0 && projects.length === 0 && (
-        <div className="rounded-xl border border-dashed px-6 py-12 text-center">
-          <p className="font-medium">Start with what you’re working on.</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+        <EmptyState
+          icon={FolderKanban}
+          title="Start with what you’re working on"
+          className="py-12"
+          action={
+            <>
+              <Button variant="outline" onClick={newArea}>
+                New area
+              </Button>
+              <Button onClick={() => newProject()}>New project</Button>
+            </>
+          }
+        >
+          <p className="mx-auto max-w-md">
             Areas are long-lived parts of your life (University, Side projects). Projects live in
-            them, each with goals, tasks and a board.
+            them, each with goals, tasks and a board. A new project can start from a template: a
+            course, an exam, a paper or a project of your own.
           </p>
-          <div className="mt-4 flex justify-center gap-2">
-            <Button variant="outline" onClick={newArea}>
-              New area
-            </Button>
-            <Button onClick={() => newProject()}>New project</Button>
-          </div>
-        </div>
+        </EmptyState>
       )}
 
       <DndContext

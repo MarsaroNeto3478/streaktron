@@ -22,6 +22,7 @@ import {
   type StatusFilter,
 } from '@/lib/task-list';
 import { onRowsKeyDown } from '@/lib/rows';
+import { EmptyState } from './page-states';
 import { TaskRow } from './task-row';
 
 const STATUS_TEXT: Record<StatusFilter, string> = {
@@ -174,11 +175,7 @@ export function TaskListView({
   const total = groups.reduce((n, g) => n + g.tasks.length, 0);
 
   if (!total) {
-    return (
-      <p className="rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
-        {empty ?? 'Nothing here with these filters.'}
-      </p>
-    );
+    return <EmptyState className="py-10">{empty ?? 'Nothing here with these filters.'}</EmptyState>;
   }
 
   return (

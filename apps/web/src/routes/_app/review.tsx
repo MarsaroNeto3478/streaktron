@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Check, CirclePause, CirclePlay, Pin } from 'luci
 import { useState, type ReactNode } from 'react';
 import { EntityIcon } from '@/components/entity-icon';
 import { PageHeader } from '@/components/page-header';
+import { PageSkeleton } from '@/components/page-states';
 import { Streaky } from '@/components/streaky';
 import { TaskListView } from '@/components/task-list-view';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,7 @@ const STEPS = [
 
 function ReviewPage() {
   const { data: r } = useQuery(reviewQuery);
-  if (!r) return null;
+  if (!r) return <PageSkeleton />;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader

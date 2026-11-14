@@ -3,12 +3,13 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { toast } from 'sonner';
+import { NotFound, PageSkeleton, RouteError } from './components/page-states';
 import { ApiError, errorMessage, setGameHandler } from './lib/api';
 import { celebrate } from './lib/game';
 import { registerServiceWorker } from './lib/push';
 import { setErrorHandler } from './lib/report';
 import { anyBusy, flushAll } from './lib/saver';
-import { followSystemTheme } from './lib/theme';
+import { startTheme } from './lib/theme';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
@@ -47,6 +48,11 @@ const router = createRouter({
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0, // TanStack Query decides freshness
   scrollRestoration: true,
+  // Shared page states (D53): a skeleton when data takes long, an error with "Try again", and a
+  // page for addresses that lead nowhere.
+  defaultPendingComponent: () => <PageSkeleton />,
+  defaultErrorComponent: RouteError,
+  defaultNotFoundComponent: NotFound,
 });
 
 declare module '@tanstack/react-router' {
@@ -55,7 +61,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-followSystemTheme();
+startTheme();
 
 // Installable app and push notifications (D45); a tapped notification moves the router.
 void registerServiceWorker((to) => void router.navigate({ to }));

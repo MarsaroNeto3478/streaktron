@@ -21,6 +21,7 @@ import { Board } from '@/components/board';
 import { Countdowns } from '@/components/countdowns';
 import { EntityIcon } from '@/components/entity-icon';
 import { GoalsPanel } from '@/components/goals-panel';
+import { PageSkeleton } from '@/components/page-states';
 import { QuickAdd } from '@/components/quick-add';
 import { RichEditor } from '@/components/rich-editor';
 import { SaveState } from '@/components/sheet-parts';
@@ -47,7 +48,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOpenTask } from '@/hooks/use-open-task';
 import { useStructureActions } from '@/lib/actions';
-import { ApiError } from '@/lib/api';
 import { useAutosave } from '@/lib/autosave';
 import { countdown, formatDayShort } from '@/lib/days';
 import { STATUS_LABEL } from '@/lib/look';
@@ -88,18 +88,6 @@ export const Route = createFileRoute('/_app/projects/$projectId')({
     ]);
   },
   component: ProjectPage,
-  errorComponent: ({ error }) => (
-    <div className="mx-auto max-w-3xl py-16 text-center">
-      <p className="font-medium">
-        {error instanceof ApiError && error.status === 404
-          ? 'This project doesn’t exist (it may have been deleted).'
-          : 'This project couldn’t be loaded.'}
-      </p>
-      <Link to="/projects" className="mt-2 inline-block text-sm text-primary hover:underline">
-        Back to projects
-      </Link>
-    </div>
-  ),
 });
 
 const STATUS_ACTION: Record<ProjectStatus, { label: string; icon: ReactNode }> = {
@@ -118,7 +106,7 @@ function ProjectPage() {
   const { data: projects = [] } = useQuery(projectsQuery);
   const { data: me } = useQuery(meQuery);
   const today = me?.today ?? '';
-  if (!page) return null;
+  if (!page) return <PageSkeleton className="max-w-6xl" />;
   // The list in the projects query is refreshed with every task write; prefer it.
   const project = projects.find((p) => p.id === projectId) ?? page.project;
   const view = s.view ?? 'board';
