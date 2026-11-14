@@ -25,6 +25,7 @@ export const ID_PREFIXES = {
   achievement: 'ach',
   link: 'lnk',
   snapshot: 'snp',
+  pushSubscription: 'psh',
 } as const;
 
 export type IdKind = keyof typeof ID_PREFIXES;

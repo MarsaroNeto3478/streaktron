@@ -4,6 +4,7 @@
 import { PgBoss } from 'pg-boss';
 import { env } from '../env';
 import { evaluateAll } from '../services/game';
+import { runPush } from '../services/push';
 import { runBackup } from './backup';
 import { QUEUES } from './names';
 import { runPurge } from './purge';
@@ -50,6 +51,14 @@ export async function startJobs(): Promise<PgBoss> {
   await boss.work<{ userId: string }>(QUEUES.game, async ([job]) => {
     if (job) await evaluateAll(job.data.userId);
   });
+
+  // Web Push (D45): focus sessions whose time is up, and the day's reminders. Every minute.
+  await boss.createQueue(QUEUES.push, { policy: 'exclusive', retryLimit: 0 });
+  await boss.work(QUEUES.push, async () => {
+    const sent = await runPush();
+    if (sent) console.log(`[jobs] ${sent} push notification(s) sent`);
+  });
+  await boss.schedule(QUEUES.push, '* * * * *');
 
   setBoss(boss);
   return boss;

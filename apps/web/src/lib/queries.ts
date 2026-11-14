@@ -10,6 +10,12 @@ export type Me = Awaited<ReturnType<typeof fetchMe>>;
 /** The signed-in user, their settings and their day (server-computed). */
 export const meQuery = queryOptions({ queryKey: ['me'], queryFn: fetchMe, staleTime: 60_000 });
 
+/** The server's push key and how many devices get notifications (D45). */
+export const pushQuery = queryOptions({
+  queryKey: ['push'],
+  queryFn: () => call(api.push.$get()),
+});
+
 /** Whether the app still needs its first account. */
 export const setupQuery = queryOptions({
   queryKey: ['setup'],

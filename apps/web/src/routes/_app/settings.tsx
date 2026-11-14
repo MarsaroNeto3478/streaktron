@@ -6,10 +6,11 @@ import {
   type Challenge,
 } from '@strekatron/shared/game';
 import { DAY_SETTINGS_LOCK_DAYS, type SettingsPatch } from '@strekatron/shared/schemas';
-import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { FolderKanban, Plus, Shapes, Trash2 } from 'lucide-react';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import type { Reminders } from '@strekatron/shared/push';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Bell, BellOff, FolderKanban, Plus, Send, Shapes, Trash2 } from 'lucide-react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,16 @@ import {
 import { Streaky } from '@/components/streaky';
 import { useGameActions, useStructureActions, useTutorialActions } from '@/lib/actions';
 import { errorMessage } from '@/lib/api';
-import { meQuery, projectsQuery, snapshotsQuery } from '@/lib/queries';
+import {
+  currentSubscription,
+  disablePush,
+  enablePush,
+  needsHomeScreen,
+  pushSupported,
+  sendTestPush,
+} from '@/lib/push';
+import { meQuery, projectsQuery, pushQuery, snapshotsQuery } from '@/lib/queries';
+import { report } from '@/lib/report';
 
 export const Route = createFileRoute('/_app/settings')({
   component: SettingsPage,
@@ -47,6 +57,8 @@ function SettingsPage() {
       <WeekSettings key={`week-${key}`} />
       <FocusPresets key={`focus-${key}`} />
       <QuestSettings key={`quests-${key}`} />
+      <DeviceNotifications />
+      <ReminderSettings key={`reminders-${key}`} />
       <StreakySettings key={`streaky-${key}`} />
       <ProjectLimit key={`limit-${key}`} />
       <DeletedItems />
@@ -403,6 +415,230 @@ function QuestSettings() {
           />
         </div>
       </div>
+    </SettingsCard>
+  );
+}
+
+// --- Notifications (D45) ---------------------------------------------------------------------
+
+/** Turning push on or off for this device, and a test. */
+function DeviceNotifications() {
+  const qc = useQueryClient();
+  const supported = pushSupported();
+  const { data: push } = useQuery({ ...pushQuery, enabled: supported });
+  const [on, setOn] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  const blocked = supported && Notification.permission === 'denied';
+
+  useEffect(() => {
+    if (!supported) return;
+    void currentSubscription().then((s) => setOn(!!s));
+  }, [supported]);
+
+  async function run(work: () => Promise<void>) {
+    setBusy(true);
+    try {
+      await work();
+    } catch (err) {
+      report(err);
+    } finally {
+      setBusy(false);
+      void qc.invalidateQueries({ queryKey: ['push'] });
+    }
+  }
+
+  const turnOn = () =>
+    run(async () => {
+      const permission = await enablePush();
+      if (permission === 'granted') {
+        setOn(true);
+        toast.success('Notifications are on for this device');
+      } else {
+        toast.error(
+          'Notifications weren’t allowed. You can allow them in the browser’s site settings.',
+        );
+      }
+    });
+  const turnOff = () =>
+    run(async () => {
+      await disablePush();
+      setOn(false);
+      toast.success('Notifications are off for this device');
+    });
+  const test = () =>
+    run(async () => {
+      const { delivered } = await sendTestPush();
+      if (!delivered) toast.error('No device got it. Turn notifications on first.');
+    });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Notifications on this device</CardTitle>
+        <CardDescription>
+          Reminders reach this browser or phone even when Strekatron is closed. Install the app (the
+          install icon in the address bar, or “Add to Home Screen” on a phone) to open it like any
+          other app.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        {!window.isSecureContext ? (
+          <p className="text-muted-foreground">
+            Notifications need a secure address. Open Strekatron at its HTTPS tailnet address (or
+            localhost on this computer).
+          </p>
+        ) : !supported ? (
+          needsHomeScreen() ? (
+            <p className="text-muted-foreground">
+              On iPhone and iPad, add Strekatron to the Home Screen first (Share → Add to Home
+              Screen), open it from there, and turn notifications on in its Settings.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">This browser can’t receive notifications.</p>
+          )
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              {on ? (
+                <Button type="button" variant="outline" disabled={busy} onClick={turnOff}>
+                  <BellOff />
+                  Turn off here
+                </Button>
+              ) : (
+                <Button type="button" disabled={busy || blocked || on === null} onClick={turnOn}>
+                  <Bell />
+                  Turn on here
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={busy || !push?.devices}
+                onClick={test}
+              >
+                <Send />
+                Send a test
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {blocked
+                ? 'This browser blocks notifications from Strekatron. Allow them in its site settings, then come back.'
+                : push
+                  ? `${push.devices} device${push.devices === 1 ? '' : 's'} with notifications on.`
+                  : ' '}
+            </p>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const HOURS = Array.from({ length: 24 }, (_, h) => h);
+
+function HourSelect({
+  id,
+  value,
+  onChange,
+  disabled,
+}: {
+  id: string;
+  value: number;
+  onChange: (h: number) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <select
+      id={id}
+      aria-label="Hour"
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="h-8 rounded-md border bg-transparent px-2 text-sm disabled:opacity-50"
+    >
+      {HOURS.map((h) => (
+        <option key={h} value={h}>
+          {hourLabel(h)}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/** Which reminders go out, and when (D45). */
+function ReminderSettings() {
+  const { data: me } = useQuery(meQuery);
+  const saved = me?.settings.reminders;
+  const [r, setR] = useState<Reminders | undefined>(saved);
+  if (!saved || !r) return null;
+  const set = (patch: Partial<Reminders>) => setR({ ...r, ...patch });
+
+  return (
+    <SettingsCard
+      title="Reminders"
+      description="What the notifications remind you of. Each one comes at most once a day, and only when there’s still something to do."
+      dirty={JSON.stringify(r) !== JSON.stringify(saved)}
+      patch={() => ({ reminders: r })}
+    >
+      <ul className="space-y-3 text-sm">
+        <li className="flex flex-wrap items-center gap-3">
+          <label className="flex flex-1 items-start gap-3">
+            <Checkbox
+              className="mt-0.5"
+              checked={r.habits.on}
+              onCheckedChange={(on) => set({ habits: { ...r.habits, on: on === true } })}
+            />
+            <span>
+              <span className="font-medium">Habits left today</span>
+              <span className="block text-xs text-muted-foreground">
+                Habits due today that aren’t checked in yet.
+              </span>
+            </span>
+          </label>
+          <HourSelect
+            id="remind-habits"
+            value={r.habits.hour}
+            disabled={!r.habits.on}
+            onChange={(hour) => set({ habits: { ...r.habits, hour } })}
+          />
+        </li>
+        <li className="flex flex-wrap items-center gap-3">
+          <label className="flex flex-1 items-start gap-3">
+            <Checkbox
+              className="mt-0.5"
+              checked={r.streak.on}
+              onCheckedChange={(on) => set({ streak: { ...r.streak, on: on === true } })}
+            />
+            <span>
+              <span className="font-medium">Streak at risk</span>
+              <span className="block text-xs text-muted-foreground">
+                When nothing has counted today yet and you have a streak going.
+              </span>
+            </span>
+          </label>
+          <HourSelect
+            id="remind-streak"
+            value={r.streak.hour}
+            disabled={!r.streak.on}
+            onChange={(hour) => set({ streak: { ...r.streak, hour } })}
+          />
+        </li>
+        <li>
+          <label className="flex items-start gap-3">
+            <Checkbox
+              className="mt-0.5"
+              checked={r.focus}
+              onCheckedChange={(on) => set({ focus: on === true })}
+            />
+            <span>
+              <span className="font-medium">Focus time is up</span>
+              <span className="block text-xs text-muted-foreground">
+                When a focus session’s planned time ends, even with the app closed.
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
     </SettingsCard>
   );
 }

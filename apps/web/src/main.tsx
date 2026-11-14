@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { toast } from 'sonner';
 import { ApiError, errorMessage, setGameHandler } from './lib/api';
 import { celebrate } from './lib/game';
+import { registerServiceWorker } from './lib/push';
 import { setErrorHandler } from './lib/report';
 import { anyBusy, flushAll } from './lib/saver';
 import { followSystemTheme } from './lib/theme';
@@ -55,6 +56,9 @@ declare module '@tanstack/react-router' {
 }
 
 followSystemTheme();
+
+// Installable app and push notifications (D45); a tapped notification moves the router.
+void registerServiceWorker((to) => void router.navigate({ to }));
 
 // Whatever waits to be saved goes when the page is hidden (tab switched, app put away, closed).
 document.addEventListener('visibilitychange', () => {

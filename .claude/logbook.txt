@@ -750,3 +750,190 @@ PEDIDO: "faz o commit, merge e push e ja pode começar o proximo passo"
 O QUE FOI FEITO: Commit no branch "phase-4-project-quests" (D44), merge na main e push para
   MarsaroNeto3478/streaktron. Em seguida, o último item da Fase 4: PWA e notificações push
   (entrada abaixo).
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — PWA e notificações push
+-------------------------------------------------------------------------------------------------
+PEDIDO: "ja pode começar o proximo passo" (o último item da Fase 4: PWA e notificações).
+O QUE FOI FEITO:
+  - O Strekatron virou um app instalável (PWA): tem nome, cores e ícones próprios (o Streaky
+    pequeno sobre fundo escuro, gerado em PNG pelo Edge), e um service worker que mostra as
+    notificações. Ele não guarda nada offline, como o plano pedia.
+  - Notificações push (Web Push), mesmo com o app fechado:
+    - "Focus time is up": quando o tempo planejado de uma sessão de foco acaba.
+    - Hábitos que faltam hoje: às 20:00 (ligado por padrão).
+    - Streak em risco: às 21:00, só se nada contou hoje e há uma sequência para manter
+      (desligado por padrão; o autor liga se quiser).
+    Cada lembrete vai no máximo uma vez por dia. O horário respeita o "dia" do autor (com o
+    início do dia às 4:00, 1:00 da manhã ainda conta como noite).
+  - Em Settings: "Notifications on this device" (ligar/desligar neste aparelho, enviar um teste,
+    dicas para HTTPS e para o iPhone) e "Reminders" (cada lembrete com seu horário).
+  - Por trás: uma tarefa que roda a cada minuto no servidor, as chaves do push guardadas em
+    data/vapid.json, duas tabelas novas (aparelhos inscritos e avisos já enviados) e a biblioteca
+    web-push.
+  - O README ganhou a seção "Install it and get notifications".
+DECISÕES: D45.
+RESULTADO: 303 testes passando (8 novos). No navegador do app, o service worker e o manifest
+  carregam; o teste de uma notificação de verdade precisa do navegador ou celular do autor.
+  Com isso, todos os itens da Fase 4 estão feitos (o Streaky ainda tem ideias em aberto no plano).
+OBSERVAÇÕES: No celular, o app precisa ser aberto pelo endereço HTTPS do Tailscale. No iPhone, só
+  funciona depois de "Adicionar à Tela de Início".
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Onde instalar o app
+-------------------------------------------------------------------------------------------------
+PEDIDO: "onde para instalar"
+O QUE FOI FEITO: Expliquei onde fica a opção de instalar o Strekatron como app: no computador, o
+  ícone de instalar na barra de endereço do Chrome ou do Edge (ou o menu do navegador); no Android,
+  o menu do Chrome → "Instalar app"; no iPhone, Safari → Compartilhar → "Adicionar à Tela de Início".
+  No celular, o app precisa ser aberto pelo endereço HTTPS do Tailscale.
+DECISÕES: nenhuma.
+RESULTADO: só explicação, nenhum código mudou.
+OBSERVAÇÕES: O Firefox no computador não instala PWAs.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — O ícone de instalar não aparece
+-------------------------------------------------------------------------------------------------
+PEDIDO: "nao tem" (com uma captura de tela do app aberto no navegador, sem o ícone de instalar).
+O QUE FOI FEITO: Pela captura, o navegador é o Opera GX, que não instala PWAs no computador (só o
+  Chrome e o Edge fazem isso). Expliquei para abrir http://localhost:5173 no Edge (já vem no
+  Windows) ou no Chrome para instalar. As notificações podem ser ligadas no Opera GX mesmo, em
+  Settings, mas ficam presas a esse navegador aberto.
+DECISÕES: nenhuma.
+RESULTADO: só explicação, nenhum código mudou.
+OBSERVAÇÕES: Uma limitação do navegador, não um erro do app.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Onde está o link do Tailscale
+-------------------------------------------------------------------------------------------------
+PEDIDO: "onde que está o link do tailscalew"
+O QUE FOI FEITO: Procurei o endereço: o Tailscale não está instalado neste computador (Windows) e o
+  .env só tem os endereços locais, então ainda não existe link. Expliquei os passos: instalar o
+  Tailscale no PC e no celular com a mesma conta, ligar o HTTPS no painel, e então rodar
+  "tailscale serve" para o app ganhar um endereço https://<maquina>.<tailnet>.ts.net
+  (README, seção "Running it day to day, over Tailscale").
+DECISÕES: nenhuma.
+RESULTADO: só explicação; nada foi instalado.
+OBSERVAÇÕES: Depois de instalar, o link aparece com "tailscale status --self".
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Instalar o Tailscale no PC
+-------------------------------------------------------------------------------------------------
+PEDIDO: "instale o tail no pc" (e depois "pronto", quando terminou o instalador e o login)
+O QUE FOI FEITO:
+  - Baixei o instalador oficial (tailscale-setup-1.104.7.exe, de pkgs.tailscale.com, assinado pela
+    Tailscale Inc.) e o autor concluiu a instalação e o login. O PC (desktop-tneku8r) e o celular
+    (motorola-edge-60-pro) já aparecem na mesma rede.
+  - Endereço do app na rede: https://desktop-tneku8r.tail5d03d2.ts.net. Adicionei esse endereço ao
+    APP_ORIGINS do .env e reiniciei a API.
+  - O vite.config.ts agora aceita endereços .ts.net (allowedHosts), para o servidor de
+    desenvolvimento (porta 5173) poder ser aberto pela rede do Tailscale.
+  - Tentei "tailscale serve --bg 5173", mas o Tailscale pediu que o recurso Serve seja ativado
+    no painel da conta. Isso fica com o autor (é uma permissão da conta dele).
+DECISÕES: nenhuma nova; segue a D2 (rodar local e pelo Tailscale).
+RESULTADO: Tailscale instalado e conectado; falta o autor ativar o Serve para o link funcionar.
+OBSERVAÇÕES: Por enquanto o link aponta para o modo de desenvolvimento (pnpm dev). O README
+  descreve servir a porta 3001 do contêiner para o uso diário.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Link do Tailscale no ar
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pronto" (o autor ativou o Serve no painel do Tailscale)
+O QUE FOI FEITO: O Tailscale estava parado; reconectei ("tailscale up") e publiquei o app com
+  "tailscale serve". Primeiro deu erro 502, porque no Windows o Vite só escuta em IPv6 (localhost)
+  e não em 127.0.0.1; servindo http://localhost:5173 funcionou. Anotei isso no README.
+RESULTADO: https://desktop-tneku8r.tail5d03d2.ts.net abre o app (página, manifest e API
+  respondendo). Agora o autor pode abrir no celular, instalar e testar as notificações.
+OBSERVAÇÕES: O link só funciona com o PC ligado, o Tailscale conectado e o pnpm dev rodando.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Tela branca no celular
+-------------------------------------------------------------------------------------------------
+PEDIDO: "só fica em tela branca" (o link do Tailscale no celular). Depois: "agora foi".
+O QUE FOI FEITO:
+  - No PC o mesmo link abria normalmente. A causa provável: o modo de desenvolvimento (Vite) manda
+    centenas de arquivos separados, e o celular ficava em branco carregando.
+  - Troquei para a versão compilada do site (um pacote só): fiz o build do web e a API passou a
+    servir esse build (STATIC_DIR), com o Tailscale apontando para a porta 3001.
+  - No caminho achei processos antigos da API que continuavam rodando e segurando a porta 3001;
+    por isso as reinicializações anteriores não tinham efeito (nem a do APP_ORIGINS). Encerrei
+    todos e subi uma API limpa.
+  - Desfiz o ajuste no vite.config.ts (não é mais necessário) e corrigi a nota do README.
+RESULTADO: O app abriu no celular pelo link do Tailscale.
+OBSERVAÇÕES: Depois de mudar o código do site, é preciso refazer o build para o celular ver a
+  mudança. No Windows, parar a tarefa não encerra os processos node filhos; vale conferir a porta.
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Qual é o usuário e a senha
+-------------------------------------------------------------------------------------------------
+PEDIDO: "qual é mesmo o usuario e a senha?"
+O QUE FOI FEITO: Consultei o banco: a conta é a do "Dev", com o e-mail dev@streaktron.local
+  (criado antes da renomeação para Strekatron, por isso o nome antigo). A senha não fica salva
+  em lugar nenhum do projeto, só em forma criptografada (hash), então não dá para recuperá-la.
+  Sugeri ver se o navegador do PC guardou a senha, ou, se não, redefinir a senha (só com o
+  autor pedindo, porque mexe na conta real).
+DECISÕES: nenhuma.
+RESULTADO: só explicação.
+OBSERVAÇÕES: Recuperação de senha pelo próprio app ainda não existe (fica para a Fase 8, contas).
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — A senha está no código?
+-------------------------------------------------------------------------------------------------
+PEDIDO: "mas a sneha nao ta no codigo?"
+O QUE FOI FEITO: Procurei no projeto. A senha padrão do seed (a conta criada por "pnpm db:seed")
+  está em apps/server/src/db/seed.ts e no .env.example. A conta do autor foi criada pelo seed antes
+  da renomeação (o e-mail ainda é dev@streaktron.local), então a senha é a padrão com o nome antigo
+  "streaktron" no lugar de "strekatron". Corrigi minha resposta anterior, que dizia que a senha
+  não estava em lugar nenhum.
+DECISÕES: nenhuma.
+RESULTADO: só explicação.
+OBSERVAÇÕES: É uma senha de desenvolvimento conhecida; vale trocar quando o app passar a ter
+  outros usuários (Fase 8).
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Atalho para o seed.ts
+-------------------------------------------------------------------------------------------------
+PEDIDO: "me de o atalho para a seed.ts"
+O QUE FOI FEITO: Passei o link do arquivo apps/server/src/db/seed.ts (linhas 9 e 10: e-mail e senha
+  padrão).
+DECISÕES: nenhuma.
+RESULTADO: só explicação.
+OBSERVAÇÕES: —
+
+-------------------------------------------------------------------------------------------------
+2026-11-13 — Erro "Failed to execute insertBefore"
+-------------------------------------------------------------------------------------------------
+PEDIDO: "ta dando um erro de failed to execute insertBefore"
+O QUE FOI FEITO: Esse erro quase sempre vem da tradução automática do navegador (o Chrome do
+  celular traduz a página, que é em inglês, e mexe no HTML por baixo do React, que então quebra).
+  Marquei o app como "não traduzir" no index.html (translate="no" e a meta
+  google=notranslate) e refiz o build, que já está no link do Tailscale.
+DECISÕES: nenhuma (a interface continua em inglês, D7).
+RESULTADO: A correção está no ar; falta o autor confirmar no celular.
+OBSERVAÇÕES: Se o erro continuar, desligar a tradução para esse site no Chrome (menu ⋮ → Traduzir
+  → "Nunca traduzir este site") ou mandar um print de onde ele aparece.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Funcionou no celular
+-------------------------------------------------------------------------------------------------
+PEDIDO: "agora funcionou"
+O QUE FOI FEITO: O autor confirmou que o app abre no celular pelo link do Tailscale, sem o erro de
+  tradução. Próximo passo sugerido: instalar o app e testar a notificação ("Send a test").
+DECISÕES: nenhuma.
+RESULTADO: Correção do insertBefore confirmada.
+OBSERVAÇÕES: Tudo do PWA, do Tailscale e da correção continua sem commit no branch phase-4-pwa.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit do PWA e pergunta sobre desligar o computador
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push e pode começar o proximo passo". No meio: "vc consegue
+  desligar o computador?"
+O QUE FOI FEITO: Rodei as verificações (tipos e lint, sem erros) e fiz o commit do PWA, das
+  notificações push, do Tailscale e da correção da tradução no branch phase-4-pwa; merge na main
+  e push para o repositório do autor.
+  Sobre desligar: respondi que consigo (comando shutdown do Windows), mas só depois de terminar
+  o commit e com a confirmação dele, porque desligar derruba o link do Tailscale e as notificações.
+DECISÕES: nenhuma nova (D45 já registrada).
+RESULTADO: Fase 4 publicada na main. Próximo passo: o Streaky dando dicas (último item da Fase 4),
+  aguardando a resposta sobre desligar.
+OBSERVAÇÕES: —

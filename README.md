@@ -63,7 +63,18 @@ The `app` service in `docker-compose.yml` is the whole app in one container: the
 
 If something else is already served at the root of your tailnet address, give Strekatron its own HTTPS port instead of replacing it: `tailscale serve --bg --https=8443 http://127.0.0.1:3001`, with `https://my-laptop.tail1234.ts.net:8443` in `APP_ORIGINS`. Tailscale serves HTTPS on 443, 8443 and 10000.
 
+While developing, don't serve the Vite dev server to a phone: it sends hundreds of separate modules and a phone shows a white page. Build the web app (`pnpm --filter @strekatron/web build`) and run the dev API with `STATIC_DIR=apps/web/dist` from the repo root (a relative path; an absolute Windows path isn't found), then `tailscale serve --bg http://localhost:3001`. Rebuild after web changes.
+
 `tailscale serve status` shows what is served, and `tailscale serve --https=443 off` (or `--https=8443 off`) stops it. The first time, Tailscale may ask you to enable HTTPS certificates for the tailnet in the admin console. Stop `pnpm dev` before starting the container, since both use port 3001, or set `APP_PORT` in `.env` and serve that port instead.
+
+## Install it and get notifications
+
+Strekatron is an installable web app (PWA). Open it at its HTTPS address (the tailnet one on a phone; `localhost` works on the computer itself), then:
+
+- **Install:** the install icon in the address bar (Chrome, Edge), or the browser menu → *Install app* / *Add to Home Screen*. On iPhone and iPad: Share → *Add to Home Screen*, and open it from there.
+- **Notifications:** Settings → *Notifications on this device* → *Turn on here*, then *Send a test*. Do it on every device you want reminders on. *Reminders* sets which ones go out and when: habits left today, streak at risk (off by default), and focus time is up.
+
+The server makes its Web Push keys once and keeps them in `data/vapid.json` (or set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`). Keep that file with the backups: new keys mean turning notifications on again on every device. Reminders are sent by a job that runs every minute, so the server has to be running.
 
 ## Backups
 

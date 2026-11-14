@@ -29,6 +29,8 @@ export const userSettings = pgTable(
       .default(d.questSettings),
     /** The answer to Streaky's question (D32, D36); null: not answered or skipped. */
     challenge: text({ enum: CHALLENGES }),
+    /** Push reminders (D45). */
+    reminders: jsonb().$type<UserSettings['reminders']>().notNull().default(d.reminders),
     /** Where the tour is (D31): new accounts and existing ones start at `new` (an invitation). */
     tutorial: text({ enum: TUTORIAL_STATES }).$type<TutorialState>().notNull().default('new'),
     ...timestamps,
