@@ -937,3 +937,63 @@ DECISÕES: nenhuma nova (D45 já registrada).
 RESULTADO: Fase 4 publicada na main. Próximo passo: o Streaky dando dicas (último item da Fase 4),
   aguardando a resposta sobre desligar.
 OBSERVAÇÕES: —
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Próximo passo começado e desligar o PC
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faça o seguinte, faça o proximo passo e depois desligue o pc ok?" e, logo depois,
+  "eu vou dormir, pode desligar".
+O QUE FOI FEITO: Commit, merge e push do PWA concluídos (6abaa3f, merge 35fd04e). Comecei o
+  próximo passo (o Streaky dando dicas quando a pessoa está travada, D31): criei o branch
+  phase-4-streaky-tips e li o que já existe (o componente Streaky, os cartões do Today). Nenhum
+  código foi escrito ainda. Como o autor foi dormir, parei aqui, parei o banco (docker compose
+  stop) e desliguei o computador.
+DECISÕES: nenhuma ainda. Ideia para a próxima sessão: um cartão do Streaky no Today com uma dica
+  por vez, escolhida por regras simples (ex.: projeto ativo sem próxima ação, caixa de entrada
+  cheia, streak em risco), que a pessoa pode dispensar.
+RESULTADO: Fase 4 na main; o branch das dicas está vazio.
+OBSERVAÇÕES: Ao ligar de novo: Docker Desktop, banco, API (servindo o build com STATIC_DIR) e o
+  Tailscale para o link do celular.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Dicas do Streaky (último item da Fase 4) e desligar o PC
+-------------------------------------------------------------------------------------------------
+PEDIDO: "espera", depois "pode desligar quando acabar, nao precisa da minha confirmação".
+O QUE FOI FEITO:
+  - Liguei o banco de novo e fiz o próximo passo: o Streaky agora dá dicas no Today, uma por vez,
+    a mais urgente primeiro:
+    - o streak precisa de hoje (à noite, se nada contou ainda) → botão para focar 10 minutos;
+    - um projeto ativo sem próxima ação → botão para abrir o projeto;
+    - nenhum projeto ativo e o Today vazio → botão para ver os projetos;
+    - caixa de entrada com 10 tarefas ou mais → botão para organizar;
+    - senão, uma dica geral ligada ao desafio que o autor escolheu (duas por desafio, alternando
+      por dia).
+    O X guarda a dica por 1 a 3 dias, neste navegador. As dicas só aparecem depois que o tour do
+    Streaky termina.
+  - As regras ficam no pacote compartilhado (5 testes novos); o cartão é tip-card.tsx.
+  - Refiz o build do site, então o link do Tailscale já mostra as dicas.
+  - Depois disso, desliguei o computador, como o autor pediu.
+DECISÕES: D46.
+RESULTADO: 308 testes passando, tipos e lint sem erros. Não conferi visualmente (o navegador do app
+  estava na tela de login). Todos os itens da Fase 4 estão feitos. Está no branch
+  phase-4-streaky-tips, sem commit.
+OBSERVAÇÕES: Próximo: Fase 5 (loot boxes e coleção). Ao ligar de novo: Docker Desktop, banco,
+  API servindo o build (STATIC_DIR) e o Tailscale.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Ligar o ambiente e começar a Fase 5
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamos ativar, ja iniciando a proxima fase"
+O QUE FOI FEITO:
+  - Liguei o Docker, o banco, a API (servindo o build do site) e o site; o link do Tailscale
+    voltou a funcionar sozinho.
+  - Antes da Fase 5 (loot boxes e coleção), perguntei três coisas. Respostas do autor:
+    - commit, merge e push das dicas do Streaky antes de começar ("Sim, commit antes");
+    - a arte provisória do catálogo vem de um pacote CC0 da internet (vou mostrar qual antes de
+      baixar);
+    - a ideia nova do observations.txt ("Quests should have a one-time-a-day rerrol for each")
+      vira regra agora: cada quest pode ser trocada uma vez por dia, inclusive a substituta.
+  - Fiz o commit das dicas (D46), merge na main e push.
+DECISÕES: D47 (troca de quest uma vez por dia), registrada a seguir.
+RESULTADO: Ambiente no ar; dicas publicadas.
+OBSERVAÇÕES: —

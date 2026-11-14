@@ -12,7 +12,8 @@
     "./game": "./src/game/index.ts",
     "./habits": "./src/habits/index.ts",
     "./calendar": "./src/calendar/index.ts",
-    "./push": "./src/push/index.ts"
+    "./push": "./src/push/index.ts",
+    "./tips": "./src/tips/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

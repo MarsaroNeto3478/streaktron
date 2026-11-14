@@ -9,6 +9,7 @@ import { QuestBoard } from '@/components/quest-board';
 import { Countdowns } from '@/components/countdowns';
 import { TaskRow } from '@/components/task-row';
 import { ReviewCard } from '@/components/review-card';
+import { TipCard } from '@/components/tip-card';
 import { TutorialCard } from '@/components/tutorial-card';
 import { Button } from '@/components/ui/button';
 import { formatDayLong } from '@/lib/days';
@@ -70,6 +71,7 @@ function TodayPage() {
 
       <TutorialCard />
       <ReviewCard />
+      <TipCard />
       <GameHeader />
       <Agenda data={today} today={me.today} />
       <FocusList
