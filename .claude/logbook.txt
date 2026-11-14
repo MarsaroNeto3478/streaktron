@@ -1179,3 +1179,38 @@ O QUE FOI FEITO: Commit no branch phase-6-export (D51), merge na main e push par
 DECISÕES: nenhuma nova.
 RESULTADO: Exportar e importar na main.
 OBSERVAÇÕES: Servidor de desenvolvimento desligado durante o merge e ligado de novo depois.
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 6: modelos de projeto
+-------------------------------------------------------------------------------------------------
+PEDIDO: "pode seguir para os modelos de projeto"
+O QUE FOI FEITO:
+  - Ao criar um projeto, agora dá para escolher "Start from": em branco ou um de 4 modelos.
+    - Course (matéria): colunas para estudar, estudando, revisar e feito; meta de 3 h de estudo
+      por semana; meta "passar na prova"; 3 primeiras tarefas.
+    - Exam prep (preparação para prova): 5 h de revisão por semana; tarefas como listar os tópicos
+      e fazer um simulado.
+    - Paper or thesis (artigo ou TCC): 4 h de escrita por semana; metas de pesquisa, rascunho e
+      versão final.
+    - Personal project (projeto pessoal): coluna de ideias; 2 h por semana; meta "primeira versão
+      funcionando".
+  - Se você informar a data da prova ou do prazo, ela vai para o calendário com contagem
+    regressiva e vira o prazo da meta. Na matéria, os dias e horários das aulas viram um evento
+    semanal que vai até a prova. Tudo isso é opcional.
+  - O que o modelo cria não conta como algo que você fez (não completa quests de "criar").
+DECISÕES: D52. Modelos feitos pelo próprio usuário (salvar um projeto como modelo) ficam para o
+  backlog.
+RESULTADO: 338 testes passando. Sem commit.
+OBSERVAÇÕES: Não vi a tela (o navegador do app está no login).
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit, merge e push dos modelos de projeto
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO:
+  - Commit do branch phase-6-templates (modelos de projeto, D52), merge no main e push para o
+    GitHub (repositório do usuário).
+DECISÕES: nenhuma nova.
+RESULTADO: main atualizado no GitHub com os modelos de projeto.
+OBSERVAÇÕES: Próximo item da Fase 6: o acabamento visual (telas vazias, carregamento, atalhos,
+  tema escuro).

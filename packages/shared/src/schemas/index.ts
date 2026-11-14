@@ -12,6 +12,7 @@ import {
   GOAL_STATUSES,
   ICONS,
   PROJECT_STATUSES,
+  TEMPLATE_KEYS,
   type GoalKind,
   type GoalPeriod,
 } from '../structure';
@@ -164,6 +165,23 @@ export const projectCreateSchema = z.object({
   icon: icon.optional(),
   startDate: optionalDay.optional(),
   dueDate: optionalDay.optional(),
+  /** Start from a template (D52): its columns, goals and first tasks, plus the dates asked for. */
+  template: z
+    .object({
+      key: z.enum(TEMPLATE_KEYS),
+      /** The exam or deadline: an event with a countdown, and the dated goal's due date. */
+      date: dateString.optional(),
+      /** Weekly classes: weekdays (0 = Sunday) and times. */
+      weekly: z
+        .object({
+          days: z.array(z.int().min(0).max(6)).min(1).max(7),
+          startTime: z.string().refine((s) => TIME_RE.test(s), 'Expected HH:MM'),
+          endTime: z.string().refine((s) => TIME_RE.test(s), 'Expected HH:MM'),
+        })
+        .refine((w) => w.startTime < w.endTime, 'Classes end after they start')
+        .optional(),
+    })
+    .optional(),
 });
 export type ProjectCreate = z.input<typeof projectCreateSchema>;
 

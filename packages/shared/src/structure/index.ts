@@ -185,3 +185,4 @@ export function pickNextAction(
 }
 
 export * from './goals';
+export * from './templates';

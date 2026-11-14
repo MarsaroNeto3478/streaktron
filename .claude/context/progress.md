@@ -227,3 +227,9 @@
 - Web: Settings → Your data (`components/your-data.tsx`), `dataActions` in actions.ts; the import dialog says what the file holds and that the current data is saved first.
 - The real account's export (read-only check): 134 KB, 102 activity rows, 70 quests, 12 tasks.
 - 335 tests; typecheck and lint clean; web rebuilt.
+
+### 2026-11-14 — Phase 6: project templates (D52, branch `phase-6-templates`, uncommitted)
+- `structure/templates.ts` (4 templates, 1 test of their consistency); `template` in `projectCreateSchema` (key, optional date, optional weekly days and times); `buildFromTemplate` in projects.ts (same transaction, no `item_created` for template items). 2 API tests.
+- Web: "Start from" in the new-project dialog (`components/template-picker.tsx`, `lib/templates.ts`): picking a template sets its icon and color, shows what it brings, and asks for its dates.
+- 338 tests; typecheck and lint clean; web rebuilt. Not checked visually (the pane is at sign-in).
+- Plan §12 backlog candidate: save a project as a template.
