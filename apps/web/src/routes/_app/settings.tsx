@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Streaky } from '@/components/streaky';
+import { YourData } from '@/components/your-data';
 import { useGameActions, useStructureActions, useTutorialActions } from '@/lib/actions';
 import { errorMessage } from '@/lib/api';
 import {
@@ -52,7 +53,10 @@ function SettingsPage() {
   const key = me ? JSON.stringify(me.settings) : 'loading';
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader title="Settings" description="Your day, your week, focus and quests." />
+      <PageHeader
+        title="Settings"
+        description="Your day, your week, focus, quests and your data."
+      />
       <DaySettings key={`day-${key}`} />
       <WeekSettings key={`week-${key}`} />
       <FocusPresets key={`focus-${key}`} />
@@ -62,6 +66,7 @@ function SettingsPage() {
       <StreakySettings key={`streaky-${key}`} />
       <ProjectLimit key={`limit-${key}`} />
       <DeletedItems />
+      <YourData />
     </div>
   );
 }
