@@ -42,7 +42,15 @@ function TasksPage() {
         showProject
         onChange={(o) => void navigate({ search: (prev) => ({ ...prev, ...o }), replace: true })}
       />
-      {!isPending && <TaskListView tasks={tasks} options={options} showProject />}
+      {isPending ? (
+        <div
+          className="h-48 animate-pulse rounded-xl bg-muted/50"
+          role="status"
+          aria-label="Loading"
+        />
+      ) : (
+        <TaskListView tasks={tasks} options={options} showProject />
+      )}
     </div>
   );
 }

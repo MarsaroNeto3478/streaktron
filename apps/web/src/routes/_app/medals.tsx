@@ -22,11 +22,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
+import { PageSkeleton } from '@/components/page-states';
 import { formatDayLong } from '@/lib/days';
 import { achievementsQuery, type Achievement } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_app/medals')({
+  loader: ({ context }) => context.queryClient.ensureQueryData(achievementsQuery),
   component: MedalsPage,
 });
 
@@ -54,7 +56,7 @@ const TIER = [
 
 function MedalsPage() {
   const { data } = useQuery(achievementsQuery);
-  if (!data) return <div className="mx-auto h-64 max-w-4xl animate-pulse rounded-xl bg-muted/60" />;
+  if (!data) return <PageSkeleton className="max-w-4xl" />;
   const all = data.achievements;
   const medals = all.filter((a) => a.kind === 'medal');
   const prizes = all.filter((a) => a.kind === 'prize');

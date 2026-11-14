@@ -4,6 +4,7 @@ import { ChevronRight, Plus, Repeat } from 'lucide-react';
 import { useState } from 'react';
 import { HabitRow } from '@/components/habits';
 import { PageHeader } from '@/components/page-header';
+import { EmptyState, PageSkeleton } from '@/components/page-states';
 import { Button } from '@/components/ui/button';
 import { habitsQuery, meQuery, type Habit } from '@/lib/queries';
 import { newHabit } from '@/lib/ui-store';
@@ -19,7 +20,7 @@ function HabitsPage() {
   const { data: habits } = useQuery(habitsQuery(false));
   const [showArchived, setShowArchived] = useState(false);
   const { data: archived = [] } = useQuery({ ...habitsQuery(true), enabled: showArchived });
-  if (!me || !habits) return null;
+  if (!me || !habits) return <PageSkeleton />;
 
   const today = habits.filter((h) => h.dueToday);
   const rest = habits.filter((h) => !h.dueToday);
@@ -37,15 +38,17 @@ function HabitsPage() {
       />
 
       {habits.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-          <Repeat className="mx-auto mb-2 size-6 text-emerald-500" />
-          No habits yet. Start with one small enough to do on a bad day.
-          <div className="mt-3">
+        <EmptyState
+          icon={Repeat}
+          title="No habits yet"
+          action={
             <Button variant="outline" size="sm" onClick={() => newHabit()}>
               <Plus /> New habit
             </Button>
-          </div>
-        </div>
+          }
+        >
+          Start with one small enough to do on a bad day.
+        </EmptyState>
       ) : (
         <>
           <Section title="Today" habits={today} today={me.today} />

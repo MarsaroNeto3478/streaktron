@@ -1214,3 +1214,29 @@ DECISÕES: nenhuma nova.
 RESULTADO: main atualizado no GitHub com os modelos de projeto.
 OBSERVAÇÕES: Próximo item da Fase 6: o acabamento visual (telas vazias, carregamento, atalhos,
   tema escuro).
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Fase 6: acabamento visual (UX polish)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "ja pode começar o proximo modulo"
+O QUE FOI FEITO:
+  - Levantamento: a lista de atalhos (tecla ?) e o tema escuro (seguindo o sistema) já existiam.
+  - Escolha de tema: Sistema, Claro ou Escuro, em Settings → Appearance e na paleta de comandos.
+    Fica salva no aparelho, então o celular e o computador podem ter temas diferentes. A página já
+    abre no tema certo, sem piscar branco.
+  - Carregamento: em vez de página em branco, um esqueleto da página; uma barrinha no topo enquanto
+    a próxima página carrega.
+  - Erros: uma tela única com "Try again" (por exemplo, quando o computador que roda o app está
+    dormindo) e, depois de uma atualização do app, um aviso "There's a new version" com botão para
+    recarregar. Endereços inexistentes ou coisas apagadas mostram "Nothing here".
+  - Telas vazias com o mesmo visual (ícone, título, texto e uma ação) em Hoje, Hábitos, Projetos e
+    listas de tarefas. A tela vazia de Projetos agora menciona os modelos.
+  - Atalhos novos: G e depois O (Coleção), G e depois M (Medalhas).
+  - Verificação visual: pela primeira vez usei um banco de dados de teste separado (apagado no
+    fim), com uma conta de teste, para ver as telas no navegador sem tocar na conta real. Conferi
+    os temas, as telas vazias, as páginas de "não encontrado" e criei uma matéria pelo modelo
+    Course (quadro, tarefas, contagem regressiva da prova e aula semanal).
+DECISÕES: D53. O tema fica no aparelho e não na conta.
+RESULTADO: 338 testes passando. Sem commit (branch phase-6-polish).
+OBSERVAÇÕES: Próximos itens da Fase 6: testes Playwright dos fluxos principais e a revisão de uso
+  (depois de 2–3 semanas usando, por volta de 18/11).

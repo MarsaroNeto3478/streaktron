@@ -9,7 +9,18 @@ import { DAY_SETTINGS_LOCK_DAYS, type SettingsPatch } from '@strekatron/shared/s
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import type { Reminders } from '@strekatron/shared/push';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellOff, FolderKanban, Plus, Send, Shapes, Trash2 } from 'lucide-react';
+import {
+  Bell,
+  BellOff,
+  FolderKanban,
+  Monitor,
+  Moon,
+  Plus,
+  Send,
+  Shapes,
+  SunMedium,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/page-header';
@@ -39,6 +50,8 @@ import {
 } from '@/lib/push';
 import { meQuery, projectsQuery, pushQuery, snapshotsQuery } from '@/lib/queries';
 import { report } from '@/lib/report';
+import { setTheme, useTheme, type Theme } from '@/lib/theme';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_app/settings')({
   component: SettingsPage,
@@ -55,8 +68,9 @@ function SettingsPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
         title="Settings"
-        description="Your day, your week, focus, quests and your data."
+        description="How it looks, your day, your week, focus, quests and your data."
       />
+      <Appearance />
       <DaySettings key={`day-${key}`} />
       <WeekSettings key={`week-${key}`} />
       <FocusPresets key={`focus-${key}`} />
@@ -68,6 +82,49 @@ function SettingsPage() {
       <DeletedItems />
       <YourData />
     </div>
+  );
+}
+
+// --- Appearance -----------------------------------------------------------------------------
+
+const THEME_CHOICES: { value: Theme; label: string; icon: typeof Moon }[] = [
+  { value: 'system', label: 'System', icon: Monitor },
+  { value: 'light', label: 'Light', icon: SunMedium },
+  { value: 'dark', label: 'Dark', icon: Moon },
+];
+
+/** Light, dark or the system's (D53): saved on this device and applied at once. */
+function Appearance() {
+  const theme = useTheme();
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Appearance</CardTitle>
+        <CardDescription>
+          Applies at once, on this device only: your phone and computer can differ.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div role="radiogroup" aria-label="Theme" className="grid grid-cols-3 gap-2 sm:max-w-sm">
+          {THEME_CHOICES.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={theme === value}
+              onClick={() => setTheme(value)}
+              className={cn(
+                'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-sm font-medium hover:bg-muted',
+                theme === value && 'border-primary bg-primary/10 hover:bg-primary/10',
+              )}
+            >
+              <Icon className="size-5" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

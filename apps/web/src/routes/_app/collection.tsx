@@ -9,12 +9,18 @@ import { Gift } from 'lucide-react';
 import { useState } from 'react';
 import { BoxIcon, ItemTile, LootReveal, type Opened } from '@/components/loot';
 import { PageHeader } from '@/components/page-header';
+import { PageSkeleton } from '@/components/page-states';
 import { Button } from '@/components/ui/button';
 import { useGameActions } from '@/lib/actions';
 import { TIER_NAMES } from '@/lib/loot';
 import { collectionQuery, lootQuery, type LootBox } from '@/lib/queries';
 
 export const Route = createFileRoute('/_app/collection')({
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(lootQuery),
+      context.queryClient.ensureQueryData(collectionQuery),
+    ]),
   component: CollectionPage,
 });
 
@@ -32,6 +38,7 @@ function CollectionPage() {
     setBusy(false);
     if (opened?.length) setResults(opened as Opened[]);
   };
+  if (!loot || !col) return <PageSkeleton className="max-w-4xl" />;
   // Boxes not opened yet (the list may still hold the ones just opened until it refetches).
   const waiting = loot?.filter((b) => !results?.some((r) => r.boxId === b.id)) ?? [];
 

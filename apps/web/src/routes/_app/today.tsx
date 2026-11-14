@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { GameHeader } from '@/components/game-header';
 import { HabitRow } from '@/components/habits';
 import { GAME } from '@strekatron/shared/game';
+import { EmptyState, PageSkeleton } from '@/components/page-states';
 import { QuestBoard } from '@/components/quest-board';
 import { Countdowns } from '@/components/countdowns';
 import { TaskRow } from '@/components/task-row';
@@ -25,6 +26,7 @@ import {
 import { editEvent, newEvent, newHabit, openPalette, startFocus } from '@/lib/ui-store';
 
 export const Route = createFileRoute('/_app/today')({
+  loader: ({ context }) => context.queryClient.ensureQueryData(todayQuery),
   component: TodayPage,
 });
 
@@ -45,7 +47,7 @@ function TodayPage() {
   const { data: me } = useQuery(meQuery);
   const { data: today } = useQuery(todayQuery);
   const { data: session } = useQuery(focusQuery);
-  if (!me) return null;
+  if (!me) return <PageSkeleton />;
   const first = me.user.name.split(/\s+/)[0];
   const top = today?.focus[0];
 
@@ -105,16 +107,16 @@ function FocusList({
         <ListTodo className="size-4 text-primary" /> Focus
       </h2>
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          Nothing due and no next actions.{' '}
-          <button
-            className="font-medium text-primary hover:underline"
-            onClick={() => openPalette('capture')}
-          >
-            Capture a task
-          </button>{' '}
-          or give an active project something to do.
-        </div>
+        <EmptyState
+          title="Nothing due and no next actions"
+          action={
+            <Button variant="outline" size="sm" onClick={() => openPalette('capture')}>
+              <Plus /> Capture a task
+            </Button>
+          }
+        >
+          Or give an active project its next action.
+        </EmptyState>
       ) : (
         <div className="rounded-xl border bg-card p-1">
           {shown.map((item) => (

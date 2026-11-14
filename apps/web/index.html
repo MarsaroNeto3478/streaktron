@@ -14,6 +14,14 @@
     <meta name="apple-mobile-web-app-title" content="Strekatron" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Strekatron</title>
+    <script>
+      // The saved theme (lib/theme.ts) before the first paint, so a dark page never flashes white.
+      try {
+        var t = localStorage.getItem('strekatron-theme');
+        if (t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches))
+          document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

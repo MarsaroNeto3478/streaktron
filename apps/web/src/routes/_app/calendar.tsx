@@ -43,6 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { PageSkeleton } from '@/components/page-states';
 import { Button } from '@/components/ui/button';
 import { useOpenTask } from '@/hooks/use-open-task';
 import { useTaskActions } from '@/lib/actions';
@@ -158,7 +159,7 @@ function CalendarPage() {
       ? monthTitle.format(atNoon(firstOfMonth(anchor || '2000-01-01')))
       : `${dayTitle.format(atNoon(from || '2000-01-01'))} – ${dayTitle.format(atNoon(to || '2000-01-01'))}`;
 
-  if (!me) return null;
+  if (!me) return <PageSkeleton className="max-w-6xl" />;
 
   return (
     <div className="mx-auto max-w-6xl space-y-4">

@@ -6,18 +6,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   BarChart3,
+  CalendarDays,
   CalendarPlus,
   ClipboardCheck,
   FolderPlus,
+  Gem,
   Inbox,
   Keyboard,
   LayoutGrid,
   ListTodo,
+  Medal,
+  Monitor,
+  Moon,
   Plus,
   Repeat,
   Settings,
   Shapes,
   Sun,
+  SunMedium,
   Timer,
   type LucideIcon,
 } from 'lucide-react';
@@ -28,6 +34,7 @@ import { useOpenEntity, useOpenTask } from '@/hooks/use-open-task';
 import { isMac } from '@/hooks/use-hotkeys';
 import { useTaskActions } from '@/lib/actions';
 import { projectsQuery, searchQuery, type Project, type SearchHit } from '@/lib/queries';
+import { setTheme } from '@/lib/theme';
 import { newArea, newEvent, newHabit, newProject, setUi, startFocus, useUi } from '@/lib/ui-store';
 import { EntityIcon, RefIcon } from './entity-icon';
 
@@ -190,11 +197,32 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       run: run(() => newHabit()),
     },
     {
+      id: 'go-calendar',
+      label: 'Go to Calendar',
+      icon: CalendarDays,
+      hint: 'G C',
+      run: run(() => void navigate({ to: '/calendar' })),
+    },
+    {
       id: 'go-stats',
       label: 'Go to Stats',
       icon: BarChart3,
       hint: 'G A',
       run: run(() => void navigate({ to: '/stats' })),
+    },
+    {
+      id: 'go-collection',
+      label: 'Go to Collection',
+      icon: Gem,
+      hint: 'G O',
+      run: run(() => void navigate({ to: '/collection' })),
+    },
+    {
+      id: 'go-medals',
+      label: 'Go to Medals',
+      icon: Medal,
+      hint: 'G M',
+      run: run(() => void navigate({ to: '/medals' })),
     },
     {
       id: 'go-settings',
@@ -209,6 +237,19 @@ function Palette({ mode, close }: { mode: 'search' | 'capture'; close: () => voi
       icon: Keyboard,
       hint: '?',
       run: run(() => setUi({ shortcuts: true })),
+    },
+    { id: 'theme-dark', label: 'Theme: dark', icon: Moon, run: run(() => setTheme('dark')) },
+    {
+      id: 'theme-light',
+      label: 'Theme: light',
+      icon: SunMedium,
+      run: run(() => setTheme('light')),
+    },
+    {
+      id: 'theme-system',
+      label: 'Theme: same as the system',
+      icon: Monitor,
+      run: run(() => setTheme('system')),
     },
   ];
   const needle = query.toLowerCase();
