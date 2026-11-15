@@ -77,6 +77,7 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D54 | Browser tests: Playwright on a fresh `strekatron_e2e` database with the installed Edge/Chrome; setup, Streaky's tour to a box, capture, phone crawl |
 | D53 | UX polish: System/Light/Dark per device; shared page skeleton, navigation bar, error, not-found and empty states |
 | D52 | Project templates: Course, Exam prep, Paper or thesis, Personal project (columns, goals, first tasks, dated countdown, weekly classes) |
 | D51 | Export (one JSON file) and import (a restore: replaces the account's data, a copy kept first) |
@@ -575,7 +576,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Project templates (e.g. "Course": default columns, goals, recurring events) — D52: Course, Exam prep, Paper or thesis, Personal project
 - [x] Data export (JSON) and import (D51: import is a restore that replaces the account's data)
 - [x] UX polish pass: empty states, loading states, keyboard shortcut cheat sheet, dark mode — D53: theme choice per device, shared loading/error/not-found/empty states
-- [ ] Playwright tests for key flows (capture → board → complete → XP → quest → box)
+- [x] Playwright tests for key flows (capture → board → complete → XP → quest → box) — D54: `pnpm test:e2e`, fresh `strekatron_e2e` database, installed Edge/Chrome; plus a phone-size crawl in light and dark
 
 **Acceptance:** After several weeks of use, the stats page tells a truthful story of where time went; medals appear as milestones are reached.
 

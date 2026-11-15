@@ -13,7 +13,7 @@ A web app that builds consistency for studies and personal projects: real projec
 
 ## Stack
 
-TypeScript monorepo (pnpm): React + Vite, TanStack Router/Query, Tailwind + shadcn/ui, TipTap, dnd-kit, cmdk · Hono on Node · PostgreSQL + Drizzle · Better Auth · pg-boss · Vitest · Docker Compose. Later phases add PixiJS and Playwright.
+TypeScript monorepo (pnpm): React + Vite, TanStack Router/Query, Tailwind + shadcn/ui, TipTap, dnd-kit, cmdk · Hono on Node · PostgreSQL + Drizzle · Better Auth · pg-boss · Vitest + Playwright · Docker Compose. Later phases add PixiJS.
 
 ```
 apps/server      Hono API: Drizzle schema + migrations, Better Auth, pg-boss jobs
@@ -40,6 +40,7 @@ Without the seed, the first visit shows **first-run setup**, which creates the o
 |---|---|
 | `pnpm dev` | Server (tsx watch) and Vite together; Vite proxies `/api` to the server |
 | `pnpm test` | All Vitest projects. Server tests use a throwaway `strekatron_test` database, so Postgres must be running |
+| `pnpm test:e2e` | Builds the web app, then Playwright (`e2e/`) on a fresh `strekatron_e2e` database, in the Edge or Chrome already installed (`E2E_CHANNEL=chrome` to pick). About 20 s |
 | `pnpm typecheck` · `pnpm lint` · `pnpm format` | TypeScript, ESLint, Prettier |
 | `pnpm build` | Web app to `apps/web/dist`, server bundle to `apps/server/dist` |
 | `pnpm db:generate` | New migration from schema changes (`apps/server/src/db/schema`) |

@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { Streaky, type StreakyMood } from '@/components/streaky';
 import { Button } from '@/components/ui/button';
 import { useTutorialActions } from '@/lib/actions';
-import { tutorialQuery, type Tutorial } from '@/lib/queries';
+import { areasQuery, tutorialQuery, type Tutorial } from '@/lib/queries';
 import { newArea, newProject, startFocus } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +28,9 @@ interface StepCopy {
 
 function useStepCopy(step: TutorialStep): StepCopy {
   const navigate = useNavigate();
+  const { data: areas = [] } = useQuery(areasQuery);
+  // The project step starts in the area the step before made (the newest one still open).
+  const newestArea = areas.filter((a) => !a.archivedAt).at(-1);
   switch (step) {
     case 'tutorial.area':
       return {
@@ -37,7 +40,7 @@ function useStepCopy(step: TutorialStep): StepCopy {
     case 'tutorial.project':
       return {
         say: 'A project is something with an end, like “Calculus exam” or “Portfolio site”. Only a few can be active at once, so you stay focused.',
-        go: { label: 'Start a project', run: () => newProject() },
+        go: { label: 'Start a project', run: () => newProject(newestArea?.id) },
       };
     case 'tutorial.task':
       return {

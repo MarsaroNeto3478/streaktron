@@ -22,6 +22,7 @@ data/
 coverage/
 playwright-report/
 test-results/
+e2e/.auth/
 
 # Logs and OS / editor files
 *.log
