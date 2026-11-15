@@ -1240,3 +1240,42 @@ DECISÕES: D53. O tema fica no aparelho e não na conta.
 RESULTADO: 338 testes passando. Sem commit (branch phase-6-polish).
 OBSERVAÇÕES: Próximos itens da Fase 6: testes Playwright dos fluxos principais e a revisão de uso
   (depois de 2–3 semanas usando, por volta de 18/11).
+
+-------------------------------------------------------------------------------------------------
+2026-11-14 — Commit do acabamento visual; Fase 6: testes de navegador (Playwright)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push e pode fazer a proxima"
+O QUE FOI FEITO:
+  - Commit, merge no main e push do acabamento visual (D53).
+  - Testes automáticos que usam o app num navegador de verdade (Playwright), como uma pessoa:
+    - Configuração inicial: cria a conta pela tela de login, sai e entra de novo.
+    - O tour do Streaky inteiro: cria uma área, um projeto pelo modelo Course, adiciona um cartão
+      no quadro, move o cartão de coluna pelo teclado e conclui a tarefa; confere XP, quests e
+      caixas; abre uma caixa na Coleção e vê o item no álbum.
+    - Captura rápida (tecla C) e ir para a Inbox (G e depois I).
+    - Todas as páginas em tamanho de celular, no tema claro e no escuro: sem erros e sem rolar
+      para o lado. E a escolha de tema continua depois de recarregar.
+  - Os testes rodam num banco de dados próprio, recriado a cada vez, e no Edge já instalado no
+    Windows (sem baixar navegador). Comando: pnpm test:e2e (uns 20 segundos).
+  - Os testes acharam dois problemas, corrigidos:
+    - No quadro, a seta para a direita não levava o cartão para a próxima coluna (mexia dentro da
+      mesma coluna), embora a lista de atalhos dissesse que sim.
+    - No tour, o projeto criado no passo 2 ia para "No area", logo depois de criar a área no passo
+      1. Agora o diálogo já abre com essa área.
+DECISÕES: D54.
+RESULTADO: 7 testes de navegador e 338 testes de unidade passando. Sem commit (branch
+  phase-6-e2e).
+OBSERVAÇÕES: Da Fase 6 faltam a revisão de uso (depois de 2–3 semanas usando, por volta de 18/11)
+  e as integrações com GitHub e Google Calendar, que precisam das suas contas.
+
+-------------------------------------------------------------------------------------------------
+2026-11-15 — Commit dos testes de navegador
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO:
+  - Commit dos testes de navegador (Playwright) e das duas correções que eles acharam (setas no
+    quadro e área do projeto no tour), merge no main e push para o GitHub.
+DECISÕES: nenhuma nova (D54 já registrada).
+RESULTADO: Fase 6 com os testes no main.
+OBSERVAÇÕES: Da Fase 6 faltam a revisão de uso (por volta de 18/11) e as integrações com GitHub e
+  Google Calendar.

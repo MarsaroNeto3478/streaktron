@@ -240,3 +240,10 @@
 - Pages that rendered nothing while loading show the skeleton; Today, Collection and Medals got loaders; empty states on Today, Habits, Projects and task lists use `EmptyState`.
 - Shortcuts G O (Collection) and G M (Medals); palette: Calendar, Collection, Medals, theme.
 - Checked in the browser pane on a throwaway database (port 3101, deleted afterwards): dark and light, empty Projects and Today, not-found pages, and the Course template from the dialog (board, tasks, countdown, weekly class). 338 tests; typecheck and lint clean; web rebuilt.
+
+### 2026-11-14 — Phase 6: browser tests (D54, merged 2026-11-15)
+- Committed, merged and pushed the UX polish pass (D53).
+- `@playwright/test` (and `@types/node`) at the root; `e2e/playwright.config.ts` (projects setup → desktop → phone, one worker, installed Edge), `apps/server/test/e2e-server.ts` (fresh `strekatron_e2e`, built web app, no jobs), `pnpm test:e2e`; `tsc -p e2e` joins `pnpm typecheck`.
+- Tests: first-run setup and sign-in; Streaky's tour to a box opened in the Collection; capture to the Inbox; every page at phone size in light and dark; the theme choice. 7 passing in about 20 s.
+- Fixed what they found: board arrow keys across columns (`boardKeyboardCoordinates`, column droppables carry `type: 'column'`); the tour's project step starts in the newest area.
+- 338 unit tests; typecheck and lint clean; web rebuilt.

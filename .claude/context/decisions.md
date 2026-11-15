@@ -235,6 +235,14 @@ The canonical record of what was decided, why, and what was considered instead. 
 - **Why:** Plan §5's project type ("Finish 3 tasks of goal X before Friday · Reach 50% of commitment goal Y this week"); it ties quests to what the user is actually aiming for, and D40's progress gives the commitment share.
 - **Alternatives:** Several project quests a week (more noise than help); counting tasks completed before the quest appeared (would make the quest free).
 
+### D54 · Browser tests (Playwright) — accepted (2026-11-14, Phase 6)
+- **Decision:** `pnpm test:e2e` builds the web app and runs Playwright (`e2e/`) against a server started on a **fresh `strekatron_e2e` database** each run (`apps/server/test/e2e-server.ts`, which refuses any database whose name doesn't end in `_e2e`). It uses the **Edge or Chrome already installed** (`channel`), so no browser download.
+  - One account (the same test owner as the server tests), so one worker and three projects in order: `setup` (first-run setup through the sign-in page, sign out, sign in), `desktop` (Streaky's tour: area → project from the Course template → a card added and moved with the keyboard → completed; XP, quests and boxes; a box opened in the Collection; capture with C, then G I to the Inbox), `phone` (every page at Pixel 7 size, light and dark: its heading, no errors, no sideways scroll; the theme choice survives a reload).
+  - Not in `pnpm test`: it needs a build and takes about 20 s; run it before merging UI work.
+- **Found by the tests and fixed:** on the board, the left and right arrows didn't move a picked-up card to the next column (the sortable default only measured cards); now they go to the next column's top. Streaky's project step opened the dialog with no area, so the project landed in "No area" right after the area step; it now starts in the newest area.
+- **Why:** The plan's key flows cross the server, the game rules and the UI; only a browser sees them together. A separate database keeps the real account untouched.
+- **Alternatives:** Playwright's own Chromium (a ~150 MB download, same coverage); running against the dev database (would touch the real account).
+
 ### D53 · UX polish: theme choice and shared page states — accepted (2026-11-14, Phase 6)
 - **Decision:** The polish pass found the shortcut cheat sheet ("?") and dark mode (following the system) already built; it adds what was missing:
   - **Theme choice:** System / Light / Dark under Settings → Appearance and in the command palette. It is saved **on the device** (`localStorage`), not the account, so a phone and a computer can differ; `index.html` applies it before the first paint (no white flash), and the browser bar color follows it.

@@ -17,6 +17,7 @@ import {
   type DragOverEvent,
   type DragStartEvent,
   type KeyboardCode,
+  type KeyboardCoordinateGetter,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -79,6 +80,29 @@ const keyboardCodes = {
   end: ['Space'] as KeyboardCode[],
 };
 
+/**
+ * Arrow keys while a card is picked up: left and right go to the next column (its top), up and
+ * down move within the column. The sortable default only looks at the cards' rects, so a right
+ * arrow could land on a card of the same column.
+ */
+const boardKeyboardCoordinates: KeyboardCoordinateGetter = (event, args) => {
+  const { droppableContainers, droppableRects, collisionRect } = args.context;
+  if ((event.code !== 'ArrowRight' && event.code !== 'ArrowLeft') || !collisionRect) {
+    return sortableKeyboardCoordinates(event, args);
+  }
+  event.preventDefault();
+  const right = event.code === 'ArrowRight';
+  const center = collisionRect.left + collisionRect.width / 2;
+  const next = droppableContainers
+    .getEnabled()
+    .filter((c) => c.data.current?.type === 'column')
+    .map((c) => droppableRects.get(c.id))
+    .filter((r) => !!r && (right ? r.left > center : r.left + r.width < center))
+    .sort((a, b) => (right ? a!.left - b!.left : b!.left - a!.left))[0];
+  if (!next) return undefined;
+  return { x: next.left + (next.width - collisionRect.width) / 2, y: next.top };
+};
+
 export function Board({
   project,
   columns,
@@ -103,7 +127,7 @@ export function Board({
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates, keyboardCodes }),
+    useSensor(KeyboardSensor, { coordinateGetter: boardKeyboardCoordinates, keyboardCodes }),
   );
 
   function onDragStart(e: DragStartEvent) {
@@ -216,7 +240,7 @@ function Lane({
   project: Project;
   today: string;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const { setNodeRef, isOver } = useDroppable({ id: column.id, data: { type: 'column' } });
   return (
     <section
       aria-label={column.title}

@@ -12,7 +12,8 @@
     "start": "pnpm --filter @strekatron/server start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "pnpm -r typecheck",
+    "test:e2e": "pnpm --filter @strekatron/web build && playwright test -c e2e",
+    "typecheck": "pnpm -r typecheck && tsc -p e2e",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -23,6 +24,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
