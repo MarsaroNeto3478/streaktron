@@ -75,6 +75,8 @@ Strekatron is an installable web app (PWA). Open it at its HTTPS address (the ta
 - **Install:** the install icon in the address bar (Chrome, Edge), or the browser menu → *Install app* / *Add to Home Screen*. On iPhone and iPad: Share → *Add to Home Screen*, and open it from there.
 - **Notifications:** Settings → *Notifications on this device* → *Turn on here*, then *Send a test*. Do it on every device you want reminders on. *Reminders* sets which ones go out and when: habits left today, streak at risk (off by default), and focus time is up.
 
+**Offline (D55).** Once a page has been opened on a device, the app opens there even when the computer is off or the phone has no signal, with what it showed last. Capturing, editing and completing tasks, moving cards and checking in habits work offline: they wait on the device (the top bar says *Offline · N*) and are sent, in order, when the server answers again; XP, quests and boxes for them arrive then, counted for the day they were done (up to a week back). Everything else needs a connection. After changing the web app, rebuild it (`pnpm --filter @strekatron/web build`) so phones pick up the new version. Signing out clears what the device kept.
+
 The server makes its Web Push keys once and keeps them in `data/vapid.json` (or set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`). Keep that file with the backups: new keys mean turning notifications on again on every device. Reminders are sent by a job that runs every minute, so the server has to be running.
 
 ## Backups

@@ -1,6 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronRight, Keyboard, LogOut, Plus, Search, Settings } from 'lucide-react';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
+import {
+  ChevronRight,
+  Keyboard,
+  LogOut,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Settings,
+} from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { CommandPalette } from '@/components/command-palette';
@@ -9,6 +17,7 @@ import { EntityIcon } from '@/components/entity-icon';
 import { FocusBar, FocusStartDialog } from '@/components/focus';
 import { GameChip, LootChip } from '@/components/game-header';
 import { Logo } from '@/components/logo';
+import { OfflineChip } from '@/components/offline-chip';
 import { NAV } from '@/components/nav';
 import { ProjectStatusProvider } from '@/components/project-status';
 import { GlobalShortcuts } from '@/components/shortcuts';
@@ -19,6 +28,7 @@ import { AreaSheet } from '@/components/area-sheet';
 import { GoalSheet } from '@/components/goal-sheet';
 import { TaskSheet } from '@/components/task-sheet';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +48,8 @@ import {
   type Me,
   type Project,
 } from '@/lib/queries';
+import { clearOfflineData } from '@/lib/offline-cache';
+import { outboxState } from '@/lib/outbox';
 import { flushAll } from '@/lib/saver';
 import { newArea, newProject, openPalette, setUi } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
@@ -106,6 +118,7 @@ export function AppShell({
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b bg-background/85 px-4 backdrop-blur md:px-8">
             <Logo className="md:invisible" />
             <div className="flex items-center gap-1">
+              <OfflineChip />
               <LootChip />
               <GameChip />
               <Button
@@ -155,6 +168,7 @@ export function AppShell({
               )}
             </Link>
           ))}
+          <MoreMenu unopened={unopened} />
         </nav>
       </div>
 
@@ -173,6 +187,90 @@ export function AppShell({
 }
 
 /** Areas with their active and parked projects. */
+/** Phones: everything the bottom bar has no room for, in a sheet from the bottom. */
+function MoreMenu({ unopened }: { unopened: number }) {
+  const [open, setOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const more = NAV.filter((n) => !n.phone);
+  const here =
+    more.some((n) => pathname.startsWith(n.to)) ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/areas/');
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        className={cn(
+          'relative flex flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted-foreground',
+          here && '!text-primary',
+        )}
+      >
+        <MoreHorizontal className="size-5" />
+        More
+        {unopened > 0 && (
+          <span
+            className="absolute top-1.5 left-[calc(50%+8px)] size-2 rounded-full bg-primary"
+            aria-hidden
+          />
+        )}
+      </button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85dvh] gap-0 rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
+        >
+          <SheetTitle className="px-5 pt-5">More</SheetTitle>
+          <SheetDescription className="sr-only">
+            Every page that isn’t in the bottom bar, and your areas and projects.
+          </SheetDescription>
+          {/* Any link followed closes the sheet. */}
+          <div
+            className="min-h-0 overflow-y-auto pb-2"
+            onClickCapture={(e) => {
+              if ((e.target as HTMLElement).closest('a')) setOpen(false);
+            }}
+          >
+            <nav className="grid grid-cols-3 gap-2 px-4 pt-4" aria-label="More pages">
+              {more.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="relative flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-medium text-muted-foreground hover:bg-muted"
+                  activeProps={{ className: '!text-primary border-primary/40 bg-primary/5' }}
+                >
+                  <Icon className="size-5" />
+                  {label}
+                  {to === '/collection' && unopened > 0 && (
+                    <span
+                      className="absolute top-1.5 right-1.5 rounded-full bg-primary px-1.5 text-[10px] leading-4 font-semibold text-primary-foreground tabular-nums"
+                      aria-label={`${unopened} unopened loot boxes`}
+                    >
+                      {unopened}
+                    </span>
+                  )}
+                </Link>
+              ))}
+              <Link
+                to="/settings"
+                className="flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-medium text-muted-foreground hover:bg-muted"
+                activeProps={{ className: '!text-primary border-primary/40 bg-primary/5' }}
+              >
+                <Settings className="size-5" />
+                Settings
+              </Link>
+            </nav>
+            <AreaTree />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+
 function AreaTree() {
   const { data: areas = [] } = useQuery(areasQuery);
   const { data: projects = [] } = useQuery(projectsQuery);
@@ -300,12 +398,22 @@ function UserMenu({ me }: { me: Me }) {
 
   async function signOut() {
     await flushAll();
+    const { pending } = outboxState();
+    if (
+      pending &&
+      !window.confirm(
+        `${pending === 1 ? '1 change' : `${pending} changes`} made offline haven’t reached the server yet. Signing out discards them. Sign out anyway?`,
+      )
+    ) {
+      return;
+    }
     const { error } = await authClient.signOut();
     if (error) {
       toast.error(error.message ?? 'Couldn’t sign out.');
       return;
     }
-    queryClient.clear();
+    // Nothing of the account stays on this device (D55).
+    await clearOfflineData(queryClient);
     await navigate({ to: '/sign-in' });
   }
 

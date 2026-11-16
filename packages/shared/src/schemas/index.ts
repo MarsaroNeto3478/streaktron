@@ -279,6 +279,8 @@ const taskFields = {
 };
 
 export const taskCreateSchema = z.object({
+  /** Made by the client (a task captured offline, D55); the server makes one when absent. */
+  id: idOf('task').optional(),
   ...taskFields,
   description: description.optional(),
   effort: taskFields.effort.optional(),

@@ -2,6 +2,10 @@
 // predicted result is merged at once (optimistic), the server's answer replaces it, a failure
 // refetches. Every action reports its own failure and resolves to undefined.
 //
+// The day-to-day ones (capture, edit, complete, move, habit check-ins) go through the outbox
+// (outbox.ts, D55): when the server can't be reached they wait on this device and the predicted
+// result stays on screen until they sync.
+//
 //   const tasks = useTaskActions();
 //   await tasks.complete(task);
 
@@ -29,6 +33,8 @@ import {
   type ProjectStatus,
 } from '@strekatron/shared/structure';
 import type { Challenge } from '@strekatron/shared/game';
+import { newId } from '@strekatron/shared/ids';
+import { userDay } from '@strekatron/shared/time';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
@@ -39,6 +45,7 @@ import type {
   FocusSession,
   Goal,
   Habit,
+  Me,
   Project,
   ProjectPage,
   Task,
@@ -46,6 +53,8 @@ import type {
   Tutorial,
 } from './queries';
 import { refreshEntities } from './entities';
+import { send, type Change } from './outbox';
+import { predictCreate, predictHabit, predictPatch } from './predict';
 import { attempt, report } from './report';
 import { cachedTask, dropTasks, mergeTasks, refreshAfterTaskWrite } from './task-cache';
 
@@ -78,42 +87,87 @@ function predictDone(qc: QueryClient, task: Task, done: boolean): Task {
   return next;
 }
 
-/** Optimistic write: merge `predicted`, send, merge the answer; on failure refetch and report. */
+/**
+ * Optimistic write through the outbox: merge `predicted`, send, merge the answer; on failure
+ * refetch and report. Offline, the prediction stays until the change syncs.
+ */
 async function optimistic(
   qc: QueryClient,
   predicted: Task[],
-  send: () => Promise<Task | Task[]>,
+  change: Change,
+  label: string,
   projects: (string | null)[],
-) {
+): Promise<Task | undefined> {
   mergeTasks(qc, ...predicted);
   try {
-    const result = await send();
-    mergeTasks(qc, ...(Array.isArray(result) ? result : [result]));
-    return result;
+    const sent = await send<Task>(change, label);
+    if (sent.queued) return predicted[0];
+    mergeTasks(qc, sent.result);
+    refreshAfterTaskWrite(qc, projects);
+    return sent.result;
   } catch (err) {
     report(err);
-    return undefined;
-  } finally {
     refreshAfterTaskWrite(qc, projects);
+    return undefined;
+  }
+}
+
+/** A task edit sent through the outbox; offline, the edit is predicted. Throws. */
+async function patchTask(qc: QueryClient, id: string, patch: TaskPatch, fallback?: Task) {
+  const sent = await send<Task>({ kind: 'task.patch', id, patch }, fallback?.title ?? 'a task');
+  if (!sent.queued) return { task: sent.result, queued: false };
+  const task = cachedTask(qc, id) ?? fallback;
+  if (!task) return { task: undefined, queued: true };
+  const predicted = predictPatch(task, patch, {
+    columns: patch.projectId ? columnsOf(qc, patch.projectId) : undefined,
+  });
+  return { task: predicted, queued: true };
+}
+
+/** The user's day now, on this device (offline, the cached `me.today` may be from yesterday). */
+function localToday(qc: QueryClient): string | undefined {
+  const me = qc.getQueryData<Me>(['me']);
+  if (!me) return undefined;
+  try {
+    return userDay(new Date(), {
+      timeZone: me.settings.timezone,
+      dayStartHour: me.settings.dayStartHour,
+    });
+  } catch {
+    return me.today;
   }
 }
 
 export function taskActions(qc: QueryClient) {
   return {
+    /** Made with its id here, so sending it again (from the outbox) makes it once (D55). */
     create: (input: TaskCreate) =>
       attempt(async () => {
-        const task = await call(api.tasks.$post({ json: input }));
-        mergeTasks(qc, task);
-        refreshAfterTaskWrite(qc, [task.projectId]);
-        return task;
+        const withId = { ...input, id: newId('task') };
+        const sent = await send<Task>({ kind: 'task.create', input: withId }, input.title);
+        if (sent.queued) {
+          const parent = input.parentTaskId ? cachedTask(qc, input.parentTaskId) : undefined;
+          const projectId = parent ? parent.projectId : (input.projectId ?? null);
+          const task = predictCreate(withId, { columns: columnsOf(qc, projectId), parent });
+          mergeTasks(qc, task);
+          // Its sheet opens from this until the server has it.
+          qc.setQueryData<TaskDetail>(['tasks', 'detail', task.id], {
+            ...task,
+            description: (input.description ?? null) as TaskDetail['description'],
+          });
+          return task;
+        }
+        mergeTasks(qc, sent.result);
+        refreshAfterTaskWrite(qc, [sent.result.projectId]);
+        return sent.result;
       }),
 
     update: (task: Task, patch: TaskPatch) =>
       attempt(async () => {
-        const updated = await call(
-          api.tasks[':id'].$patch({ param: { id: task.id }, json: patch }),
-        );
+        const { task: updated, queued } = await patchTask(qc, task.id, patch, task);
+        if (!updated) return undefined;
         mergeTasks(qc, updated);
+        if (queued) return updated;
         if (patch.projectId !== undefined || patch.goalId !== undefined) {
           refreshAfterTaskWrite(qc, [task.projectId, updated.projectId]);
         } else if (patch.dueDate !== undefined || patch.scheduledDate !== undefined) {
@@ -126,8 +180,8 @@ export function taskActions(qc: QueryClient) {
 
     /** Autosave's sender: throws, so the saver can retry and show its state. */
     save: async (id: string, patch: TaskPatch) => {
-      const updated = await call(api.tasks[':id'].$patch({ param: { id }, json: patch }));
-      mergeTasks(qc, updated);
+      const { task: updated, queued } = await patchTask(qc, id, patch, cachedTask(qc, id));
+      if (updated) mergeTasks(qc, updated);
       // Task views leave the document out; the cached detail must have what was saved, or the
       // sheet opened again would start from the old text.
       if (patch.description !== undefined) {
@@ -137,7 +191,7 @@ export function taskActions(qc: QueryClient) {
             : old,
         );
       }
-      refreshEntities(qc);
+      if (!queued) refreshEntities(qc);
       return updated;
     },
 
@@ -145,7 +199,8 @@ export function taskActions(qc: QueryClient) {
       optimistic(
         qc,
         [predictDone(qc, task, true)],
-        () => call(api.tasks[':id'].complete.$post({ param: { id: task.id } })),
+        { kind: 'task.complete', id: task.id },
+        task.title,
         [task.projectId],
       ),
 
@@ -153,7 +208,8 @@ export function taskActions(qc: QueryClient) {
       optimistic(
         qc,
         [predictDone(qc, task, false)],
-        () => call(api.tasks[':id'].reopen.$post({ param: { id: task.id } })),
+        { kind: 'task.reopen', id: task.id },
+        task.title,
         [task.projectId],
       ),
 
@@ -187,13 +243,8 @@ export function taskActions(qc: QueryClient) {
       return optimistic(
         qc,
         predicted,
-        () =>
-          call(
-            api.tasks[':id'].move.$post({
-              param: { id: task.id },
-              json: { columnId: column.id, index },
-            }),
-          ),
+        { kind: 'task.move', id: task.id, move: { columnId: column.id, index } },
+        task.title,
         [task.projectId],
       );
     },
@@ -639,15 +690,36 @@ export function useReviewActions() {
 // --- Habits ----------------------------------------------------------------------------------
 
 export function habitActions(qc: QueryClient) {
-  /** Put a fresh view of a habit wherever it's cached; Today re-reads its list. */
-  const put = (h: Habit) => {
+  /** Put a fresh view of a habit wherever it's cached; Today re-reads its list (unless offline). */
+  const put = (h: Habit, refetch = true) => {
     for (const archived of [false, true]) {
       qc.setQueryData<Habit[]>(['habits', archived], (list) =>
         list?.map((x) => (x.id === h.id ? h : x)),
       );
     }
-    void qc.invalidateQueries({ queryKey: ['today'] });
+    qc.setQueryData<{ habits: Habit[] }>(['today'], (old) =>
+      old ? { ...old, habits: old.habits.map((x) => (x.id === h.id ? h : x)) } : old,
+    );
+    if (refetch) void qc.invalidateQueries({ queryKey: ['today'] });
   };
+  const cachedHabit = (id: string) =>
+    qc.getQueryData<Habit[]>(['habits', false])?.find((h) => h.id === id) ??
+    qc.getQueryData<{ habits: Habit[] }>(['today'])?.habits.find((h) => h.id === id);
+
+  /** Check in or uncheck through the outbox; offline, the habit shows it at once. */
+  async function checkTo(id: string, checked: boolean, date: string | undefined, change: Change) {
+    const habit = cachedHabit(id);
+    const sent = await send<Habit>(change, habit?.title ?? 'a habit');
+    if (!sent.queued) {
+      put(sent.result);
+      return sent.result;
+    }
+    const today = localToday(qc);
+    if (!habit || !today) return habit;
+    const predicted = predictHabit(habit, date ?? today, checked, today);
+    put(predicted, false);
+    return predicted;
+  }
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ['habits'] });
     void qc.invalidateQueries({ queryKey: ['today'] });
@@ -693,22 +765,13 @@ export function habitActions(qc: QueryClient) {
         });
       }),
 
-    /** Check in for today, or `date` (yesterday, when forgotten). */
+    /** Check in for today, or `date` (yesterday, when forgotten). Works offline (D55). */
     checkIn: (id: string, date?: string) =>
-      attempt(async () => {
-        const h = await call(
-          api.habits[':id'].checkin.$post({ param: { id }, json: date ? { date } : {} }),
-        );
-        put(h);
-        return h;
-      }),
+      attempt(() => checkTo(id, true, date, { kind: 'habit.checkin', id, date })),
 
+    /** Works offline (D55). */
     uncheck: (id: string, date: string) =>
-      attempt(async () => {
-        const h = await call(api.habits[':id'].checkin[':date'].$delete({ param: { id, date } }));
-        put(h);
-        return h;
-      }),
+      attempt(() => checkTo(id, false, date, { kind: 'habit.uncheck', id, date })),
   };
 }
 

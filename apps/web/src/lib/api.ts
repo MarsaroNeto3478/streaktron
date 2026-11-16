@@ -25,7 +25,21 @@ export class ApiError extends Error {
   get isUnauthorized() {
     return this.status === 401;
   }
+
+  /** The server couldn't be reached: no network, or the proxy in front of it found it down. */
+  get isUnreachable() {
+    return UNREACHABLE.has(this.status);
+  }
 }
+
+// 0: the request never got an answer. 502/503/504: `tailscale serve` (or another proxy) answered
+// for a server that is off.
+const UNREACHABLE = new Set([0, 502, 503, 504]);
+
+/** The server couldn't be reached (offline, or it's off): what waits in the outbox (D55). */
+export const isUnreachable = (err: unknown) => err instanceof ApiError && err.isUnreachable;
+
+const OFFLINE_MESSAGE = 'Can’t reach the server. This needs a connection.';
 
 const FALLBACK: Record<number, string> = {
   401: 'Sign in to continue.',
@@ -33,6 +47,9 @@ const FALLBACK: Record<number, string> = {
   404: 'Not found.',
   409: 'That conflicts with something that changed.',
   429: 'Too many requests. Try again in a moment.',
+  502: OFFLINE_MESSAGE,
+  503: OFFLINE_MESSAGE,
+  504: OFFLINE_MESSAGE,
 };
 
 /** An error body from the server (ours, or Better Auth's `{ message, code }`). */
@@ -69,6 +86,12 @@ type Ok<R> =
     : never;
 
 let onGame: (events: GameEvents) => void = () => {};
+let onReach: (reached: boolean) => void = () => {};
+
+/** Told after every request whether the server answered (the offline indicator, D55). */
+export const setReachHandler = (fn: (reached: boolean) => void) => {
+  onReach = fn;
+};
 
 /** Where a write's `game` block goes (main.tsx: celebrate it and refresh the game's queries). */
 export const setGameHandler = (fn: (events: GameEvents) => void) => {
@@ -87,8 +110,10 @@ export async function call<R extends ClientResponse<unknown, number, string>>(
   try {
     res = await request;
   } catch (err) {
-    throw new ApiError(0, 'network', 'Can’t reach the server. Check your connection.', err);
+    onReach(false);
+    throw new ApiError(0, 'network', OFFLINE_MESSAGE, err);
   }
+  onReach(!UNREACHABLE.has(res.status));
   if (!res.ok) throw await errorFrom(res as unknown as Response);
   if (res.status === 204) return undefined as Ok<R>;
   const body: unknown = await res.json();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError, call, errorMessage } from './api';
+import { ApiError, call, errorMessage, isUnreachable } from './api';
 
 const respond = (status: number, body?: unknown) =>
   Promise.resolve(
@@ -41,9 +41,21 @@ describe('call', () => {
 
   it('falls back to a clear message for bodies it can’t read', async () => {
     const err = await call(
-      Promise.resolve(new Response('<html>Bad gateway</html>', { status: 502 })) as never,
+      Promise.resolve(new Response('<html>Oops</html>', { status: 500 })) as never,
     ).catch((e: unknown) => e);
     expect(errorMessage(err)).toBe('The server ran into a problem. Try again.');
+  });
+
+  it('a proxy answering for a server that is off counts as unreachable (D55)', async () => {
+    const err = await call(
+      Promise.resolve(new Response('<html>Bad gateway</html>', { status: 502 })) as never,
+    ).catch((e: unknown) => e);
+    expect(isUnreachable(err)).toBe(true);
+    expect(errorMessage(err)).toBe('Can’t reach the server. This needs a connection.');
+    const offline = await call(Promise.reject(new TypeError('Failed to fetch'))).catch(
+      (e: unknown) => e,
+    );
+    expect(isUnreachable(offline)).toBe(true);
   });
 
   it('turns a network failure into an ApiError', async () => {
