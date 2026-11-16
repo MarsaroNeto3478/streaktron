@@ -24,7 +24,7 @@ import {
   type Conn,
   type Tx,
 } from './common';
-import { recordActivity, touch, type ActivityInput } from './activity';
+import { recordActivity, requestTime, touch, type ActivityInput } from './activity';
 import { writeLinks } from './links';
 import { ownedProject, unpinClosed } from './projects';
 
@@ -169,6 +169,15 @@ const inColumn = (columnId: string) =>
 
 export async function createTask(userId: string, input: TaskCreate) {
   return db.transaction(async (tx) => {
+    // An id made by the client (a task captured offline, D55): sending it twice makes it once.
+    if (input.id) {
+      const [existing] = await tx
+        .select({ userId: tasks.userId })
+        .from(tasks)
+        .where(eq(tasks.id, input.id));
+      if (existing?.userId === userId) return taskView(tx, userId, input.id);
+      if (existing) throw conflict('id_taken', 'That id is already in use.');
+    }
     const position = input.position ?? 'bottom';
     let projectId = input.projectId ?? null;
     let columnId: string | null = null;
@@ -194,7 +203,7 @@ export async function createTask(userId: string, input: TaskCreate) {
         : landingColumn(columns, false);
       if (!column) throw invalid('invalid_column', 'That column isn’t on this project’s board.');
       columnId = column.id;
-      if (column.category === 'done') completedAt = new Date();
+      if (column.category === 'done') completedAt = requestTime();
       scope = inColumn(column.id);
     } else {
       if (input.columnId) throw invalid('invalid_column', 'Inbox tasks aren’t on a board.');
@@ -202,7 +211,7 @@ export async function createTask(userId: string, input: TaskCreate) {
     }
     if (input.goalId) await assertGoal(tx, userId, input.goalId, projectId);
 
-    const id = newId('task');
+    const id = input.id ?? newId('task');
     await tx.insert(tasks).values({
       id,
       userId,
@@ -318,7 +327,7 @@ export async function completeTask(userId: string, id: string) {
   return db.transaction(async (tx) => {
     const task = await ownedTask(tx, userId, id);
     if (task.completedAt) return taskView(tx, userId, id);
-    const values: Partial<TaskRow> = { completedAt: new Date() };
+    const values: Partial<TaskRow> = { completedAt: requestTime() };
     if (task.projectId && !task.parentTaskId) {
       const columns = await projectColumns(tx, task.projectId);
       const current = columns.find((c) => c.id === task.columnId);
@@ -382,7 +391,7 @@ export async function moveTask(userId: string, id: string, move: TaskMove) {
       .update(tasks)
       .set({
         columnId: column.id,
-        completedAt: done ? (task.completedAt ?? new Date()) : null,
+        completedAt: done ? (task.completedAt ?? requestTime()) : null,
       })
       .where(eq(tasks.id, id));
     await writeOrder(tx, tasks, userId, order);

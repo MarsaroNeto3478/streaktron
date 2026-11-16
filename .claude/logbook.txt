@@ -1279,3 +1279,83 @@ DECISÕES: nenhuma nova (D54 já registrada).
 RESULTADO: Fase 6 com os testes no main.
 OBSERVAÇÕES: Da Fase 6 faltam a revisão de uso (por volta de 18/11) e as integrações com GitHub e
   Google Calendar.
+
+-------------------------------------------------------------------------------------------------
+2026-11-16 — Pergunta: usar no celular sem ligar o Docker e a API?
+-------------------------------------------------------------------------------------------------
+PEDIDO: "eu tenho uma pergunta, eu vou conseguir usar o mobile sem precisar ligar o docker e a api?"
+O QUE FOI FEITO:
+  - Só resposta, sem mudança no código. Não: o celular é só a tela; os dados ficam no Postgres
+    (Docker) do computador e a API é quem aplica as regras do jogo (D2, D17). O app instalado no
+    celular (PWA, D45) não guarda dados offline (offline ficou fora do escopo, plan.md §6).
+  - Caminhos: (1) deixar tudo subir sozinho quando o Windows liga (o computador ainda precisa estar
+    ligado); (2) hospedar num servidor (D13, decisão adiada); (3) modo offline (o mais caro, fora
+    do escopo).
+DECISÕES: nenhuma.
+RESULTADO: Pergunta respondida; recomendado o caminho (1) por enquanto.
+OBSERVAÇÕES: —
+
+-------------------------------------------------------------------------------------------------
+2026-11-16 — Fase 6 (extra): modo offline
+-------------------------------------------------------------------------------------------------
+PEDIDO: "vamo para o modo offline, eu acho melhor"
+O QUE FOI FEITO:
+  - Antes de começar, duas perguntas: (1) o modo offline ainda precisa do computador ligado em
+    algum momento para sincronizar, e o XP/quests/caixas chegam só na sincronização — resposta:
+    "Sim, offline + sync"; (2) o que funciona offline — resposta: "Dia a dia" (ver tudo que já foi
+    aberto; capturar, editar, concluir/reabrir, mover no quadro, marcar hábito).
+  - O app fica guardado no celular: o service worker salva os arquivos do app, então ele abre sem
+    o servidor. Os dados que já foram carregados também ficam salvos (IndexedDB).
+  - Fila de mudanças: quando o servidor não responde, as ações do dia a dia ficam numa fila no
+    aparelho e a tela já mostra o resultado. Quando o servidor volta, elas vão em ordem.
+  - Cada ação leva a hora em que foi feita, então uma tarefa concluída no ônibus conta para o dia
+    certo (streak e XP), até uma semana para trás. Mais antigo que isso é recusado.
+  - Tarefas criadas offline já nascem com o id feito no celular; se a fila mandar duas vezes, o
+    servidor cria uma só.
+  - Aviso no topo: "Offline · N" (N mudanças esperando), "Syncing" e a mensagem "Synced N changes
+    made offline". Página nunca aberta no aparelho mostra "Not saved for offline use". Sair da
+    conta apaga o que ficou guardado no aparelho.
+  - O resto (criar área/projeto/meta, abrir caixas, foco, configurações) continua precisando de
+    conexão.
+  - Para os testes, abri o Docker Desktop, que estava fechado.
+DECISÕES: D55 (modo offline para o dia a dia).
+RESULTADO: 9 testes de navegador (incluindo o novo de offline: capturar, concluir, recarregar sem
+  rede, marcar hábito e sincronizar) e 355 testes de unidade passando. Sem commit (branch
+  offline-mode).
+OBSERVAÇÕES: Para o celular pegar a versão nova é preciso gerar o build do app de novo. XP,
+  quests e caixas das ações offline só aparecem depois de sincronizar, porque quem calcula o jogo
+  é o servidor (D17). Aprendizado do Quire: offline é o recurso mais caro, por isso o escopo ficou
+  só no dia a dia.
+
+-------------------------------------------------------------------------------------------------
+2026-11-16 — Barra de navegação do celular (botão More)
+-------------------------------------------------------------------------------------------------
+PEDIDO: "antes mude o HUD do mobile, que falta coisas importantes para la"
+O QUE FOI FEITO:
+  - Perguntei o que faltava. No celular, Habits, Weekly review, Stats, Collection, Medals e as
+    áreas só abriam pela busca. Opções: Habits na barra, um botão "More", barra de XP no topo,
+    botão de foco no topo. Escolha: botão "More", com a barra Today · Inbox · Projects · Habits ·
+    More.
+  - O "More" abre uma folha de baixo para cima com Tasks, Calendar, Weekly review, Stats,
+    Collection (com o número de caixas), Medals, Settings e as áreas com seus projetos. Tocar num
+    item fecha a folha. O botão fica destacado quando a página aberta é uma delas, e mostra um
+    ponto quando há caixas para abrir.
+  - Teste de navegador novo: confere a barra, abre o More, vê as páginas e as áreas e vai para
+    Stats.
+DECISÕES: D56. Ideias oferecidas e não escolhidas agora: barra de XP no topo do celular e botão
+  de foco no topo.
+RESULTADO: 10 testes de navegador passando. Sem commit (branch offline-mode, junto com o modo
+  offline).
+OBSERVAÇÕES: —
+
+-------------------------------------------------------------------------------------------------
+2026-11-16 — Commit do modo offline e da barra do celular
+-------------------------------------------------------------------------------------------------
+PEDIDO: "faz o commit, merge e push"
+O QUE FOI FEITO:
+  - Commit do modo offline (D55) e do botão More no celular (D56), merge no main e push para o
+    GitHub.
+DECISÕES: nenhuma nova.
+RESULTADO: Modo offline e nova barra do celular no main.
+OBSERVAÇÕES: Da Fase 6 faltam a revisão de uso (por volta de 18/11) e as integrações com GitHub e
+  Google Calendar.

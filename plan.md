@@ -77,6 +77,8 @@ The full decisions log, with rationale, alternatives and status, lives in **`.cl
 | D31 | Streaky is a guide mascot (not the rejected pet); the tutorial is a quest chain (Phase 4) |
 | D32 | Challenge question as multiple choice (Phase 4); anonymous comparison with the social phase |
 | D33 | Focus clock outside the app (title, favicon, mini window), breaks, a visible celebration |
+| D56 | Phone navigation: Today, Inbox, Projects, Habits and More (a sheet with the other pages, Settings and the areas) |
+| D55 | Offline mode for day-to-day use: app and data kept on the device, an outbox for capture/edit/complete/move/check-in, client-made task ids, `X-Occurred-At` (≤ 7 days) |
 | D54 | Browser tests: Playwright on a fresh `strekatron_e2e` database with the installed Edge/Chrome; setup, Streaky's tour to a box, capture, phone crawl |
 | D53 | UX polish: System/Light/Dark per device; shared page skeleton, navigation bar, error, not-found and empty states |
 | D52 | Project templates: Course, Exam prep, Paper or thesis, Personal project (columns, goals, first tasks, dated countdown, weekly classes) |
@@ -373,7 +375,7 @@ Svelte 5 would be a perfectly good web framework; the deciding factors are Postg
 - **Backups (D18).** One `pg_dump` per day to `data/backups/`, keeping the last 14 (named by the owner's local day). The job checks hourly and at startup, so a machine that was off at night still gets one. Optional copy to a folder or Google Drive later. Retries on failure.
 - **Deleting (D19).** Tasks and goals are soft-deleted (`deleted_at`, Undo in the toast). Projects and areas are written to a JSON snapshot and then deleted, restorable from Settings. Both last 30 days, then an hourly purge job removes them.
 - **Multi-tenant from day one (D1).** Better Auth users; every table has `user_id`; every query is scoped. Sign-up is closed (invite-only / first user) until the product is opened.
-- **Offline is out of scope** for now. If it's ever added, start from Quire's final design (a route table of every write, client-made ids so creates are idempotent, one merge rule), not from scratch (Quire's OFF-1…13).
+- **Offline (D55), day-to-day use only.** The service worker keeps the built app; the query cache is saved in IndexedDB; capture, edit, complete, move and habit check-ins wait in an outbox (`lib/outbox.ts`) when the server can't be reached and go in order when it answers, each with `X-Occurred-At` so it counts for the day it was made. Built from Quire's final design: one route table, client-made ids (creates are idempotent), one merge rule. Everything else needs a connection.
 
 ### Repository layout
 
@@ -576,6 +578,7 @@ Each phase ends with a usable app. **Phase 3 completion = MVP = start using it d
 - [x] Project templates (e.g. "Course": default columns, goals, recurring events) — D52: Course, Exam prep, Paper or thesis, Personal project
 - [x] Data export (JSON) and import (D51: import is a restore that replaces the account's data)
 - [x] UX polish pass: empty states, loading states, keyboard shortcut cheat sheet, dark mode — D53: theme choice per device, shared loading/error/not-found/empty states
+- [x] *(user's choice, 2026-11-16)* Offline mode for day-to-day use, syncing when the computer is on (D55)
 - [x] Playwright tests for key flows (capture → board → complete → XP → quest → box) — D54: `pnpm test:e2e`, fresh `strekatron_e2e` database, installed Edge/Chrome; plus a phone-size crawl in light and dark
 
 **Acceptance:** After several weeks of use, the stats page tells a truthful story of where time went; medals appear as milestones are reached.
@@ -657,7 +660,7 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 
 - **References in JSON blobs dangle** (LOG-2, LOG-3, LOG-12). → FK columns with explicit `ON DELETE`.
 - **One function per question** ("what refers to X", "what names does this go by"); copies drift (LOG-8, LOG-13).
-- **Offline sync is the most expensive feature** (OFF-1…13). → Out of scope; if ever needed, start from Quire's final design.
+- **Offline sync is the most expensive feature** (OFF-1…13). → Day-to-day writes only (D55), from Quire's final design.
 - **One autosave helper, one merge rule** (DES-3/4/6: 15 debounced saves written 6 ways).
 - **Don't recheck everything on every save** (SRV-8). → Incremental quest evaluation.
 - **Failures in follow-up work must not fail the write** (SRV-4: an error in the quest check turned a committed save into a 500). → Game evaluation errors are logged and retried, never returned as a failed save.
@@ -679,7 +682,7 @@ Quire (`~/Documentos/quire`) is the user's earlier project: a worldbuilding and 
 - Save a project as a template (own templates, after the built-in ones from D52 have been used)
 - Notes as a first-class entity (linkable documents not tied to a task)
 - Time-of-day focus analytics ("you focus best at…")
-- Offline mode (see §6 note)
+- Offline for more writes (projects, goals, focus) — D55 covers the day-to-day ones
 - Google Calendar / iCal import
 - i18n (Portuguese) — out of scope per D7
 - Recycle duplicate collectibles into shards; rotating shard shop to buy specific items

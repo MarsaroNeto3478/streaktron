@@ -17,15 +17,27 @@ export interface GameScope {
   activities: Activity[];
   /** Entities whose details changed (follow-up quests watch these). */
   touched: Set<string>;
+  /** When the change was made, for a write made offline and sent later (D55); null: now. */
+  occurredAt: Date | null;
 }
 
 const scope = new AsyncLocalStorage<GameScope>();
 
 /** Run `fn` collecting what it records, for the game evaluation after the write. */
-export function withGameScope<T>(fn: (s: GameScope) => Promise<T>): Promise<T> {
-  const s: GameScope = { userId: null, activities: [], touched: new Set() };
+export function withGameScope<T>(
+  fn: (s: GameScope) => Promise<T>,
+  occurredAt: Date | null = null,
+): Promise<T> {
+  const s: GameScope = { userId: null, activities: [], touched: new Set(), occurredAt };
   return scope.run(s, () => fn(s));
 }
+
+/**
+ * When the change this request makes happened: now, or, for a write made offline and sent later,
+ * when it was made (D55). Activity, completion times and check-in days use it, so a task done on
+ * the bus counts for the day it was done; quests are still evaluated now.
+ */
+export const requestTime = () => scope.getStore()?.occurredAt ?? new Date();
 
 /** Mark entities whose details changed in this request. */
 export function touch(userId: string, ...ids: (string | null | undefined)[]) {
@@ -61,7 +73,7 @@ export async function recordActivity(
   conn: Conn,
   userId: string,
   entries: ActivityInput | ActivityInput[],
-  at = new Date(),
+  at = requestTime(),
 ): Promise<Activity[]> {
   const list = Array.isArray(entries) ? entries : [entries];
   if (!list.length) return [];

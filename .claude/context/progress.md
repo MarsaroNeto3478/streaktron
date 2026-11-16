@@ -247,3 +247,11 @@
 - Tests: first-run setup and sign-in; Streaky's tour to a box opened in the Collection; capture to the Inbox; every page at phone size in light and dark; the theme choice. 7 passing in about 20 s.
 - Fixed what they found: board arrow keys across columns (`boardKeyboardCoordinates`, column droppables carry `type: 'column'`); the tour's project step starts in the newest area.
 - 338 unit tests; typecheck and lint clean; web rebuilt.
+
+### 2026-11-16 — Offline mode (D55) and phone navigation (D56), merged 2026-11-16
+- The user asked whether the phone works without Docker and the API; after the options, chose offline mode with sync, day-to-day scope.
+- Server: client-made task ids (idempotent create), `X-Occurred-At` → `requestTime()` for activity, completion time and check-in day (≤ 7 days, else `offline_too_old`); `test/offline.test.ts` (7).
+- Web: `lib/idb.ts`, `lib/offline-cache.ts` (query cache in IndexedDB, restored before the first load, `gcTime` 14 days, `networkMode: 'always'`), `lib/outbox.ts` (route table, order, coalesced edits, drain on reach/online/visible/20 s, 5 tries for 5xx), `lib/predict.ts` (+ tests), actions for capture/edit/complete/move/check-in through it; offline chip in the top bar; "Not saved for offline use" page state; sign-out clears the device; 502–504 count as unreachable.
+- Service worker keeps the built app (precache list written by a Vite plugin; nothing cached in dev).
+- `e2e/offline.e2e.ts`: capture, complete, reload offline, habit check-in, sync when back; a never-opened page offline. 9 browser tests, 355 unit tests; typecheck and lint clean.
+- Phone navigation (D56): bottom bar Today · Inbox · Projects · Habits · More; More's sheet has the other pages, Settings and the areas tree (`MoreMenu` in app-shell). A browser test opens it and follows Stats; 10 browser tests.

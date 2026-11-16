@@ -5,7 +5,7 @@ import { Link, useRouter, useRouterState, type ErrorComponentProps } from '@tans
 import { CloudOff, SearchX, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { ApiError, errorMessage } from '@/lib/api';
+import { ApiError, errorMessage, isUnreachable } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 /** A page still loading: the shape of a header and a few blocks. */
@@ -124,6 +124,28 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
   // A deleted thing, or an address that was never one (a malformed id answers 400).
   if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
     return <NotFound />;
+  }
+  // Offline, on a page this device hasn't opened yet: nothing saved to show (D55).
+  if (isUnreachable(error)) {
+    return (
+      <Problem
+        icon={CloudOff}
+        title="Not saved for offline use"
+        action={
+          <Button
+            onClick={() => {
+              reset();
+              void router.invalidate();
+            }}
+          >
+            Try again
+          </Button>
+        }
+      >
+        The server can’t be reached, and this page hasn’t been opened on this device yet. Pages
+        you’ve opened before work offline; this one will load once the server is back.
+      </Problem>
+    );
   }
   if (isStaleBuild(error)) {
     return (

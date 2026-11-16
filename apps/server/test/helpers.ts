@@ -12,9 +12,9 @@ export async function resetDb() {
 /** A request to the app, as the browser would send it (JSON, same-origin). */
 export function request(
   path: string,
-  init: { method?: string; body?: unknown; cookie?: string } = {},
+  init: { method?: string; body?: unknown; cookie?: string; headers?: Record<string, string> } = {},
 ) {
-  const headers = new Headers({ origin: ORIGIN });
+  const headers = new Headers({ origin: ORIGIN, ...init.headers });
   if (init.body !== undefined) headers.set('content-type', 'application/json');
   if (init.cookie) headers.set('cookie', init.cookie);
   return app.request(path, {

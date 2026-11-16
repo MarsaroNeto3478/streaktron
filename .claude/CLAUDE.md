@@ -4,7 +4,7 @@ Strekatron is a web app that helps people stay consistent with studies and perso
 
 ## Current status
 
-- **Phase:** Phases 0–3 done (Phase 3 = MVP, 2026-11-04, being dogfooded). **Phase 4** done 2026-11-13 (habits, calendar, countdowns, weekly review, commitment goals, weekly/review/project quests, Streaky's tour, PWA and Web Push); Streaky's tips done 2026-11-14 (D46). **Phase 5** (loot boxes and collection, D48) done 2026-11-14. **Phase 6** in progress: medals and prizes (D49), stats page (D50), export/import (D51) and project templates (D52) merged; the UX polish pass (D53) merged; Playwright tests (D54) merged; next the usage review (after 2–3 weeks of use) and the GitHub/Google Calendar integrations.
+- **Phase:** Phases 0–3 done (Phase 3 = MVP, 2026-11-04, being dogfooded). **Phase 4** done 2026-11-13 (habits, calendar, countdowns, weekly review, commitment goals, weekly/review/project quests, Streaky's tour, PWA and Web Push); Streaky's tips done 2026-11-14 (D46). **Phase 5** (loot boxes and collection, D48) done 2026-11-14. **Phase 6** in progress: medals and prizes (D49), stats page (D50), export/import (D51) and project templates (D52) merged; the UX polish pass (D53) merged; Playwright tests (D54) merged; **offline mode** for day-to-day use (D55) and the phone's More menu (D56) merged; next the usage review (after 2–3 weeks of use) and the GitHub/Google Calendar integrations.
 - **Run it:** `pnpm db:up && pnpm dev` (README has setup, scripts, Tailscale and backups). On the Windows machine pnpm isn't installed globally: use `npx pnpm@11.24.0 …`.
 - **Repository:** https://github.com/MarsaroNeto3478/streaktron (this user's copy), branch `main`.
 - **Two parallel versions:** the user (this repo, renamed Strekatron on 2026-11-05, D41) and a partner (`JVGdev/streaktron`) built a shared base, then each continues their own version; at the end they'll compare both and merge the best into a bigger project. Keep this repo's choices well documented (decisions.md) so the comparison is easy; never push to the partner's repo.
@@ -55,6 +55,7 @@ Read the relevant context file before working on an area; read `plan.md` section
 - One client autosave helper (`useAutosave`) and one optimistic-update merge rule (`lib/task-cache.ts`); writes go through `lib/actions.ts`.
 - Game evaluation errors never fail a committed write (log and retry).
 - Failed API responses are always `{ error: { code, message, details? } }` (throw `HttpError` on the server); the web app calls the API only through `call()` in `apps/web/src/lib/api.ts`.
+- Offline (D55): day-to-day writes go through the outbox (`lib/outbox.ts`: a route-table entry + a prediction in `lib/predict.ts`); anything else just needs a connection. Changes that should count on the day they were made use `requestTime()` on the server, not `new Date()`.
 - Browser tests: `pnpm test:e2e` (D54) before merging UI work; selectors by role and label, as a person reads the page.
 - Schema changes: edit `apps/server/src/db/schema`, then `pnpm db:generate`. Hand-written SQL goes in a `drizzle-kit generate --custom` migration, never into generated ones.
 - TypeScript stays on 6.0 until typescript-eslint supports TS 7 (it needs the old JS API).

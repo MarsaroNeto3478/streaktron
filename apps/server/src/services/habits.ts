@@ -21,7 +21,7 @@ import { addDays, type DateString } from '@strekatron/shared/time';
 import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '../db/client';
 import { habitCheckins, habits, userSettings } from '../db/schema';
-import { dayOf, recordActivity, touch, userToday } from './activity';
+import { dayOf, recordActivity, requestTime, touch, userToday } from './activity';
 import { defined, edgeOrder, invalid, notFound, type Conn } from './common';
 import { ownedProject } from './projects';
 
@@ -214,7 +214,8 @@ export async function restoreHabit(userId: string, id: string) {
 }
 
 async function checkinDay(conn: Conn, userId: string, date: DateString | undefined) {
-  const today = await userToday(conn, userId);
+  // The day it was done, for a check-in made offline (D55).
+  const today = await userToday(conn, userId, requestTime());
   const day = date ?? today;
   if (day > today || day < addDays(today, -CHECKIN_BACKDATE_DAYS)) {
     throw invalid('invalid_checkin_date', 'Check in for today, or yesterday if you forgot.');

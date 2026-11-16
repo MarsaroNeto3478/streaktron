@@ -74,3 +74,37 @@ test('the theme chosen in Settings wins over the system’s, and stays after a r
   await page.getByRole('radio', { name: 'System' }).click();
   await expect(page.locator('html')).not.toHaveClass(/dark/);
 });
+
+test('the bottom bar has the day-to-day pages, and More has the rest', async ({ page }) => {
+  await page.goto('/today');
+  const bar = page.getByRole('navigation', { name: 'Main' }).last();
+  for (const name of ['Today', 'Inbox', 'Projects', 'Habits']) {
+    await expect(bar.getByRole('link', { name: new RegExp(`^${name}`) })).toBeVisible();
+  }
+  await page.screenshot({ path: 'data/e2e-results/phone-bar.png' });
+
+  await bar.getByRole('button', { name: 'More' }).click();
+  const sheet = page.getByRole('dialog', { name: 'More' });
+  const pages = sheet.getByRole('navigation', { name: 'More pages' });
+  for (const name of [
+    'Tasks',
+    'Calendar',
+    'Weekly review',
+    'Stats',
+    'Collection',
+    'Medals',
+    'Settings',
+  ]) {
+    await expect(pages.getByRole('link', { name: new RegExp(`^${name}`) })).toBeVisible();
+  }
+  // The areas and projects, as in the sidebar.
+  await expect(sheet.getByRole('link', { name: 'University' })).toBeVisible();
+  // Once the sheet has slid up.
+  await sheet.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  await page.screenshot({ path: 'data/e2e-results/phone-more.png' });
+
+  await pages.getByRole('link', { name: 'Stats' }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page).toHaveURL(/\/stats/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Stats');
+});
